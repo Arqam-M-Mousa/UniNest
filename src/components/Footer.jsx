@@ -12,9 +12,12 @@ const Footer = () => {
         </div>
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-5 text-sm">
           <div className="space-y-3">
-            <h3 className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase">
+            <Link
+              to="/"
+              className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase no-underline hover:text-[var(--color-accent)] transition-colors block"
+            >
               {t("home")}
-            </h3>
+            </Link>
             <ul className="space-y-2">
               <li>
                 <Link

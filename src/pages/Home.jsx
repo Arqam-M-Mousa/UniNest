@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { heroFeatureItems } from "../components/FeatureIcons";
+import campusClockImg from "../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import heroImg from "../assets/image.jpg";
+import studentsImg from "../assets/lhrm_ljdyd_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 const Home = () => {
   const { t } = useLanguage();
@@ -8,16 +12,24 @@ const Home = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center text-center px-6 py-24 md:py-32">
+      <section className="relative flex items-center justify-center text-center px-6 py-24 md:py-32 overflow-hidden min-h-[500px]">
+        {/* Background Image */}
+        <img
+          src={heroImg}
+          alt="Campus Background"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          loading="eager"
+        />
+        {/* Overlay */}
         <div
-          className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg-alt)] to-[var(--color-bg)] dark:from-[var(--color-bg-alt)] dark:to-[var(--color-bg)]"
+          className="absolute inset-0 bg-white/40 dark:bg-black/40"
           aria-hidden="true"
         />
-        <div className="relative max-w-4xl">
-          <h1 className="heading-font text-4xl md:text-5xl font-bold mb-6 leading-tight text-[var(--color-text)]">
+        <div className="relative max-w-4xl z-10">
+          <h1 className="heading-font text-4xl md:text-5xl font-bold mb-6 leading-tight text-white drop-shadow-lg">
             {t("heroTitle")}
           </h1>
-          <p className="text-lg md:text-xl mb-10 text-[var(--color-text-soft)]">
+          <p className="text-lg md:text-xl mb-10 text-white/90 drop-shadow-md">
             {t("heroSubtitle")}
           </p>
           <Link
@@ -55,15 +67,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="flex justify-center">
-              <svg width="200" height="200" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="90" fill="#E0E7FF" />
-                <path
-                  d="M100 40 L60 80 L60 140 L140 140 L140 80 Z"
-                  fill="#6366f1"
-                />
-                <rect x="85" y="100" width="30" height="40" fill="#4f46e5" />
-                <circle cx="70" cy="60" r="15" fill="#06b6d4" opacity="0.8" />
-              </svg>
+              <img
+                src={campusClockImg}
+                alt="Campus Clock"
+                className="w-full max-w-[569px] h-auto rounded-lg shadow-lg object-cover"
+              />
             </div>
             <div>
               <h2 className="heading-font text-3xl font-bold mb-6 text-[var(--color-text)]">
@@ -108,33 +116,47 @@ const Home = () => {
       </section>
 
       {/* Ready CTA */}
-      <section className="py-16 themed-surface">
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <div className="border-4 border-[var(--color-accent)] rounded-3xl p-12 themed-surface-alt">
-            <h2 className="heading-font text-3xl font-bold mb-8 text-[var(--color-text)]">
-              {t("readyTitle")}
-            </h2>
-            <Link
-              to="/marketplace"
-              className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
-            >
-              {t("startSearching")}
-            </Link>
+      <section className="py-20 themed-surface">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="relative rounded-[50px] p-16 themed-surface-alt border-4 themed-border shadow-2xl overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+            <div className="relative z-10">
+              <h2 className="heading-font text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
+                {t("readyTitle")}
+              </h2>
+              <p className="text-lg text-[var(--color-text-soft)] mb-10 max-w-2xl mx-auto">
+                Browse hundreds of verified student-friendly apartments and find
+                your perfect home today
+              </p>
+              <Link
+                to="/marketplace"
+                className="inline-block px-12 py-4 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-lg focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
+              >
+                {t("startSearching")}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Final Banner */}
-      <section className="relative min-h-[320px] flex items-center justify-center text-center px-6 py-20">
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-hover)] opacity-90 dark:opacity-75"
-          aria-hidden="true"
+      <section className="relative min-h-[320px] flex items-center justify-center text-center px-6 py-20 overflow-hidden">
+        <img
+          src={studentsImg}
+          alt="University Campus"
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="relative max-w-3xl">
-          <h2 className="heading-font text-4xl font-bold mb-4 text-white drop-shadow-sm">
+        <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
+        <div className="relative max-w-3xl z-10">
+          <h2 className="heading-font text-4xl font-bold mb-4 text-white drop-shadow-lg">
             {t("builtForStudents")}
           </h2>
-          <p className="text-xl text-white/90">{t("weUnderstand")}</p>
+          <p className="text-xl text-white drop-shadow-md">
+            {t("weUnderstand")}
+          </p>
         </div>
       </section>
     </div>

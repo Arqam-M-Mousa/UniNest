@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { properties } from "../data/properties";
+import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 const Marketplace = () => {
   const { t } = useLanguage();
@@ -17,50 +18,61 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen themed-surface">
-      <section className="py-12 px-8 text-center">
+      <section className="relative py-12 px-8 text-center overflow-hidden">
+        {/* Background Image */}
+        <img
+          src={nnuImg}
+          alt="Campus Background"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Overlay */}
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--color-bg-alt)] to-[var(--color-bg)] dark:from-[var(--color-bg-alt)] dark:to-[var(--color-bg)]"
+          className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/20 dark:from-black/60 dark:to-black/40"
           aria-hidden="true"
         />
-        <div className="max-w-7xl mx-auto mb-8">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <h1 className="heading-font text-4xl font-bold text-[var(--color-text)]">
-              {t("marketplaceTitle")}
-            </h1>
-            <Link
-              to="/signin"
-              className="flex items-center gap-2 text-sm text-[var(--color-text-soft)] hover:text-[var(--color-accent)]"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M16 17v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
-              {t("signIn")} / {t("signUp").replace("Sign Up", "Register")}
-            </Link>
+
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="max-w-7xl mx-auto mb-8">
+            <div className="flex justify-between items-center flex-wrap gap-4">
+              <h1 className="heading-font text-4xl font-bold text-white drop-shadow-lg">
+                {t("marketplaceTitle")}
+              </h1>
+              <Link
+                to="/signin"
+                className="flex items-center gap-2 text-sm text-white hover:text-white drop-shadow"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M16 17v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
+                {t("signIn")} / {t("signUp").replace("Sign Up", "Register")}
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <p className="text-center text-xl mb-8 text-[var(--color-text-soft)]">
-          {t("marketplaceSubtitle")}
-        </p>
+          <p className="text-center text-xl mb-8 text-white drop-shadow-md">
+            {t("marketplaceSubtitle")}
+          </p>
 
-        <div className="max-w-2xl mx-auto themed-surface-alt rounded-full px-6 py-3 flex items-center gap-4">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"
-              stroke="#999"
-              strokeWidth="2"
-              strokeLinecap="round"
+          <div className="max-w-2xl mx-auto bg-white dark:bg-white backdrop-blur-sm rounded-full px-6 py-3 flex items-center gap-4 shadow-lg">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"
+                stroke="#999"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder={t("searchPlaceholder")}
+              className="flex-1 bg-transparent border-none outline-none text-base text-gray-900 placeholder:text-gray-500"
             />
-          </svg>
-          <input
-            type="text"
-            placeholder={t("searchPlaceholder")}
-            className="flex-1 bg-transparent border-none outline-none text-base text-[var(--color-text)] placeholder:text-[var(--color-text-soft)]"
-          />
+          </div>
         </div>
       </section>
 

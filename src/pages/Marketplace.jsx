@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { properties } from "../data/properties";
+import HeartButton from "../components/HeartButton";
 import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 const Marketplace = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRTL = language === "ar";
   const [activeTab, setActiveTab] = useState("lastListings");
   const [selectedPrice, setSelectedPrice] = useState("all");
 
@@ -199,7 +201,12 @@ const Marketplace = () => {
           </svg>
           {t("masonry")}
         </button>
-        <button className="ml-auto flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm">
+        <button
+          className={`${
+            isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
+          } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm`}
+          dir={isRTL ? "rtl" : "ltr"}
+        >
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
             <path
               d="M10 5v10M5 10h10"
@@ -320,15 +327,9 @@ const Marketplace = () => {
                   alt={property.name}
                   className="absolute top-0 left-0 w-full h-full object-cover"
                 />
-                <button className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:scale-110">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </button>
+                <div className="absolute top-4 right-4">
+                  <HeartButton size={40} />
+                </div>
               </div>
               <div className="p-4">
                 <h3 className="text-xl mb-2 text-[var(--color-text)]">

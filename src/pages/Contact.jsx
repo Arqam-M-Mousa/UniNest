@@ -3,21 +3,22 @@ import { useState } from "react";
 
 const faqs = [
   {
-    q: "How are listings verified?",
-    a: "We manually review ownership docs & run consistency checks before publishing.",
+    q: "faqQ1",
+    a: "faqA1",
   },
   {
-    q: "Can I schedule a tour?",
-    a: "Yes. Use the message feature on a listing to request viewing times directly.",
+    q: "faqQ2",
+    a: "faqA2",
   },
   {
-    q: "Do you support roommate matching?",
-    a: "We're introducing a matching beta soon—stay tuned!",
+    q: "faqQ3",
+    a: "faqA3",
   },
 ];
 
 const Contact = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRTL = language === "ar";
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
@@ -40,8 +41,7 @@ const Contact = () => {
           {t("contact")}
         </h1>
         <p className="text-lg max-w-3xl mx-auto leading-relaxed text-[var(--color-text-soft)]">
-          We'd love to hear from you—questions, suggestions or partnership
-          ideas.
+          {t("contactSubtitle")}
         </p>
       </section>
 
@@ -51,22 +51,31 @@ const Contact = () => {
           {/* Form */}
           <form
             onSubmit={handleSubmit}
-            className="themed-surface-alt rounded-3xl p-8 shadow-card flex flex-col gap-6"
+            className={`themed-surface-alt rounded-3xl p-8 shadow-card flex flex-col gap-6 ${
+              isRTL ? "text-right" : "text-left"
+            }`}
             aria-labelledby="contactFormTitle"
+            dir={isRTL ? "rtl" : "ltr"}
           >
             <h2
               id="contactFormTitle"
               className="heading-font text-2xl font-bold m-0 text-[var(--color-text)]"
             >
-              Send a Message
+              {t("sendMessageHeading")}
             </h2>
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col text-left">
+            <div className={`grid gap-6 sm:grid-cols-2 ${isRTL ? "" : ""}`}>
+              {" "}
+              {/* grid itself can remain neutral */}
+              <div
+                className={`flex flex-col ${
+                  isRTL ? "text-right" : "text-left"
+                }`}
+              >
                 <label
                   htmlFor="name"
                   className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
                 >
-                  Name
+                  {t("nameLabel")}
                 </label>
                 <input
                   id="name"
@@ -75,15 +84,19 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   className="px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)]"
-                  placeholder="Your name"
+                  placeholder={t("namePlaceholder")}
                 />
               </div>
-              <div className="flex flex-col text-left">
+              <div
+                className={`flex flex-col ${
+                  isRTL ? "text-right" : "text-left"
+                }`}
+              >
                 <label
                   htmlFor="email"
                   className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
                 >
-                  Email
+                  {t("emailLabel")}
                 </label>
                 <input
                   id="email"
@@ -93,16 +106,18 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   className="px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)]"
-                  placeholder="you@example.com"
+                  placeholder={t("emailPlaceholder")}
                 />
               </div>
             </div>
-            <div className="flex flex-col text-left">
+            <div
+              className={`flex flex-col ${isRTL ? "text-right" : "text-left"}`}
+            >
               <label
                 htmlFor="message"
                 className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
               >
-                Message
+                {t("messageLabel")}
               </label>
               <textarea
                 id="message"
@@ -112,7 +127,7 @@ const Contact = () => {
                 required
                 rows={6}
                 className="px-4 py-3 rounded-xl resize-y bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)]"
-                placeholder="Tell us how we can help..."
+                placeholder={t("messagePlaceholder")}
               />
             </div>
             <button
@@ -120,49 +135,61 @@ const Contact = () => {
               className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2 anim-btn-pulse"
               aria-live="polite"
             >
-              {submitted ? "Sent! ✅" : "Send Message"}
+              {submitted ? t("sent") : t("sendMessage")}
             </button>
-            <p className="text-xs text-[var(--color-text-soft)] m-0 text-left">
-              We reply within 24h (weekdays). Your data is only used to respond
-              to this inquiry.
+            <p
+              className={`text-xs text-[var(--color-text-soft)] m-0 ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+            >
+              {t("privacyNotice")}
             </p>
           </form>
           {/* Info + FAQ */}
           <div className="space-y-10">
-            <div className="themed-surface-alt rounded-3xl p-8 shadow-card text-left">
+            <div
+              className={`themed-surface-alt rounded-3xl p-8 shadow-card ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+              dir={isRTL ? "rtl" : "ltr"}
+            >
               <h2 className="heading-font text-2xl font-bold mb-4 text-[var(--color-text)]">
-                Direct Contact
+                {t("directContact")}
               </h2>
-              <ul className="space-y-2 text-sm text-[var(--color-text-soft)]">
+              <ul
+                className={`space-y-2 text-sm text-[var(--color-text-soft)] ${
+                  isRTL ? "text-right" : "text-left"
+                }`}
+              >
                 <li>
-                  <strong className="text-[var(--color-text)]">Email:</strong>{" "}
+                  <strong className="text-[var(--color-text)]">
+                    {t("emailLabel")}:
+                  </strong>{" "}
                   UniNest@hotmail.com
                 </li>
                 <li>
-                  <strong className="text-[var(--color-text)]">Support:</strong>{" "}
-                  Mon–Fri, 9am–6pm (GMT+2)
+                  <strong className="text-[var(--color-text)]">
+                    {t("supportLabel")}
+                  </strong>{" "}
+                  {t("supportHours")}
                 </li>
                 <li>
                   <strong className="text-[var(--color-text)]">
-                    Response Time:
+                    {t("responseTimeLabel")}
                   </strong>{" "}
-                  Usually under 4 hours
+                  {t("usualResponse")}
                 </li>
               </ul>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {["Listings", "Security", "Partners", "Press"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-4 py-1.5 rounded-full text-xs font-semibold bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text-soft)]"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {/* Removed tag pills section as requested */}
             </div>
-            <div className="themed-surface-alt rounded-3xl p-8 shadow-card text-left">
+            <div
+              className={`themed-surface-alt rounded-3xl p-8 shadow-card ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+              dir={isRTL ? "rtl" : "ltr"}
+            >
               <h2 className="heading-font text-2xl font-bold mb-6 text-[var(--color-text)]">
-                FAQs
+                {t("faqs")}
               </h2>
               <div className="space-y-4">
                 {faqs.map((f, i) => {
@@ -179,7 +206,7 @@ const Contact = () => {
                         aria-expanded={open}
                       >
                         <span className="font-medium text-sm text-[var(--color-text)]">
-                          {f.q}
+                          {t(f.q)}
                         </span>
                         <span className="text-[var(--color-text-soft)] text-xs">
                           {open ? "−" : "+"}
@@ -187,7 +214,7 @@ const Contact = () => {
                       </button>
                       {open && (
                         <div className="px-5 pb-4 text-xs text-[var(--color-text-soft)] leading-relaxed">
-                          {f.a}
+                          {t(f.a)}
                         </div>
                       )}
                     </div>

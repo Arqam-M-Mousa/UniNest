@@ -8,20 +8,20 @@ const About = () => {
 
   const howItWorks = [
     {
-      step: "Discover",
-      desc: "Browse verified, student-friendly listings near campus.",
+      step: t("hiwDiscoverTitle"),
+      desc: t("hiwDiscoverDesc"),
     },
     {
-      step: "Compare",
-      desc: "Filter by budget, distance, amenities and roommate options.",
+      step: t("hiwCompareTitle"),
+      desc: t("hiwCompareDesc"),
     },
     {
-      step: "Connect",
-      desc: "Message owners securely and schedule viewings fast.",
+      step: t("hiwConnectTitle"),
+      desc: t("hiwConnectDesc"),
     },
     {
-      step: "Move In",
-      desc: "Start your semester settled, confident and prepared.",
+      step: t("hiwMoveInTitle"),
+      desc: t("hiwMoveInDesc"),
     },
   ];
 
@@ -51,27 +51,22 @@ const About = () => {
               as="h2"
               className="heading-font text-3xl font-bold mb-4 text-[var(--color-text)]"
             >
-              Our Mission
+              {t("ourMission")}
             </Reveal>
             <Reveal
               as="p"
               className="text-base leading-relaxed text-[var(--color-text-soft)] mb-6"
             >
-              We exist to remove friction from student housing. No more endless
-              social feed posts or unreliable landlord chains. UniNest
-              centralizes trusted listings, transparent pricing and simple
-              communication—so you can focus on your studies and campus life.
+              {t("missionParagraph")}
             </Reveal>
             <Reveal
               as="ul"
               className="list-disc pl-5 space-y-2 text-[var(--color-text-soft)] text-sm"
             >
-              <li>Verified listings & fair pricing transparency.</li>
-              <li>
-                Tools that match lifestyle (quiet, social, partner-ready).
-              </li>
-              <li>Support for international & first-year students.</li>
-              <li>Inclusive approach to budget & accessibility needs.</li>
+              <li>{t("missionPoint1")}</li>
+              <li>{t("missionPoint2")}</li>
+              <li>{t("missionPoint3")}</li>
+              <li>{t("missionPoint4")}</li>
             </Reveal>
           </div>
           <div className="flex justify-center">
@@ -147,7 +142,7 @@ const About = () => {
       {/* Values */}
       <section className="px-8 py-16">
         <h2 className="heading-font text-3xl font-bold mb-10 text-center text-[var(--color-text)]">
-          Core Values
+          {t("coreValues")}
         </h2>
         <div className="max-w-5xl mx-auto">
           <AnimatedFeatures variant="about" />
@@ -160,7 +155,7 @@ const About = () => {
           as="h2"
           className="heading-font text-3xl font-bold mb-8 text-center text-[var(--color-text)]"
         >
-          How It Works
+          {t("howItWorks")}
         </Reveal>
         <div className="max-w-4xl mx-auto grid sm:grid-cols-2 gap-6">
           {howItWorks.map((item, i) => (
@@ -188,7 +183,7 @@ const About = () => {
               to="/marketplace"
               className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-colors shadow-md focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)] animate-glow-pulse"
             >
-              Start Exploring
+              {t("startExploring")}
             </Link>
           </Reveal>
         </div>

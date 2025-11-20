@@ -13,6 +13,40 @@ body {
     color: var(--color-text);
     transition: background-color .35s ease, color .35s ease;
 }
+
+/* Decorative background for features section */
+.features-bg {
+    --feature-grad1: radial-gradient(circle at 15% 35%, rgba(96, 181, 239, 0.22), transparent 60%);
+    --feature-grad2: radial-gradient(circle at 85% 65%, rgba(74, 159, 216, 0.18), transparent 65%);
+    background:
+        var(--feature-grad1),
+        var(--feature-grad2),
+        var(--color-surface);
+}
+.dark .features-bg {
+    --feature-grad1: radial-gradient(circle at 20% 40%, rgba(96, 181, 239, 0.12), transparent 60%);
+    --feature-grad2: radial-gradient(circle at 80% 60%, rgba(74, 159, 216, 0.10), transparent 65%);
+    background:
+        var(--feature-grad1),
+        var(--feature-grad2),
+        var(--color-surface-alt);
+}
+
+/* Optional subtle grid pattern overlay */
+.features-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mix-blend-mode: overlay;
+    opacity: 0.35;
+}
+.dark .features-bg::after {
+    background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    opacity: 0.25;
+}
 /* Color System (variables) */
 :root {
     --color-bg: #f8fafc; /* Light background */

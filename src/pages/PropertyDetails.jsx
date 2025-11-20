@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { properties } from "../data/properties";
+import HeartButton from "../components/HeartButton";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -75,16 +76,10 @@ const PropertyDetails = () => {
             <h1 className="heading-font text-3xl text-[var(--color-text)] m-0">
               {property.name}
             </h1>
-            <button className="themed-surface border-2 themed-border rounded-full w-12 h-12 flex items-center justify-center cursor-pointer transition-all hover:border-[var(--color-accent)] hover:scale-110">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <path
-                  d="M14 25l-1.69-1.54C6.3 17.92 2 14.06 2 9.58 2 6.32 4.42 4 7.5 4c1.74 0 3.41.81 4.5 2.09C13.09 4.81 14.76 4 16.5 4 19.58 4 22 6.32 22 9.58c0 4.48-4.3 8.34-10.31 13.88L14 25z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-[var(--color-text)]"
-                />
-              </svg>
-            </button>
+            <HeartButton
+              size={48}
+              className="themed-surface border-2 themed-border hover:border-[var(--color-accent)]"
+            />
           </div>
 
           <p className="text-[var(--color-text-soft)] leading-relaxed mb-8">

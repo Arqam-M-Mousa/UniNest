@@ -51,7 +51,7 @@ const Home = () => {
       </section>
 
       {/* Features */}
-      <section className="py-16 themed-surface">
+      <section className="py-16 themed-surface features-bg relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <AnimatedFeatures variant="home" />
         </div>
@@ -132,8 +132,7 @@ const Home = () => {
               </Reveal>
               <Reveal delay={120}>
                 <p className="text-lg text-[var(--color-text-soft)] mb-10 max-w-2xl mx-auto">
-                  Browse hundreds of verified student-friendly apartments and
-                  find your perfect home today
+                  {t("ctaBrowseSubtitle")}
                 </p>
               </Reveal>
               <Reveal delay={260}>

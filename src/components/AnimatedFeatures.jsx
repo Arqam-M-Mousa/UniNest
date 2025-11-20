@@ -34,11 +34,7 @@ export default function AnimatedFeatures({ variant = "home" }) {
     return () => obs.disconnect();
   }, []);
 
-  const aboutDescriptions = [
-    "Trust & safety first in every listing we verify.",
-    "Designed for student life: proximity, community, balance.",
-    "Affordability matters—options for different budgets.",
-  ];
+  const aboutDescriptions = [t("aboutDesc1"), t("aboutDesc2"), t("aboutDesc3")];
 
   return (
     <div
@@ -70,7 +66,7 @@ export default function AnimatedFeatures({ variant = "home" }) {
                 variant === "about" ? "uppercase tracking-wide text-sm" : ""
               }`}
             >
-              {variant === "about" ? key.replace(/([A-Z])/g, " $1") : t(key)}
+              {variant === "about" ? t(key) : t(key)}
             </h3>
             {variant === "about" && (
               <p className="mt-2 text-xs text-[var(--color-text-soft)] leading-relaxed max-w-[220px]">

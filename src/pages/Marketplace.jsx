@@ -149,7 +149,6 @@ const Marketplace = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            <circle cx="14.5" cy="5" r="1" fill="currentColor" />
           </svg>
           {t("favorites")}
         </button>

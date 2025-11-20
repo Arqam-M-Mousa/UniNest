@@ -117,7 +117,7 @@ const Contact = () => {
             </div>
             <button
               type="submit"
-              className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2"
+              className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2 anim-btn-pulse"
               aria-live="polite"
             >
               {submitted ? "Sent! ✅" : "Send Message"}

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { heroFeatureItems } from "../components/FeatureIcons";
+import AnimatedFeatures from "../components/AnimatedFeatures";
 import campusClockImg from "../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 import heroImg from "../assets/image.jpg";
 import studentsImg from "../assets/lhrm_ljdyd_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import Reveal from "../components/Reveal";
 
 const Home = () => {
   const { t } = useLanguage();
@@ -26,39 +27,33 @@ const Home = () => {
           aria-hidden="true"
         />
         <div className="relative max-w-4xl z-10">
-          <h1 className="heading-font text-4xl md:text-5xl font-bold mb-6 leading-tight text-white drop-shadow-lg">
-            {t("heroTitle")}
-          </h1>
-          <p className="text-lg md:text-xl mb-10 text-white/90 drop-shadow-md">
-            {t("heroSubtitle")}
-          </p>
-          <Link
-            to="/marketplace"
-            className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-md shadow-black/10 dark:shadow-black/40 transition-colors focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
+          <Reveal
+            as="h1"
+            className="heading-font text-4xl md:text-5xl font-bold mb-6 leading-tight text-white drop-shadow-lg"
           >
-            {t("startSearching")}
-          </Link>
+            {t("heroTitle")}
+          </Reveal>
+          <Reveal
+            as="p"
+            className="text-lg md:text-xl mb-10 text-white/90 drop-shadow-md"
+          >
+            {t("heroSubtitle")}
+          </Reveal>
+          <Reveal>
+            <Link
+              to="/marketplace"
+              className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-md shadow-black/10 dark:shadow-black/40 transition-colors focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)] anim-btn-pulse"
+            >
+              {t("startSearching")}
+            </Link>
+          </Reveal>
         </div>
       </section>
 
       {/* Features */}
       <section className="py-16 themed-surface">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
-            {heroFeatureItems.map(({ key, Icon }) => (
-              <div key={key} className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)]">
-                  <Icon
-                    className="w-10 h-10 text-[var(--color-accent)]"
-                    aria-hidden="true"
-                  />
-                </div>
-                <h3 className="font-semibold text-base text-[var(--color-text)]">
-                  {t(key)}
-                </h3>
-              </div>
-            ))}
-          </div>
+          <AnimatedFeatures variant="home" />
         </div>
       </section>
 
@@ -91,12 +86,15 @@ const Home = () => {
         id="offers"
       >
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="heading-font text-center text-4xl font-bold mb-12 text-[var(--color-text)]">
+          <Reveal
+            as="h2"
+            className="heading-font text-center text-4xl font-bold mb-12 text-[var(--color-text)]"
+          >
             {t("ourOffers")}
-          </h2>
+          </Reveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[400, 200, 200].map((h, i) => (
-              <div
+              <Reveal
                 key={i}
                 className={`rounded-2xl overflow-hidden shadow-2xl ${
                   i === 0 ? "md:row-span-2" : ""
@@ -105,38 +103,47 @@ const Home = () => {
                 <div
                   className={`relative bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] min-h-[${h}px] flex items-end p-6`}
                 >
-                  <div className="themed-surface px-6 py-2 rounded-full font-bold text-lg">
+                  <div className="themed-surface px-6 py-2 rounded-full font-bold text-lg animate-float-slow">
                     1500$
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Ready CTA */}
+      {/* Ready CTA (Animated) */}
       <section className="py-20 themed-surface">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="relative rounded-[50px] p-16 themed-surface-alt border-4 themed-border shadow-2xl overflow-hidden">
             {/* Decorative circles */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2 animate-float-slow"></div>
+            <div
+              className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full translate-y-1/2 -translate-x-1/2 animate-float-slow"
+              style={{ animationDelay: "1.2s" }}
+            ></div>
 
             <div className="relative z-10">
-              <h2 className="heading-font text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
-                {t("readyTitle")}
-              </h2>
-              <p className="text-lg text-[var(--color-text-soft)] mb-10 max-w-2xl mx-auto">
-                Browse hundreds of verified student-friendly apartments and find
-                your perfect home today
-              </p>
-              <Link
-                to="/marketplace"
-                className="inline-block px-12 py-4 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-lg focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
-              >
-                {t("startSearching")}
-              </Link>
+              <Reveal delay={0}>
+                <h2 className="heading-font text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
+                  {t("readyTitle")}
+                </h2>
+              </Reveal>
+              <Reveal delay={120}>
+                <p className="text-lg text-[var(--color-text-soft)] mb-10 max-w-2xl mx-auto">
+                  Browse hundreds of verified student-friendly apartments and
+                  find your perfect home today
+                </p>
+              </Reveal>
+              <Reveal delay={260}>
+                <Link
+                  to="/marketplace"
+                  className="inline-block px-12 py-4 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-lg focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)] animate-glow-pulse"
+                >
+                  {t("startSearching")}
+                </Link>
+              </Reveal>
             </div>
           </div>
         </div>
@@ -151,12 +158,15 @@ const Home = () => {
         />
         <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
         <div className="relative max-w-3xl z-10">
-          <h2 className="heading-font text-4xl font-bold mb-4 text-white drop-shadow-lg">
+          <Reveal
+            as="h2"
+            className="heading-font text-4xl font-bold mb-4 text-white drop-shadow-lg"
+          >
             {t("builtForStudents")}
-          </h2>
-          <p className="text-xl text-white drop-shadow-md">
+          </Reveal>
+          <Reveal as="p" className="text-xl text-white drop-shadow-md">
             {t("weUnderstand")}
-          </p>
+          </Reveal>
         </div>
       </section>
     </div>

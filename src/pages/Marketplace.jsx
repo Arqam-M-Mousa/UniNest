@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { properties } from "../data/properties";
+import TabButton from "../components/TabButton";
 import HeartButton from "../components/HeartButton";
+import Reveal from "../components/Reveal";
 import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 const Marketplace = () => {
@@ -79,127 +81,119 @@ const Marketplace = () => {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 flex gap-3 flex-wrap">
-        <button
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
-            activeTab === "lastListings"
-              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-              : "btn-outline"
-          }`}
+        <TabButton
+          active={activeTab === "lastListings"}
           onClick={() => setActiveTab("lastListings")}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <rect
+                x="2"
+                y="2"
+                width="16"
+                height="16"
+                rx="3"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M6 7h8M6 10h8M6 13h5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          }
         >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <rect
-              x="2"
-              y="2"
-              width="16"
-              height="16"
-              rx="3"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <path
-              d="M6 7h8M6 10h8M6 13h5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
           {t("lastListings")}
-        </button>
-        <button
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
-            activeTab === "offers"
-              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-              : "btn-outline"
-          }`}
+        </TabButton>
+        <TabButton
+          active={activeTab === "offers"}
           onClick={() => setActiveTab("offers")}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <circle
+                cx="10"
+                cy="10"
+                r="8"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M7 13l6-6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <circle cx="8" cy="8" r="1" fill="currentColor" />
+              <circle cx="12" cy="12" r="1" fill="currentColor" />
+            </svg>
+          }
         >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <circle
-              cx="10"
-              cy="10"
-              r="8"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <path
-              d="M7 13l6-6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <circle cx="8" cy="8" r="1" fill="currentColor" />
-            <circle cx="12" cy="12" r="1" fill="currentColor" />
-          </svg>
           {t("offers")}
-        </button>
-        <button
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
-            activeTab === "favorites"
-              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-              : "btn-outline"
-          }`}
+        </TabButton>
+        <TabButton
+          active={activeTab === "favorites"}
           onClick={() => setActiveTab("favorites")}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M10 2.8l2.15 4.36 4.81.72-3.5 3.41.83 4.79-4.29-2.26-4.29 2.26.83-4.79-3.5-3.41 4.81-.72L10 2.8Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          }
         >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 2.8l2.15 4.36 4.81.72-3.5 3.41.83 4.79-4.29-2.26-4.29 2.26.83-4.79-3.5-3.41 4.81-.72L10 2.8Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
           {t("favorites")}
-        </button>
-        <button
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
-            activeTab === "masonry"
-              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-              : "btn-outline"
-          }`}
+        </TabButton>
+        <TabButton
+          active={activeTab === "masonry"}
           onClick={() => setActiveTab("masonry")}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <rect
+                x="2.5"
+                y="2.5"
+                width="7"
+                height="5"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <rect
+                x="11"
+                y="2.5"
+                width="6.5"
+                height="8"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <rect
+                x="2.5"
+                y="9.5"
+                width="4.5"
+                height="8"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <rect
+                x="8"
+                y="11"
+                width="9.5"
+                height="6.5"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+            </svg>
+          }
         >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <rect
-              x="2.5"
-              y="2.5"
-              width="7"
-              height="5"
-              rx="1"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <rect
-              x="11"
-              y="2.5"
-              width="6.5"
-              height="8"
-              rx="1"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <rect
-              x="2.5"
-              y="9.5"
-              width="4.5"
-              height="8"
-              rx="1"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <rect
-              x="8"
-              y="11"
-              width="9.5"
-              height="6.5"
-              rx="1"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
           {t("masonry")}
-        </button>
+        </TabButton>
         <button
           className={`${
             isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
@@ -314,33 +308,44 @@ const Marketplace = () => {
         </aside>
 
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
-          {properties.map((property) => (
-            <Link
-              key={property.id}
-              to={`/marketplace/${property.id}`}
-              className="themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit transition-all hover:-translate-y-1 hover:shadow-xl shadow-card"
-            >
-              <div className="relative pt-[75%] bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] overflow-hidden">
-                <img
-                  src={property.images[0]}
-                  alt={property.name}
-                  className="absolute top-0 left-0 w-full h-full object-cover"
-                />
-                <div className="absolute top-4 right-4">
-                  <HeartButton size={40} />
+          {properties.map((property, idx) => (
+            <Reveal key={property.id} delay={idx * 70} className="w-full">
+              <Link
+                to={`/marketplace/${property.id}`}
+                className="market-card themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit shadow-card"
+              >
+                <div className="market-card-img-wrapper relative pt-[75%] bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)]">
+                  <img
+                    src={property.images[0]}
+                    alt={property.name}
+                    className="absolute top-0 left-0 w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <span className="market-card-gradient" aria-hidden="true" />
+                  <div className="absolute top-4 right-4">
+                    <HeartButton size={40} />
+                  </div>
                 </div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-xl mb-2 text-[var(--color-text)]">
-                  {property.price}
-                </h3>
-                <p className="text-[var(--color-text-soft)] text-sm m-0">
-                  {property.rooms.bedrooms}
-                  {t("beds")}, {property.rooms.bathrooms}
-                  {t("baths")}, {property.squareMeter}
-                </p>
-              </div>
-            </Link>
+                <div className="p-4">
+                  <h3 className="text-xl mb-2 text-[var(--color-text)] font-semibold tracking-tight">
+                    {property.price}
+                  </h3>
+                  <p className="text-[var(--color-text-soft)] text-sm m-0 flex items-center gap-2">
+                    <span>
+                      {property.rooms.bedrooms}
+                      {t("beds")}
+                    </span>
+                    <span className="opacity-40">•</span>
+                    <span>
+                      {property.rooms.bathrooms}
+                      {t("baths")}
+                    </span>
+                    <span className="opacity-40">•</span>
+                    <span>{property.squareMeter}</span>
+                  </p>
+                </div>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </div>

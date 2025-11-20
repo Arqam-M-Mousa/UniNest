@@ -92,19 +92,34 @@ const Home = () => {
           >
             {t("ourOffers")}
           </Reveal>
+          {/* Restored image cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[400, 200, 200].map((h, i) => (
+            {[
+              { src: campusClockImg, alt: "Campus Clock", price: "1500$" },
+              { src: nnuImg, alt: "Campus Housing", price: "1500$" },
+              { src: heroImg, alt: "Student Life", price: "1500$" },
+            ].map((offer, i) => (
               <Reveal
                 key={i}
-                className={`rounded-2xl overflow-hidden shadow-2xl ${
+                className={`group rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.02] ${
                   i === 0 ? "md:row-span-2" : ""
                 }`}
               >
-                <div
-                  className={`relative bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] min-h-[${h}px] flex items-end p-6`}
-                >
-                  <div className="themed-surface px-6 py-2 rounded-full font-bold text-lg animate-float-slow">
-                    1500$
+                <div className="relative h-full flex flex-col">
+                  {/* Image */}
+                  <img
+                    src={offer.src}
+                    alt={offer.alt}
+                    className={`w-full h-full object-cover ${
+                      i === 0 ? "min-h-[400px]" : "min-h-[200px]"
+                    }`}
+                    loading={i === 0 ? "eager" : "lazy"}
+                  />
+                  {/* Gradient overlay for readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-70 group-hover:opacity-80 transition-opacity"></div>
+                  {/* Price pill */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 themed-surface px-6 py-2 rounded-full font-bold text-lg shadow-md animate-float-slow">
+                    {offer.price}
                   </div>
                 </div>
               </Reveal>

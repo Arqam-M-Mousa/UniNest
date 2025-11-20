@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { properties } from "../data/properties";
+import StatsCard from "../components/StatsCard";
 import HeartButton from "../components/HeartButton";
 
 const PropertyDetails = () => {
@@ -93,30 +94,12 @@ const PropertyDetails = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="themed-surface p-6 rounded-xl text-center">
-              <h3 className="text-sm text-[var(--color-text-soft)] mb-2 font-medium">
-                {t("squareMeter")}
-              </h3>
-              <p className="text-lg text-[var(--color-text)] font-semibold m-0">
-                {property.squareMeter}
-              </p>
-            </div>
-            <div className="themed-surface p-6 rounded-xl text-center">
-              <h3 className="text-sm text-[var(--color-text-soft)] mb-2 font-medium">
-                {t("availableIn")}
-              </h3>
-              <p className="text-lg text-[var(--color-text)] font-semibold m-0">
-                {property.availableIn}
-              </p>
-            </div>
-            <div className="themed-surface p-6 rounded-xl text-center">
-              <h3 className="text-sm text-[var(--color-text-soft)] mb-2 font-medium">
-                {t("garage")}
-              </h3>
-              <p className="text-lg text-[var(--color-text)] font-semibold m-0">
-                {property.garage ? t("yes") : t("no")}
-              </p>
-            </div>
+            <StatsCard label={t("squareMeter")} value={property.squareMeter} />
+            <StatsCard label={t("availableIn")} value={property.availableIn} />
+            <StatsCard
+              label={t("garage")}
+              value={property.garage ? t("yes") : t("no")}
+            />
           </div>
 
           <div className="themed-surface p-6 rounded-xl mb-6">

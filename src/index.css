@@ -192,3 +192,47 @@ body *, body *::before, body *::after {
 .group:hover .feature-icon-wrapper svg { transform: translateY(-3px) scale(1.12); }
 /* Smooth icon transitions */
 .feature-icon-wrapper svg { transition: transform .6s cubic-bezier(.16,.84,.44,1); }
+
+/* ================= Marketplace Cards ================= */
+@keyframes market-card-in {
+    0% { opacity: 0; transform: translateY(18px) scale(.96) rotateX(8deg); }
+    60% { opacity: 1; }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); }
+}
+@keyframes market-card-img-reveal {
+    0% { transform: scale(1.08) translateY(6px); opacity: 0; }
+    100% { transform: scale(1.02) translateY(0); opacity: 1; }
+}
+.market-card {
+    position: relative;
+    isolation: isolate;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    animation: market-card-in .7s cubic-bezier(.22,.9,.3,1) forwards;
+    transition: transform .6s cubic-bezier(.22,.9,.3,1), box-shadow .55s ease;
+    will-change: transform;
+}
+.market-card:hover {
+    transform: translateY(-10px) rotateX(5deg) scale(1.015);
+    box-shadow: 0 18px 34px -12px rgba(0,0,0,.35), 0 6px 16px -4px rgba(0,0,0,.28);
+}
+.market-card::after {
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:linear-gradient(145deg, rgba(99,102,241,.22), transparent 70%);
+    opacity:0; transition:opacity .55s ease;
+}
+.market-card:hover::after { opacity:.85; }
+.market-card-img-wrapper { position:relative; overflow:hidden; }
+.market-card-img-wrapper img {
+    animation: market-card-img-reveal .9s cubic-bezier(.22,.9,.3,1) forwards;
+    transition: transform .8s cubic-bezier(.22,.9,.3,1), filter .6s ease;
+    will-change: transform;
+}
+.market-card:hover .market-card-img-wrapper img { transform: scale(1.08); filter: brightness(.92) saturate(1.15); }
+.market-card .market-card-gradient { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,.15)); opacity:0; transition:opacity .65s ease; }
+.market-card:hover .market-card-gradient { opacity:.65; }
+@media (prefers-reduced-motion: reduce) {
+    .market-card, .market-card-img-wrapper img { animation:none; transition:none; }
+    .market-card:hover { transform:none; }
+    .market-card:hover .market-card-img-wrapper img { transform:none; filter:none; }
+}

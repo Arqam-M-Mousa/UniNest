@@ -11,6 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 export default function Reveal({
   as: Tag = "div",
   threshold = 0.2,
+  delay = 0, // milliseconds
   className = "",
   children,
 }) {
@@ -41,6 +42,7 @@ export default function Reveal({
       className={`${className} ${
         visible ? "animate-fade-up" : "opacity-0 translate-y-3"
       } transform-gpu`}
+      style={visible && delay ? { animationDelay: `${delay}ms` } : undefined}
     >
       {children}
     </Tag>

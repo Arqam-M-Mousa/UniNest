@@ -5,10 +5,7 @@ import { useLanguage } from "../context/LanguageContext";
 const SignIn = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,15 +13,12 @@ const SignIn = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 bg-gradient-to-br from-indigo-50 to-slate-50 dark:from-slate-800 dark:to-slate-900">
-      <div className="bg-white dark:bg-slate-800 border-[3px] border-primary dark:border-primary-dark rounded-[30px] p-10 max-w-[500px] w-full shadow-lg shadow-primary/10">
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 themed-surface">
+      <div className="themed-surface-alt border-[3px] border-[var(--color-accent)] rounded-[30px] p-10 max-w-[500px] w-full shadow-lg shadow-black/10 dark:shadow-black/30">
         <div className="flex justify-center mb-6 -mt-14">
           <svg
             width="99"
@@ -42,7 +36,7 @@ const SignIn = () => {
           </svg>
         </div>
 
-        <h1 className="text-center text-5xl text-slate-800 dark:text-slate-100 mb-12 font-bold">
+        <h1 className="heading-font text-center text-5xl mb-12 font-bold text-[var(--color-text)]">
           {t("signIn")}
         </h1>
 
@@ -55,10 +49,9 @@ const SignIn = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full py-3 border-none text-2xl bg-transparent text-slate-900 dark:text-slate-100 text-center focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-500 placeholder:text-2xl border-b border-slate-300 dark:border-slate-600 focus:border-b-2 focus:border-primary dark:focus:border-primary-dark transition-all"
+              className="w-full py-3 border-none text-2xl bg-transparent text-[var(--color-text)] text-center focus:outline-none placeholder:text-[var(--color-text-soft)] placeholder:text-2xl border-b border-[var(--color-border)] focus:border-b-2 focus:border-[var(--color-accent)] transition-all"
             />
           </div>
-
           <div className="relative">
             <input
               type="password"
@@ -67,14 +60,10 @@ const SignIn = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full py-3 border-none text-2xl bg-transparent text-slate-900 dark:text-slate-100 text-center focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-500 placeholder:text-2xl border-b border-slate-300 dark:border-slate-600 focus:border-b-2 focus:border-primary dark:focus:border-primary-dark transition-all"
+              className="w-full py-3 border-none text-2xl bg-transparent text-[var(--color-text)] text-center focus:outline-none placeholder:text-[var(--color-text-soft)] placeholder:text-2xl border-b border-[var(--color-border)] focus:border-b-2 focus:border-[var(--color-accent)] transition-all"
             />
           </div>
-
-          <button
-            type="submit"
-            className="bg-primary dark:bg-primary-dark hover:bg-primary-dark dark:hover:bg-primary text-white border-none py-3.5 px-8 rounded-full text-base font-semibold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary-dark/30 mt-4"
-          >
+          <button type="submit" className="btn-primary mt-4">
             {t("signIn")}
           </button>
         </form>
@@ -82,15 +71,15 @@ const SignIn = () => {
         <div className="text-center mt-6">
           <Link
             to="/forgot-password"
-            className="text-slate-400 dark:text-slate-500 no-underline text-sm transition-colors hover:text-primary dark:hover:text-primary-dark block mb-4"
+            className="no-underline text-sm transition-colors text-[var(--color-text-soft)] hover:text-[var(--color-accent)] block mb-4"
           >
             {t("forgotPassword")}
           </Link>
-          <p className="text-slate-600 dark:text-slate-400 text-sm m-0">
+          <p className="text-[var(--color-text-soft)] text-sm m-0">
             {t("noAccount")}{" "}
             <Link
               to="/signup"
-              className="text-slate-800 dark:text-slate-200 underline font-semibold hover:text-primary dark:hover:text-primary-dark"
+              className="underline font-semibold text-[var(--color-text)] hover:text-[var(--color-accent)]"
             >
               {t("createOne")}
             </Link>

@@ -12,13 +12,13 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-[50vh] flex items-center justify-center py-16 px-4 bg-white dark:bg-slate-900">
-      <div className="w-full max-w-md bg-slate-50 dark:bg-slate-800 p-8 rounded-2xl shadow-card">
-        <h1 className="text-3xl font-bold mb-6 text-slate-800 dark:text-slate-100">
+    <div className="min-h-[50vh] flex items-center justify-center py-16 px-4 themed-surface">
+      <div className="w-full max-w-md themed-surface-alt p-8 rounded-2xl shadow-card">
+        <h1 className="heading-font text-3xl font-bold mb-6 text-[var(--color-text)]">
           {t("forgotPassword")}
         </h1>
         {submitted ? (
-          <p className="text-gray-600 dark:text-slate-300 text-sm">
+          <p className="text-[var(--color-text-soft)] text-sm">
             If this email exists, a reset link was sent.
           </p>
         ) : (
@@ -29,12 +29,9 @@ const ForgotPassword = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("email")}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="input-field"
             />
-            <button
-              type="submit"
-              className="w-full bg-primary dark:bg-primary-dark hover:bg-primary-dark dark:hover:bg-primary text-white font-semibold py-3 rounded-lg transition-colors"
-            >
+            <button type="submit" className="btn-primary w-full">
               Send Reset Link
             </button>
           </form>

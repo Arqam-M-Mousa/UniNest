@@ -16,14 +16,20 @@ const Marketplace = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <section className="bg-gradient-to-r from-gradientStart to-gradientEnd dark:from-slate-700 dark:to-slate-800 py-12 px-8 text-white">
+    <div className="min-h-screen themed-surface">
+      <section className="py-12 px-8 text-center">
+        <div
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--color-bg-alt)] to-[var(--color-bg)] dark:from-[var(--color-bg-alt)] dark:to-[var(--color-bg)]"
+          aria-hidden="true"
+        />
         <div className="max-w-7xl mx-auto mb-8">
           <div className="flex justify-between items-center flex-wrap gap-4">
-            <h1 className="text-4xl font-bold">{t("marketplaceTitle")}</h1>
+            <h1 className="heading-font text-4xl font-bold text-[var(--color-text)]">
+              {t("marketplaceTitle")}
+            </h1>
             <Link
               to="/signin"
-              className="flex items-center gap-2 text-sm hover:underline"
+              className="flex items-center gap-2 text-sm text-[var(--color-text-soft)] hover:text-[var(--color-accent)]"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
@@ -37,11 +43,11 @@ const Marketplace = () => {
           </div>
         </div>
 
-        <p className="text-center text-xl mb-8 opacity-95">
+        <p className="text-center text-xl mb-8 text-[var(--color-text-soft)]">
           {t("marketplaceSubtitle")}
         </p>
 
-        <div className="max-w-2xl mx-auto bg-white dark:bg-slate-700 rounded-full px-6 py-3 flex items-center gap-4">
+        <div className="max-w-2xl mx-auto themed-surface-alt rounded-full px-6 py-3 flex items-center gap-4">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
               d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"
@@ -53,7 +59,7 @@ const Marketplace = () => {
           <input
             type="text"
             placeholder={t("searchPlaceholder")}
-            className="flex-1 bg-transparent border-none outline-none text-base text-slate-700 dark:text-slate-200"
+            className="flex-1 bg-transparent border-none outline-none text-base text-[var(--color-text)] placeholder:text-[var(--color-text-soft)]"
           />
         </div>
       </section>
@@ -62,8 +68,8 @@ const Marketplace = () => {
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
             activeTab === "lastListings"
-              ? "bg-primary text-white border-primary"
-              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:bg-primary hover:text-white hover:border-primary"
+              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+              : "btn-outline"
           }`}
           onClick={() => setActiveTab("lastListings")}
         >
@@ -89,8 +95,8 @@ const Marketplace = () => {
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
             activeTab === "offers"
-              ? "bg-primary text-white border-primary"
-              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:bg-primary hover:text-white hover:border-primary"
+              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+              : "btn-outline"
           }`}
           onClick={() => setActiveTab("offers")}
         >
@@ -116,8 +122,8 @@ const Marketplace = () => {
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
             activeTab === "favorites"
-              ? "bg-primary text-white border-primary"
-              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:bg-primary hover:text-white hover:border-primary"
+              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+              : "btn-outline"
           }`}
           onClick={() => setActiveTab("favorites")}
         >
@@ -136,8 +142,8 @@ const Marketplace = () => {
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-medium text-sm transition-all ${
             activeTab === "masonry"
-              ? "bg-primary text-white border-primary"
-              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:bg-primary hover:text-white hover:border-primary"
+              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+              : "btn-outline"
           }`}
           onClick={() => setActiveTab("masonry")}
         >
@@ -181,7 +187,7 @@ const Marketplace = () => {
           </svg>
           {t("masonry")}
         </button>
-        <button className="ml-auto flex items-center gap-2 px-6 py-3 rounded-full bg-primary dark:bg-primary-dark hover:bg-primary-dark dark:hover:bg-primary text-white font-medium text-sm transition-colors">
+        <button className="ml-auto flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
             <path
               d="M10 5v10M5 10h10"
@@ -195,8 +201,8 @@ const Marketplace = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12 grid lg:grid-cols-[250px_1fr] gap-8">
-        <aside className="bg-white dark:bg-slate-800 p-6 rounded-xl sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-6 text-slate-800 dark:text-slate-100">
+        <aside className="themed-surface-alt p-6 rounded-xl sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
+          <h3 className="flex items-center gap-2 text-lg font-semibold mb-6 text-[var(--color-text)]">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path
                 d="M3 6h14M6 10h8M8 14h4"
@@ -210,7 +216,7 @@ const Marketplace = () => {
 
           {[...Array(4)].map((_, sectionIdx) => (
             <div key={sectionIdx} className="mb-8">
-              <h4 className="flex items-center gap-2 text-sm font-medium mb-4 text-gray-600 dark:text-slate-300">
+              <h4 className="flex items-center gap-2 text-sm font-medium mb-4 text-[var(--color-text-soft)]">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   {sectionIdx === 0 && (
                     <path
@@ -265,8 +271,8 @@ const Marketplace = () => {
                     key={`filter-${sectionIdx}-${index}`}
                     className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition-all ${
                       selectedPrice === range.label && sectionIdx === 0
-                        ? "bg-primary text-white border-primary"
-                        : "bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-gray-200 dark:border-slate-600 hover:bg-primary hover:text-white hover:border-primary"
+                        ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+                        : "bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-white hover:border-[var(--color-accent)]"
                     }`}
                     onClick={() =>
                       sectionIdx === 0 && setSelectedPrice(range.label)
@@ -276,8 +282,8 @@ const Marketplace = () => {
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         selectedPrice === range.label && sectionIdx === 0
-                          ? "bg-white text-primary"
-                          : "bg-white dark:bg-slate-600 text-primary dark:text-slate-100"
+                          ? "bg-white text-[var(--color-accent)]"
+                          : "bg-white dark:bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
                       }`}
                     >
                       {range.count}
@@ -294,9 +300,9 @@ const Marketplace = () => {
             <Link
               key={property.id}
               to={`/marketplace/${property.id}`}
-              className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden no-underline text-inherit transition-all hover:-translate-y-1 hover:shadow-xl shadow-card"
+              className="themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit transition-all hover:-translate-y-1 hover:shadow-xl shadow-card"
             >
-              <div className="relative pt-[75%] bg-slate-200 dark:bg-slate-700 overflow-hidden">
+              <div className="relative pt-[75%] bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] overflow-hidden">
                 <img
                   src={property.images[0]}
                   alt={property.name}
@@ -313,10 +319,10 @@ const Marketplace = () => {
                 </button>
               </div>
               <div className="p-4">
-                <h3 className="text-xl mb-2 text-slate-800 dark:text-slate-100">
+                <h3 className="text-xl mb-2 text-[var(--color-text)]">
                   {property.price}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm m-0">
+                <p className="text-[var(--color-text-soft)] text-sm m-0">
                   {property.rooms.bedrooms}
                   {t("beds")}, {property.rooms.bathrooms}
                   {t("baths")}, {property.squareMeter}

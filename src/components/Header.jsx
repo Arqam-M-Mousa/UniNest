@@ -8,11 +8,11 @@ const Header = () => {
   const location = useLocation();
 
   return (
-    <header className="bg-white/90 dark:bg-slate-900 backdrop-blur shadow-sm sticky top-0 z-50">
+    <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-6 py-3">
         <Link
           to="/"
-          className="text-xl font-bold tracking-tight text-slate-700 dark:text-slate-100"
+          className="text-xl heading-font font-bold tracking-tight text-[var(--color-text)]"
         >
           UniNest
         </Link>
@@ -40,9 +40,10 @@ const Header = () => {
               key={link.to}
               to={link.to}
               className={
-                link.match(location.pathname)
-                  ? "text-primary dark:text-primary font-semibold"
-                  : "text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors"
+                (link.match(location.pathname)
+                  ? "text-[var(--color-accent)] font-semibold"
+                  : "themed-text-soft hover:text-[var(--color-accent)]") +
+                " transition-colors"
               }
             >
               {link.label}
@@ -52,14 +53,14 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={toggleLanguage}
-            className="px-3 py-1.5 rounded-md bg-primary dark:bg-primary-dark hover:bg-primary-dark dark:hover:bg-primary text-white text-sm font-medium transition-colors"
+            className="px-3 py-1.5 rounded-md bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
           >
             {language === "en" ? "العربية" : "English"}
           </button>
           <button
             onClick={toggleTheme}
             aria-label="Toggle dark mode"
-            className="p-2 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark"
+            className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
           >
             {theme === "light" ? (
               <svg
@@ -96,7 +97,7 @@ const Header = () => {
           </button>
           <Link
             to="/signin"
-            className="p-2 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
             aria-label="Account"
           >
             <svg

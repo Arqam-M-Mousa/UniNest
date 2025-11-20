@@ -16,11 +16,21 @@ export const ThemeProvider = ({ children }) => {
     return "light";
   });
 
+  // Apply theme classes to both <html> and <body> for extra robustness.
+  // This helps if custom CSS targets body.dark and ensures Tailwind "dark" variants still work (html has class).
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") root.classList.add("dark");
-    else root.classList.remove("dark");
-    root.style.colorScheme = theme;
+    const html = document.documentElement;
+    const body = document.body;
+    if (theme === "dark") {
+      html.classList.add("dark");
+      body.classList.add("dark");
+    } else {
+      html.classList.remove("dark");
+      body.classList.remove("dark");
+    }
+    html.style.colorScheme = theme;
+    html.setAttribute("data-theme", theme);
+    body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 

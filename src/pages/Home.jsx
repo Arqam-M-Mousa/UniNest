@@ -7,34 +7,41 @@ const Home = () => {
 
   return (
     <div className="w-full">
-      <section className="relative min-h-[500px] bg-hero-pattern-light dark:bg-hero-pattern-dark bg-cover bg-center flex items-center justify-center text-center text-slate-800 dark:text-white px-8 py-16">
-        <div className="max-w-3xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+      {/* Hero Section */}
+      <section className="relative flex items-center justify-center text-center px-6 py-24 md:py-32">
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg-alt)] to-[var(--color-bg)] dark:from-[var(--color-bg-alt)] dark:to-[var(--color-bg)]"
+          aria-hidden="true"
+        />
+        <div className="relative max-w-4xl">
+          <h1 className="heading-font text-4xl md:text-5xl font-bold mb-6 leading-tight text-[var(--color-text)]">
             {t("heroTitle")}
           </h1>
-          <p className="text-lg md:text-xl mb-8 opacity-95">
+          <p className="text-lg md:text-xl mb-10 text-[var(--color-text-soft)]">
             {t("heroSubtitle")}
           </p>
           <Link
             to="/marketplace"
-            className="inline-block bg-primary dark:bg-primary-dark hover:bg-primary-dark dark:hover:bg-primary text-white px-10 py-3.5 rounded-full font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-md shadow-black/10 dark:shadow-black/40 transition-colors focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
           >
             {t("startSearching")}
           </Link>
         </div>
       </section>
 
-      <section className="py-16 bg-white dark:bg-slate-900">
+      {/* Features */}
+      <section className="py-16 themed-surface">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
-            {heroFeatureItems.map(({ key, Icon, bg, color }) => (
+            {heroFeatureItems.map(({ key, Icon }) => (
               <div key={key} className="flex flex-col items-center text-center">
-                <div
-                  className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${bg}`}
-                >
-                  <Icon className={`w-10 h-10 ${color}`} aria-hidden="true" />
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)]">
+                  <Icon
+                    className="w-10 h-10 text-[var(--color-accent)]"
+                    aria-hidden="true"
+                  />
                 </div>
-                <h3 className="text-slate-800 dark:text-slate-200 font-semibold text-base">
+                <h3 className="font-semibold text-base text-[var(--color-text)]">
                   {t(key)}
                 </h3>
               </div>
@@ -43,7 +50,8 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-16 bg-slate-50 dark:bg-slate-800">
+      {/* About Us */}
+      <section className="py-16 themed-bg-alt">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="flex justify-center">
@@ -58,10 +66,10 @@ const Home = () => {
               </svg>
             </div>
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-slate-800 dark:text-slate-100">
+              <h2 className="heading-font text-3xl font-bold mb-6 text-[var(--color-text)]">
                 {t("aboutUs")}
               </h2>
-              <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
+              <p className="text-base leading-relaxed text-[var(--color-text-soft)]">
                 {t("aboutUsText")}
               </p>
             </div>
@@ -69,49 +77,46 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Offers */}
       <section
-        className="py-16 bg-gradient-to-r from-primary to-primary-dark dark:from-slate-700 dark:to-slate-800"
+        className="py-16 bg-[var(--color-surface)] dark:bg-[var(--color-surface-alt)]"
         id="offers"
       >
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-center text-4xl font-bold text-white mb-12">
+          <h2 className="heading-font text-center text-4xl font-bold mb-12 text-[var(--color-text)]">
             {t("ourOffers")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <div className="md:row-span-2 rounded-2xl overflow-hidden shadow-2xl">
-              <div className="relative bg-gradient-to-br from-purple-500 to-purple-700 min-h-[400px] flex items-end p-6">
-                <div className="bg-white text-slate-900 px-6 py-2 rounded-full font-bold text-lg">
-                  1500$
+            {[400, 200, 200].map((h, i) => (
+              <div
+                key={i}
+                className={`rounded-2xl overflow-hidden shadow-2xl ${
+                  i === 0 ? "md:row-span-2" : ""
+                }`}
+              >
+                <div
+                  className={`relative bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] min-h-[${h}px] flex items-end p-6`}
+                >
+                  <div className="themed-surface px-6 py-2 rounded-full font-bold text-lg">
+                    1500$
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-2xl">
-              <div className="relative bg-gradient-to-br from-purple-500 to-purple-700 min-h-[200px] flex items-end p-6">
-                <div className="bg-white text-gray-900 px-6 py-2 rounded-full font-bold text-lg">
-                  1500$
-                </div>
-              </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-2xl">
-              <div className="relative bg-gradient-to-br from-purple-500 to-purple-700 min-h-[200px] flex items-end p-6">
-                <div className="bg-white text-gray-900 px-6 py-2 rounded-full font-bold text-lg">
-                  1500$
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-white dark:bg-slate-900">
+      {/* Ready CTA */}
+      <section className="py-16 themed-surface">
         <div className="max-w-2xl mx-auto px-4 text-center">
-          <div className="border-4 border-primary dark:border-primary-dark rounded-3xl p-12 bg-white dark:bg-slate-800">
-            <h2 className="text-3xl font-bold mb-8 text-slate-800 dark:text-slate-100">
+          <div className="border-4 border-[var(--color-accent)] rounded-3xl p-12 themed-surface-alt">
+            <h2 className="heading-font text-3xl font-bold mb-8 text-[var(--color-text)]">
               {t("readyTitle")}
             </h2>
             <Link
               to="/marketplace"
-              className="inline-block bg-primary dark:bg-primary-dark hover:bg-primary-dark dark:hover:bg-primary text-white px-10 py-3.5 rounded-full font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
             >
               {t("startSearching")}
             </Link>
@@ -119,10 +124,17 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="relative min-h-[400px] bg-final-pattern bg-cover bg-center flex items-center justify-center text-white text-center px-8 py-16 dark:brightness-90">
-        <div>
-          <h2 className="text-4xl font-bold mb-4">{t("builtForStudents")}</h2>
-          <p className="text-xl opacity-95">{t("weUnderstand")}</p>
+      {/* Final Banner */}
+      <section className="relative min-h-[320px] flex items-center justify-center text-center px-6 py-20">
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-hover)] opacity-90 dark:opacity-75"
+          aria-hidden="true"
+        />
+        <div className="relative max-w-3xl">
+          <h2 className="heading-font text-4xl font-bold mb-4 text-white drop-shadow-sm">
+            {t("builtForStudents")}
+          </h2>
+          <p className="text-xl text-white/90">{t("weUnderstand")}</p>
         </div>
       </section>
     </div>

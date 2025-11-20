@@ -8,14 +8,41 @@ body {
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: system-ui, Segoe UI, Arial, sans-serif;
-    background-color: #f1f5f9; /* slate-50 */
-    color: #1e293b; /* slate-800 */
+    font-family: var(--font-sans, system-ui, Segoe UI, Arial, sans-serif);
+    background-color: var(--color-bg);
+    color: var(--color-text);
     transition: background-color .35s ease, color .35s ease;
 }
-.dark body {
-    background-color: #0f172a; /* slate-900 */
-    color: #f1f5f9; /* slate-50 */
+/* Color System (variables) */
+:root {
+    --color-bg: #f8fafc; /* Light background */
+    --color-bg-alt: #eef2f7; /* Subtle section background */
+    --color-surface: #ffffff; /* Cards / header */
+    --color-surface-alt: #f1f5f9; /* Secondary surfaces */
+    --color-text: #0f172a;
+    --color-text-soft: #475569;
+    --color-border: #e2e8f0;
+    --color-accent: #6366f1;
+    --color-accent-hover: #4f46e5;
+    --color-ring: #818cf8;
+    --color-hero-overlay: rgba(255,255,255,0.65);
+    --font-sans: 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
+    --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+.dark {
+    --color-bg: #0d1320; /* Deep navy */
+    --color-bg-alt: #121b2b; /* Slightly lighter section */
+    --color-surface: #1e293b; /* Elevated surfaces */
+    --color-surface-alt: #162032; /* Secondary surfaces */
+    --color-text: #f1f5f9;
+    --color-text-soft: #94a3b8;
+    --color-border: #334155;
+    --color-accent: #6366f1;
+    --color-accent-hover: #818cf8;
+    --color-ring: #6366f1;
+    --color-hero-overlay: rgba(0,0,0,0.55);
+    --font-sans: 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
+    --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 
 /* Smooth theme transitions for common elements */
@@ -24,10 +51,45 @@ body *, body *::before, body *::after {
 }
 
 /* Selection colors adapt to theme */
-::selection { background: #6366f1; color: #ffffff; }
-.dark ::selection { background: #4f46e5; color: #ffffff; }
+::selection { background: var(--color-accent); color: #ffffff; }
+.dark ::selection { background: var(--color-accent-hover); color: #ffffff; }
 
 /* Utility helpers (optional) */
-.themed-surface { @apply bg-white dark:bg-slate-800; }
-.themed-text-soft { @apply text-slate-600 dark:text-slate-400; }
-.themed-border { @apply border-slate-200 dark:border-slate-700; }
+.themed-surface { background-color: var(--color-surface); color: var(--color-text); }
+.themed-surface-alt { background-color: var(--color-surface-alt); color: var(--color-text); }
+.themed-bg-alt { background-color: var(--color-bg-alt); }
+.themed-text-soft { color: var(--color-text-soft); }
+.themed-border { border-color: var(--color-border); }
+.themed-accent { color: var(--color-accent); }
+/* Heading font utility */
+.heading-font { font-family: var(--font-heading); }
+
+/* Buttons & Inputs (shared) */
+.btn-primary {
+    @apply inline-flex items-center justify-center font-semibold rounded-full transition-colors focus:outline-none focus:ring-4;
+    background: var(--color-accent);
+    color: #fff;
+    padding: 0.75rem 2.5rem;
+    box-shadow: 0 4px 14px -4px rgba(0,0,0,0.2);
+}
+.btn-primary:hover { background: var(--color-accent-hover); }
+.btn-primary:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-ring) 55%, transparent); }
+
+.btn-outline {
+    @apply inline-flex items-center justify-center font-medium rounded-full transition-colors border;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    padding: 0.6rem 1.75rem;
+}
+.btn-outline:hover { background: var(--color-bg-alt); color: var(--color-accent); }
+
+.input-field {
+    @apply w-full rounded-lg transition-colors focus:outline-none;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.75rem 1rem;
+}
+.input-field::placeholder { color: var(--color-text-soft); }
+.input-field:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ring) 40%, transparent); }

@@ -28,7 +28,7 @@ export const translations = {
     home: "Home",
     aboutUsLink: "About Us",
     connect: "Connect",
-    rightsReserved: "©2025 جميع الحقوق محفوظة",
+    rightsReserved: "©2025 All rights reserved",
     email: "Email",
     password: "Password",
     forgotPassword: "Did you forget your password?",

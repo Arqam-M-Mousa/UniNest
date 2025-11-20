@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Minimal global layer – rely on Tailwind utilities everywhere.
+     Add only essential resets that Tailwind does not cover for this project. */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: system-ui, Segoe UI, Arial, sans-serif;
+    background-color: #f1f5f9; /* slate-50 */
+    color: #1e293b; /* slate-800 */
+    transition: background-color .35s ease, color .35s ease;
+}
+.dark body {
+    background-color: #0f172a; /* slate-900 */
+    color: #f1f5f9; /* slate-50 */
+}
+
+/* Smooth theme transitions for common elements */
+body *, body *::before, body *::after {
+    transition: background-color .35s ease, color .35s ease, border-color .35s ease;
+}
+
+/* Selection colors adapt to theme */
+::selection { background: #6366f1; color: #ffffff; }
+.dark ::selection { background: #4f46e5; color: #ffffff; }
+
+/* Utility helpers (optional) */
+.themed-surface { @apply bg-white dark:bg-slate-800; }
+.themed-text-soft { @apply text-slate-600 dark:text-slate-400; }
+.themed-border { @apply border-slate-200 dark:border-slate-700; }

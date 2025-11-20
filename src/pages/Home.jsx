@@ -13,7 +13,7 @@ const Home = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center text-center px-6 py-24 md:py-32 overflow-hidden min-h-[500px]">
+      <section className="relative flex items-center justify-center text-center px-4 sm:px-6 py-20 md:py-32 overflow-hidden min-h-[420px] md:min-h-[520px]">
         {/* Background Image */}
         <img
           src={heroImg}
@@ -26,16 +26,16 @@ const Home = () => {
           className="absolute inset-0 bg-white/40 dark:bg-black/40"
           aria-hidden="true"
         />
-        <div className="relative max-w-4xl z-10">
+        <div className="relative max-w-4xl z-10 px-2 sm:px-4">
           <Reveal
             as="h1"
-            className="heading-font text-4xl md:text-5xl font-bold mb-6 leading-tight text-white drop-shadow-lg"
+            className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight text-white drop-shadow-lg"
           >
             {t("heroTitle")}
           </Reveal>
           <Reveal
             as="p"
-            className="text-lg md:text-xl mb-10 text-white/90 drop-shadow-md"
+            className="text-base sm:text-lg md:text-xl mb-8 md:mb-10 text-white/90 drop-shadow-md max-w-2xl mx-auto"
           >
             {t("heroSubtitle")}
           </Reveal>
@@ -51,25 +51,27 @@ const Home = () => {
       </section>
 
       {/* Features */}
-      <section className="py-16 themed-surface features-bg relative overflow-hidden">
+      <section className="py-14 sm:py-16 themed-surface features-bg relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <AnimatedFeatures variant="home" />
         </div>
       </section>
 
       {/* About Us */}
-      <section className="py-16 themed-bg-alt">
+      <section className="py-14 sm:py-16 themed-bg-alt">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="flex justify-center">
               <img
                 src={campusClockImg}
                 alt="Campus Clock"
-                className="w-full max-w-[569px] h-auto rounded-lg shadow-lg object-cover"
+                className="w-full max-w-[569px] h-auto rounded-lg shadow-lg object-cover aspect-[16/10] md:aspect-auto"
+                loading="lazy"
+                sizes="(min-width: 1024px) 45vw, 90vw"
               />
             </div>
             <div>
-              <h2 className="heading-font text-3xl font-bold mb-6 text-[var(--color-text)]">
+              <h2 className="heading-font text-2xl sm:text-3xl font-bold mb-6 text-[var(--color-text)]">
                 {t("aboutUs")}
               </h2>
               <p className="text-base leading-relaxed text-[var(--color-text-soft)]">
@@ -82,7 +84,7 @@ const Home = () => {
 
       {/* Offers */}
       <section
-        className="py-16 bg-[var(--color-surface)] dark:bg-[var(--color-surface-alt)]"
+        className="py-14 sm:py-16 bg-[var(--color-surface)] dark:bg-[var(--color-surface-alt)]"
         id="offers"
       >
         <div className="max-w-6xl mx-auto px-4">
@@ -114,6 +116,11 @@ const Home = () => {
                       i === 0 ? "min-h-[400px]" : "min-h-[200px]"
                     }`}
                     loading={i === 0 ? "eager" : "lazy"}
+                    sizes={
+                      i === 0
+                        ? "(min-width: 1024px) 33vw, 100vw"
+                        : "(min-width: 1024px) 33vw, 100vw"
+                    }
                   />
                   {/* Gradient overlay for readability */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-70 group-hover:opacity-80 transition-opacity"></div>
@@ -129,9 +136,9 @@ const Home = () => {
       </section>
 
       {/* Ready CTA (Animated) */}
-      <section className="py-20 themed-surface">
+      <section className="py-16 md:py-20 themed-surface">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="relative rounded-[50px] p-16 themed-surface-alt border-4 themed-border shadow-2xl overflow-hidden">
+          <div className="relative rounded-3xl md:rounded-[50px] p-10 md:p-16 themed-surface-alt border-4 themed-border shadow-2xl overflow-hidden">
             {/* Decorative circles */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2 animate-float-slow"></div>
             <div
@@ -141,12 +148,12 @@ const Home = () => {
 
             <div className="relative z-10">
               <Reveal delay={0}>
-                <h2 className="heading-font text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
+                <h2 className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
                   {t("readyTitle")}
                 </h2>
               </Reveal>
               <Reveal delay={120}>
-                <p className="text-lg text-[var(--color-text-soft)] mb-10 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-[var(--color-text-soft)] mb-8 md:mb-10 max-w-2xl mx-auto">
                   {t("ctaBrowseSubtitle")}
                 </p>
               </Reveal>
@@ -164,7 +171,7 @@ const Home = () => {
       </section>
 
       {/* Final Banner */}
-      <section className="relative min-h-[320px] flex items-center justify-center text-center px-6 py-20 overflow-hidden">
+      <section className="relative min-h-[300px] sm:min-h-[320px] flex items-center justify-center text-center px-4 sm:px-6 py-16 sm:py-20 overflow-hidden">
         <img
           src={studentsImg}
           alt="University Campus"
@@ -174,11 +181,14 @@ const Home = () => {
         <div className="relative max-w-3xl z-10">
           <Reveal
             as="h2"
-            className="heading-font text-4xl font-bold mb-4 text-white drop-shadow-lg"
+            className="heading-font text-3xl sm:text-4xl font-bold mb-4 text-white drop-shadow-lg"
           >
             {t("builtForStudents")}
           </Reveal>
-          <Reveal as="p" className="text-xl text-white drop-shadow-md">
+          <Reveal
+            as="p"
+            className="text-lg sm:text-xl text-white drop-shadow-md max-w-2xl mx-auto"
+          >
             {t("weUnderstand")}
           </Reveal>
         </div>

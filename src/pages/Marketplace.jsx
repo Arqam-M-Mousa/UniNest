@@ -213,7 +213,10 @@ const Marketplace = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12 grid lg:grid-cols-[250px_1fr] gap-8">
-        <aside className="themed-surface-alt p-6 rounded-xl sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
+        <aside
+          className="themed-surface-alt p-6 rounded-xl mb-8 lg:mb-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto shadow-sm"
+          aria-label={t("filters")}
+        >
           <h3 className="flex items-center gap-2 text-lg font-semibold mb-6 text-[var(--color-text)]">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path
@@ -307,7 +310,7 @@ const Marketplace = () => {
           ))}
         </aside>
 
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
           {properties.map((property, idx) => (
             <Reveal key={property.id} delay={idx * 70} className="w-full">
               <Link

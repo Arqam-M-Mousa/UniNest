@@ -14,28 +14,36 @@ const Home = () => {
     <div className="w-full">
       {/* Hero Section */}
       <section className="relative flex items-center justify-center text-center px-4 sm:px-6 py-20 md:py-32 overflow-hidden min-h-[420px] md:min-h-[520px]">
-        {/* Background Image */}
+        {/* Background Image with blur */}
         <img
           src={heroImg}
           alt="Campus Background"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-center scale-108 blur-[2px]"
           loading="eager"
         />
-        {/* Overlay */}
+        {/* Overlay with gradient */}
         <div
-          className="absolute inset-0 bg-white/40 dark:bg-black/40"
+          className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40 dark:from-black/50 dark:via-black/40 dark:to-black/60"
           aria-hidden="true"
         />
         <div className="relative max-w-4xl z-10 px-2 sm:px-4">
           <Reveal
             as="h1"
-            className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight text-white drop-shadow-lg"
+            className="heading-font text-3xl sm:text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl tracking-tight"
+            style={{
+              textShadow:
+                "0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)",
+            }}
           >
             {t("heroTitle")}
           </Reveal>
           <Reveal
             as="p"
-            className="text-base sm:text-lg md:text-xl mb-8 md:mb-10 text-white/90 drop-shadow-md max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-2xl mb-8 md:mb-10 text-white font-medium drop-shadow-lg max-w-2xl mx-auto leading-relaxed"
+            style={{
+              textShadow:
+                "0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4)",
+            }}
           >
             {t("heroSubtitle")}
           </Reveal>
@@ -94,8 +102,8 @@ const Home = () => {
           >
             {t("ourOffers")}
           </Reveal>
-          {/* Restored image cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {/* 3 rotating cards layout */}
+          <div className="relative flex items-center justify-center gap-4 md:gap-8 max-w-6xl mx-auto px-4 min-h-[400px]">
             {[
               { src: campusClockImg, alt: "Campus Clock", price: "1500$" },
               { src: nnuImg, alt: "Campus Housing", price: "1500$" },
@@ -103,30 +111,42 @@ const Home = () => {
             ].map((offer, i) => (
               <Reveal
                 key={i}
-                className={`group rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.02] ${
-                  i === 0 ? "md:row-span-2" : ""
-                }`}
+                className={`group relative rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer
+                  ${
+                    i === 1
+                      ? "w-[45%] md:w-[400px] h-[350px] md:h-[400px] z-20 scale-100"
+                      : "w-[25%] md:w-[280px] h-[280px] md:h-[320px] z-10 opacity-70"
+                  }
+                  hover:scale-105 hover:opacity-100 hover:z-30 hover:shadow-3xl
+                `}
+                style={{
+                  transform:
+                    i === 0
+                      ? "perspective(1000px) rotateY(8deg)"
+                      : i === 2
+                      ? "perspective(1000px) rotateY(-8deg)"
+                      : "perspective(1000px) rotateY(0deg)",
+                }}
               >
                 <div className="relative h-full flex flex-col">
                   {/* Image */}
                   <img
                     src={offer.src}
                     alt={offer.alt}
-                    className={`w-full h-full object-cover ${
-                      i === 0 ? "min-h-[400px]" : "min-h-[200px]"
-                    }`}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    sizes={
-                      i === 0
-                        ? "(min-width: 1024px) 33vw, 100vw"
-                        : "(min-width: 1024px) 33vw, 100vw"
-                    }
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading={i === 1 ? "eager" : "lazy"}
                   />
-                  {/* Gradient overlay for readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-70 group-hover:opacity-80 transition-opacity"></div>
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
                   {/* Price pill */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 themed-surface px-6 py-2 rounded-full font-bold text-lg shadow-md animate-float-slow">
-                    {offer.price}
+                  <div
+                    className={`absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-[var(--color-surface)] px-6 py-2 rounded-full font-bold text-lg shadow-lg transition-all duration-300 group-hover:scale-110 animate-float-slow ${
+                      i !== 1 ? "text-sm px-4 py-1" : ""
+                    }`}
+                  >
+                    <span className="text-[var(--color-text)]">
+                      {offer.price}
+                    </span>
                   </div>
                 </div>
               </Reveal>
@@ -175,7 +195,7 @@ const Home = () => {
         <img
           src={studentsImg}
           alt="University Campus"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover blur-[1px]"
         />
         <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
         <div className="relative max-w-3xl z-10">

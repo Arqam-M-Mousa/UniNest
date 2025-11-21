@@ -27,7 +27,7 @@ const Marketplace = () => {
         <img
           src={nnuImg}
           alt="Campus Background"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover blur-[2px]"
         />
         {/* Overlay */}
         <div
@@ -46,13 +46,30 @@ const Marketplace = () => {
                 to="/signin"
                 className="flex items-center gap-2 text-sm text-white hover:text-white drop-shadow"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path
-                    d="M16 17v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-white/40 dark:border-white/30 bg-white/10 dark:bg-white/10 backdrop-blur-sm">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                    className="text-white"
+                  >
+                    <circle
+                      cx="12"
+                      cy="9"
+                      r="4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M4 20v-1c0-4.2 3.8-7 8-7s8 2.8 8 7v1"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
                 {t("signIn")} / {t("signUp").replace("Sign Up", "Register")}
               </Link>
             </div>
@@ -214,7 +231,7 @@ const Marketplace = () => {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12 grid lg:grid-cols-[250px_1fr] gap-8">
         <aside
-          className="themed-surface-alt p-6 rounded-xl mb-8 lg:mb-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto shadow-sm"
+          className="themed-surface-alt p-6 rounded-xl mb-8 lg:mb-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto shadow-sm border border-[var(--color-border)]"
           aria-label={t("filters")}
         >
           <h3 className="flex items-center gap-2 text-lg font-semibold mb-6 text-[var(--color-text)]">
@@ -315,7 +332,7 @@ const Marketplace = () => {
             <Reveal key={property.id} delay={idx * 70} className="w-full">
               <Link
                 to={`/marketplace/${property.id}`}
-                className="market-card themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit shadow-card"
+                className="market-card themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit shadow-card ring-0 hover:ring-2 hover:ring-[var(--color-accent)] transition-shadow"
               >
                 <div className="market-card-img-wrapper relative pt-[75%] bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)]">
                   <img

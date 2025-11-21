@@ -49,7 +49,7 @@ const SignIn = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full py-3 border-none text-2xl bg-transparent text-[var(--color-text)] text-center focus:outline-none placeholder:text-[var(--color-text-soft)] placeholder:text-2xl border-b border-[var(--color-border)] focus:border-b-2 focus:border-[var(--color-accent)] transition-all"
+              className="input-field text-xl"
             />
           </div>
           <div className="relative">
@@ -60,7 +60,7 @@ const SignIn = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full py-3 border-none text-2xl bg-transparent text-[var(--color-text)] text-center focus:outline-none placeholder:text-[var(--color-text-soft)] placeholder:text-2xl border-b border-[var(--color-border)] focus:border-b-2 focus:border-[var(--color-accent)] transition-all"
+              className="input-field text-xl"
             />
           </div>
           <button type="submit" className="btn-primary mt-4">

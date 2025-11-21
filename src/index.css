@@ -65,17 +65,17 @@ body {
 }
 .dark {
     /* Refined dark palette (layered navy / slate) */
-    --color-bg: #0d1117;            /* Base background (deep navy) */
-    --color-bg-alt: #131a23;        /* Section background */
-    --color-surface: #1c2430;       /* Primary surface (cards) */
-    --color-surface-alt: #253140;   /* Secondary surface */
-    --color-border: #2e3d4d;        /* Border with enough contrast */
-    --color-text: #f1f5f9;          /* High contrast text */
-    --color-text-soft: #93a4b7;     /* Muted / secondary text */
+    --color-bg: #92a4b1;            /* Base background */
+    --color-bg-alt: #1e2025;        /* Section background (darker) */
+    --color-surface: #1e2025;       /* Primary surface (cards) */
+    --color-surface-alt: #1e2025;   /* Secondary surface */
+    --color-border: #4a5568;        /* Border with enough contrast */
+    --color-text: #ffffff;          /* High contrast white text */
+    --color-text-soft: #e2e8f0;     /* Soft white / secondary text */
     --color-accent: #5b6ef7;        /* Indigo accent slightly brighter for dark */
     --color-accent-hover: #4a58d8;  /* Hover variant */
     --color-ring: #5b6ef7;          /* Focus ring */
-    --color-hero-overlay: rgba(13,17,23,0.6); /* Dark overlay */
+    --color-hero-overlay: rgba(146,164,177,0.6); /* Dark overlay */
     /* Fonts unchanged */
     --font-sans: 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
     --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;

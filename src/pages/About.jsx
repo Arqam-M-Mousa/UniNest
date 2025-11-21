@@ -161,7 +161,7 @@ const About = () => {
           {howItWorks.map((item, i) => (
             <Reveal
               key={item.step}
-              className="how-it-works-card themed-surface-alt rounded-xl p-5 shadow-card"
+              className="how-it-works-card themed-surface-alt rounded-xl p-5 shadow-card border border-[var(--color-border)]"
             >
               <div className="flex items-center gap-3 mb-2">
                 <span className="badge-animated inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-accent)] text-white font-bold">

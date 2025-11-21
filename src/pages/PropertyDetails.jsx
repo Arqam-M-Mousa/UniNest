@@ -72,7 +72,7 @@ const PropertyDetails = () => {
           )}
         </div>
 
-        <div className="lg:col-span-1 themed-surface-alt p-8 rounded-2xl">
+        <div className="lg:col-span-1 themed-surface-alt p-8 rounded-2xl border border-[var(--color-border)]">
           <div className="flex justify-between items-start mb-6">
             <h1 className="heading-font text-3xl text-[var(--color-text)] m-0">
               {property.name}
@@ -102,7 +102,7 @@ const PropertyDetails = () => {
             />
           </div>
 
-          <div className="themed-surface p-6 rounded-xl mb-6">
+          <div className="themed-surface p-6 rounded-xl mb-6 border border-[var(--color-border)]">
             <h3 className="text-base text-[var(--color-text)] mb-3 font-semibold">
               {t("rooms")}
             </h3>
@@ -113,7 +113,7 @@ const PropertyDetails = () => {
             </p>
           </div>
 
-          <div className="themed-surface p-6 rounded-xl">
+          <div className="themed-surface p-6 rounded-xl border border-[var(--color-border)]">
             <h3 className="text-base text-[var(--color-text)] mb-3 font-semibold">
               {t("partner")}
             </h3>
@@ -122,7 +122,7 @@ const PropertyDetails = () => {
             </p>
           </div>
         </div>
-        <div className="lg:col-span-1 themed-surface-alt p-8 rounded-2xl text-center sticky top-24">
+        <div className="lg:col-span-1 themed-surface-alt p-8 rounded-2xl text-center sticky top-24 border border-[var(--color-border)]">
           <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
             {property.owner.avatar ? (
               <img

@@ -4,7 +4,9 @@ import React from "react";
 // Props: label (string), value (string|number), className
 export default function StatsCard({ label, value, className = "" }) {
   return (
-    <div className={`themed-surface p-6 rounded-xl text-center ${className}`}>
+    <div
+      className={`themed-surface p-6 rounded-xl text-center border border-[var(--color-border)] ${className}`}
+    >
       <h3 className="text-sm text-[var(--color-text-soft)] mb-2 font-medium">
         {label}
       </h3>

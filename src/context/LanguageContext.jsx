@@ -13,7 +13,7 @@ export const translations = {
     welcomeBack: "Welcome back! Sign in to continue",
     createYourAccount: "Create your account to get started",
     heroTitle:
-      "Find Your Perfect Nest Near Campus — Safe, Verified, and Student-Friendly.",
+      "Find Your Perfect Place Near Campus — Safe, Verified, and Student-Friendly.",
     heroSubtitle:
       "Simplify your housing search with verified listings and trusted landlords",
     startSearching: "Start Searching",

@@ -249,7 +249,7 @@ const Header = () => {
                         />
                       </svg>
                       <span className="font-medium">
-                        {t("myProfile") || "My Profile"}
+                        {t("My profile") || "My Profile"}
                       </span>
                     </Link>
                     <button
@@ -270,7 +270,7 @@ const Header = () => {
                         />
                       </svg>
                       <span className="font-medium">
-                        {t("signOut") || "Sign Out"}
+                        {t("Logout") || "Sign Out"}
                       </span>
                     </button>
                   </div>

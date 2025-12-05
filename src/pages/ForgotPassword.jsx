@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 themed-surface relative overflow-hidden">
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 themed-bg-alt relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/6 via-transparent to-[var(--color-accent)]/12 pointer-events-none" />
 
       <div className="w-full max-w-md themed-surface-alt p-8 rounded-3xl shadow-2xl border border-[var(--color-accent)]/20 backdrop-blur-sm relative z-10">

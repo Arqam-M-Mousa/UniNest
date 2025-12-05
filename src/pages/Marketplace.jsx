@@ -6,6 +6,7 @@ import { properties } from "../data/properties";
 import TabButton from "../components/TabButton";
 import HeartButton from "../components/HeartButton";
 import Reveal from "../components/Reveal";
+import Alert from "../components/Alert";
 import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 const Marketplace = () => {
@@ -15,6 +16,8 @@ const Marketplace = () => {
   const isRTL = language === "ar";
   const [activeTab, setActiveTab] = useState("lastListings");
   const [selectedPrice, setSelectedPrice] = useState("all");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMessage, setAuthModalMessage] = useState("");
 
   const priceRanges = [
     { label: "Arqam", count: 15 },
@@ -22,6 +25,24 @@ const Marketplace = () => {
     { label: "Arqam", count: 30 },
     { label: "Arqam", count: 12 },
   ];
+
+  const handlePostAdClick = () => {
+    if (!isAuthenticated) {
+      setAuthModalMessage("postAd");
+      setShowAuthModal(true);
+    } else {
+      alert("Create ad functionality coming soon!");
+    }
+  };
+
+  const handleMessageClick = (e) => {
+    if (!isAuthenticated) {
+      setAuthModalMessage("message");
+      setShowAuthModal(true);
+    } else {
+      console.log("Opening message conversation");
+    }
+  };
 
   return (
     <div className="min-h-screen themed-surface">
@@ -40,12 +61,6 @@ const Marketplace = () => {
 
         {/* Content */}
         <div className="relative z-10">
-          <div className="max-w-7xl mx-auto mb-8">
-            <h1 className="heading-font text-4xl font-bold text-white drop-shadow-lg text-center">
-              {t("marketplaceTitle")}
-            </h1>
-          </div>
-
           <p className="text-center text-xl mb-8 text-white drop-shadow-md">
             {t("marketplaceSubtitle")}
           </p>
@@ -183,15 +198,7 @@ const Marketplace = () => {
           {t("masonry")}
         </TabButton>
         <button
-          onClick={() => {
-            if (!isAuthenticated) {
-              alert("Please sign in to post an ad");
-              navigate("/signin");
-            } else {
-              // TODO: Navigate to create ad page
-              alert("Create ad functionality coming soon!");
-            }
-          }}
+          onClick={handlePostAdClick}
           className={`${
             isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
           } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
@@ -349,6 +356,24 @@ const Marketplace = () => {
           ))}
         </div>
       </div>
+
+      {/* Auth Required Alert */}
+      <Alert
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title={t("Sign In Required") || "Sign In Required"}
+        message={
+          authModalMessage === "message"
+            ? t("Please Sign in To Message") ||
+              "Please sign in to message the property owner."
+            : t("Please Sign in To Post Ad") ||
+              "Please sign in to your account to post an ad and connect with students."
+        }
+        type="warning"
+        confirmText={t("signIn") || "Sign In"}
+        cancelText={t("cancel") || "Cancel"}
+        onConfirm={() => navigate("/signin")}
+      />
     </div>
   );
 };

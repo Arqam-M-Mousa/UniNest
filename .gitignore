@@ -1,0 +1,38 @@
+# Node modules and logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependency locks (if using a different manager, remove the others)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+Frontend/dist/
+Frontend/.vite/
+Frontend/.next/
+Backend/dist/
+Backend/build/
+
+# Environment & local config
+.env
+.env.*
+*.local
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Docker/compose artifacts
+**/.docker-compose.env
+
+# Coverage & testing
+coverage/
+.nyc_output/

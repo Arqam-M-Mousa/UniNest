@@ -209,29 +209,69 @@ const Header = () => {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-lg border themed-border shadow-lg themed-surface-alt overflow-hidden z-50">
-                  <div className="px-4 py-3 bg-[var(--color-surface)]">
-                    <p className="text-sm font-medium text-[var(--color-text)]">
-                      {user?.firstName} {user?.lastName}
-                    </p>
-                    <p className="text-xs themed-text-soft">{user?.email}</p>
-                    <p className="text-xs text-[var(--color-accent)] mt-1">
+                <div className="absolute right-0 mt-3 w-64 rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-5 py-4 bg-gradient-to-br from-[var(--color-accent)]/10 to-transparent border-b themed-border">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white font-semibold">
+                        {user?.firstName?.[0]}
+                        {user?.lastName?.[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+                          {user?.firstName} {user?.lastName}
+                        </p>
+                        <p className="text-xs themed-text-soft truncate">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-[var(--color-accent)]/20 text-[var(--color-accent)] text-xs font-medium">
                       {user?.role}
-                    </p>
+                    </span>
                   </div>
-                  <div className="py-1">
+                  <div className="py-2">
                     <Link
                       to="/profile"
                       onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm themed-text-soft hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
                     >
-                      {t("myProfile") || "My Profile"}
+                      <svg
+                        className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <span className="font-medium">
+                        {t("myProfile") || "My Profile"}
+                      </span>
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-[var(--color-surface)] transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-all group"
                     >
-                      {t("signOut") || "Sign Out"}
+                      <svg
+                        className="w-4 h-4 group-hover:scale-110 transition-transform"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      <span className="font-medium">
+                        {t("signOut") || "Sign Out"}
+                      </span>
                     </button>
                   </div>
                 </div>

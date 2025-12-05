@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { authAPI } from "../services/api";
+import Alert from "../components/Alert";
 
 const SignUp = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,13 +22,56 @@ const SignUp = () => {
     universityId: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
     if (formData.password !== formData.passwordAgain) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
-    navigate("/marketplace");
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Prepare signup data
+      const signupData = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        role: formData.role,
+        phoneNumber: formData.phoneNumber,
+      };
+
+      // Add optional fields for students
+      if (formData.role === "Student") {
+        if (formData.studentId) signupData.studentId = formData.studentId;
+        if (formData.universityId)
+          signupData.universityId = formData.universityId;
+      }
+
+      console.log("Signing up with data:", signupData);
+      const response = await authAPI.signup(signupData);
+
+      if (response.success) {
+        console.log("Signup successful:", response.data);
+        // Show success message and redirect to signin
+        setShowSuccessAlert(true);
+      } else {
+        setError(response.message || "Signup failed");
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError(err.message || "An error occurred during signup");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -66,6 +114,12 @@ const SignUp = () => {
           {t("createYourAccount") || "Create your account to get started"}
         </p>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 text-red-600 rounded-lg border border-red-500/30 text-sm">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="relative group">
@@ -106,6 +160,10 @@ const SignUp = () => {
           </div>
 
           <div className="relative group">
+            <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+              {t("phoneNumber")}{" "}
+              <span className="text-red-500/60">(Optional)</span>
+            </label>
             <input
               type="tel"
               name="phoneNumber"
@@ -132,6 +190,10 @@ const SignUp = () => {
           {formData.role === "Student" && (
             <>
               <div className="relative group">
+                <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                  {t("studentId")}{" "}
+                  <span className="text-red-500/60">(Optional)</span>
+                </label>
                 <input
                   type="text"
                   name="studentId"
@@ -143,6 +205,10 @@ const SignUp = () => {
               </div>
 
               <div className="relative group">
+                <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                  {t("selectUniversity")}{" "}
+                  <span className="text-red-500/60">(Optional)</span>
+                </label>
                 <select
                   name="universityId"
                   value={formData.universityId}
@@ -186,9 +252,10 @@ const SignUp = () => {
 
           <button
             type="submit"
-            className="btn-primary mt-6 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300"
+            disabled={loading}
+            className="btn-primary mt-6 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t("signUp")}
+            {loading ? "Creating Account..." : t("signUp")}
           </button>
         </form>
 
@@ -204,6 +271,20 @@ const SignUp = () => {
           </p>
         </div>
       </div>
+
+      {/* Success Alert */}
+      <Alert
+        isOpen={showSuccessAlert}
+        onClose={() => {
+          setShowSuccessAlert(false);
+          navigate("/signin");
+        }}
+        title="Account Created!"
+        message="Your account has been created successfully. Please sign in to continue."
+        type="success"
+        confirmText="Sign In Now"
+        onConfirm={() => navigate("/signin")}
+      />
     </div>
   );
 };

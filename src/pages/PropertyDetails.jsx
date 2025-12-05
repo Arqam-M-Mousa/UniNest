@@ -12,8 +12,11 @@ const PropertyDetails = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const property = properties.find((p) => p.id === parseInt(id));
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeImage, setActiveImage] = useState(
+    property ? property.images?.[0] : null
+  );
 
   if (!property) {
     return (
@@ -59,55 +62,68 @@ const PropertyDetails = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-8 px-4 md:px-8 grid grid-cols-1 lg:grid-cols-[1fr_1fr_300px] gap-8 items-start">
-        <div className="lg:col-span-1">
-          <div className="relative pt-[75%] rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-700 mb-4">
-            <img
-              src={property.images[0]}
-              alt={property.name}
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-          </div>
-          {property.images.length > 1 && (
-            <div className="grid grid-cols-2 gap-4">
-              {property.images.slice(1).map((image, index) => (
-                <div
-                  key={index}
-                  className="relative pt-[75%] rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 cursor-pointer transition-transform hover:scale-105"
-                >
-                  <img
-                    src={image}
-                    alt={`${property.name} ${index + 2}`}
-                    className="absolute top-0 left-0 w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+      <div className="max-w-7xl mx-auto mt-8 px-4 md:px-8 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 items-start">
+        <div className="space-y-6">
+          <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-lg">
+            <div className="relative aspect-[4/3] bg-slate-200 dark:bg-slate-700">
+              <img
+                src={activeImage || property.images[0]}
+                alt={property.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"
+                aria-hidden="true"
+              />
+              <div className="absolute top-4 left-4 flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-slate-900">
+                  {t("availableIn")}: {property.availableIn}
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-accent)] text-white shadow-md">
+                  {property.price}
+                </span>
+              </div>
+              <div className="absolute top-4 right-4">
+                <HeartButton
+                  size={48}
+                  className="bg-white/90 backdrop-blur border-2 border-white/60"
+                />
+              </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-3">
+                <h1 className="heading-font text-3xl md:text-4xl text-white m-0 drop-shadow">
+                  {property.name}
+                </h1>
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black/60 text-white border border-white/20">
+                  {property.location || t("marketplace")}
+                </span>
+              </div>
             </div>
-          )}
-        </div>
 
-        <div className="lg:col-span-1 themed-surface-alt p-8 rounded-2xl border border-[var(--color-border)]">
-          <div className="flex justify-between items-start mb-6">
-            <h1 className="heading-font text-3xl text-[var(--color-text)] m-0">
-              {property.name}
-            </h1>
-            <HeartButton
-              size={48}
-              className="themed-surface border-2 themed-border hover:border-[var(--color-accent)]"
-            />
+            {property.images.length > 1 && (
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-3 p-4 bg-[var(--color-bg)] dark:bg-[var(--color-surface)]">
+                {property.images.slice(0, 8).map((image, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setActiveImage(image)}
+                    className={`relative pt-[75%] rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 transition-transform hover:scale-[1.02] border ${
+                      activeImage === image
+                        ? "border-[var(--color-accent)] shadow-lg"
+                        : "border-[var(--color-border)]"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${property.name} ${index + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <p className="text-[var(--color-text-soft)] leading-relaxed mb-8">
-            {property.description}
-          </p>
-
-          <div className="bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-hover)] p-6 rounded-xl mb-8">
-            <h2 className="text-white text-3xl m-0 heading-font">
-              {property.price}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid md:grid-cols-3 gap-4">
             <StatsCard label={t("squareMeter")} value={property.squareMeter} />
             <StatsCard label={t("availableIn")} value={property.availableIn} />
             <StatsCard
@@ -116,28 +132,70 @@ const PropertyDetails = () => {
             />
           </div>
 
-          <div className="themed-surface p-6 rounded-xl mb-6 border border-[var(--color-border)]">
-            <h3 className="text-base text-[var(--color-text)] mb-3 font-semibold">
-              {t("rooms")}
-            </h3>
-            <p className="text-[var(--color-text-soft)] m-0">
-              {t("kitchen")}, {property.rooms.bathrooms}
-              {t("baths")}, {property.rooms.bedrooms}
-              {t("beds")}, {t("livingRoom")}
-            </p>
+          <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="heading-font text-2xl text-[var(--color-text)] m-0">
+                  {t("overview") || "Overview"}
+                </h2>
+                <p className="text-[var(--color-text-soft)] text-sm m-0">
+                  {property.description}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-[var(--color-text-soft)] m-0">
+                  {t("startingFrom") || "Starting from"}
+                </p>
+                <p className="text-3xl font-bold text-[var(--color-accent)] m-0">
+                  {property.price}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                {property.rooms.bedrooms} {t("beds")}
+              </span>
+              <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                {property.rooms.bathrooms} {t("baths")}
+              </span>
+              <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                {t("kitchen")}
+              </span>
+              <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                {t("livingRoom")}
+              </span>
+              <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                {property.squareMeter} m²
+              </span>
+            </div>
           </div>
 
-          <div className="themed-surface p-6 rounded-xl border border-[var(--color-border)]">
-            <h3 className="text-base text-[var(--color-text)] mb-3 font-semibold">
-              {t("partner")}
-            </h3>
-            <p className="text-[var(--color-text-soft)] m-0">
-              {property.partner ? t("yes") : t("no")}
-            </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="themed-surface border border-[var(--color-border)] rounded-2xl p-5 shadow-sm">
+              <h3 className="text-base text-[var(--color-text)] mb-3 font-semibold">
+                {t("rooms")}
+              </h3>
+              <p className="text-[var(--color-text-soft)] m-0">
+                {t("kitchen")}, {property.rooms.bathrooms}
+                {t("baths")}, {property.rooms.bedrooms}
+                {t("beds")}, {t("livingRoom")}
+              </p>
+            </div>
+
+            <div className="themed-surface border border-[var(--color-border)] rounded-2xl p-5 shadow-sm">
+              <h3 className="text-base text-[var(--color-text)] mb-3 font-semibold">
+                {t("partner")}
+              </h3>
+              <p className="text-[var(--color-text-soft)] m-0">
+                {property.partner ? t("yes") : t("no")}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="lg:col-span-1 themed-surface-alt p-8 rounded-2xl text-center sticky top-24 border border-[var(--color-border)]">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+
+        <div className="themed-surface-alt p-8 rounded-2xl border border-[var(--color-border)] shadow-lg sticky top-24">
+          <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-[var(--color-border)]">
             {property.owner.avatar ? (
               <img
                 src={property.owner.avatar}
@@ -162,24 +220,37 @@ const PropertyDetails = () => {
               </div>
             )}
           </div>
-          <h3 className="text-xl text-[var(--color-text)] mb-2 heading-font">
+          <h3 className="text-xl text-[var(--color-text)] mb-1 heading-font text-center">
             {property.owner.name}
           </h3>
-          <p className="text-[var(--color-text-soft)] text-sm mb-6">
+          <p className="text-[var(--color-text-soft)] text-sm mb-6 text-center">
             {t("ownerOfBuilding")}
           </p>
-          <button
-            onClick={handleMessageClick}
-            className="w-full btn-primary mb-4 text-base"
-          >
-            {t("messageNow")}
-          </button>
-          <a
-            href={`tel:${property.owner.phone}`}
-            className="block font-semibold text-lg no-underline text-[var(--color-text)] hover:text-[var(--color-accent)]"
-          >
-            {property.owner.phone}
-          </a>
+          <div className="space-y-3">
+            <button
+              onClick={handleMessageClick}
+              className="w-full btn-primary text-base py-3 rounded-xl shadow-md"
+            >
+              {t("messageNow")}
+            </button>
+            <a
+              href={`tel:${property.owner.phone}`}
+              className="block w-full text-center font-semibold text-lg no-underline text-[var(--color-text)] hover:text-[var(--color-accent)]"
+            >
+              {property.owner.phone}
+            </a>
+          </div>
+          <div className="mt-6 p-4 rounded-xl bg-[var(--color-bg)] dark:bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text-soft)]">
+            <p className="m-0">
+              {t("availableIn")}: {property.availableIn}
+            </p>
+            <p className="m-0">
+              {t("garage")}: {property.garage ? t("yes") : t("no")}
+            </p>
+            <p className="m-0">
+              {t("partner")}: {property.partner ? t("yes") : t("no")}
+            </p>
+          </div>
         </div>
       </div>
 

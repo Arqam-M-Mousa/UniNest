@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Apartments from "./pages/Apartments";
 import ForgotPassword from "./pages/ForgotPassword";
+import Profile from "./pages/profile/Profile";
 
 // Separate inner app so we can access theme after providers
 function ThemedLayout() {
@@ -25,6 +26,7 @@ function ThemedLayout() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/:id" element={<PropertyDetails />} />
           <Route path="/about" element={<About />} />

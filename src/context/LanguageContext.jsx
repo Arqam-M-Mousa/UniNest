@@ -43,6 +43,8 @@ export const translations = {
     university: "University",
     selectUniversity: "Select your university",
     forgotPassword: "Did you forget your password?",
+    sendResetLink: "Send Reset Link",
+    resetLinkSent: "If this email exists, a reset link was sent.",
     noAccount: "You don't have an account?",
     createOne: "Create one",
     passwordAgain: "Password Again",
@@ -219,6 +221,9 @@ export const translations = {
     university: "الجامعة",
     selectUniversity: "اختر جامعتك",
     forgotPassword: "هل نسيت كلمة المرور؟",
+    sendResetLink: "إرسال رابط إعادة التعيين",
+    resetLinkSent:
+      "إذا كان هذا البريد موجودًا، فقد تم إرسال رابط إعادة التعيين.",
     noAccount: "ليس لديك حساب؟",
     createOne: "إنشاء واحد",
     passwordAgain: "كلمة المرور مرة أخرى",

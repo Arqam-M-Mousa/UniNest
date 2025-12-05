@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 import { properties } from "../data/properties";
 import TabButton from "../components/TabButton";
 import HeartButton from "../components/HeartButton";
@@ -9,6 +10,8 @@ import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.j
 
 const Marketplace = () => {
   const { t, language } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const isRTL = language === "ar";
   const [activeTab, setActiveTab] = useState("lastListings");
   const [selectedPrice, setSelectedPrice] = useState("all");
@@ -38,41 +41,9 @@ const Marketplace = () => {
         {/* Content */}
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto mb-8">
-            <div className="flex justify-between items-center flex-wrap gap-4">
-              <h1 className="heading-font text-4xl font-bold text-white drop-shadow-lg">
-                {t("marketplaceTitle")}
-              </h1>
-              <Link
-                to="/signin"
-                className="flex items-center gap-2 text-sm text-white hover:text-white drop-shadow"
-              >
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-white/40 dark:border-white/30 bg-white/10 dark:bg-white/10 backdrop-blur-sm">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    className="text-white"
-                  >
-                    <circle
-                      cx="12"
-                      cy="9"
-                      r="4"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M4 20v-1c0-4.2 3.8-7 8-7s8 2.8 8 7v1"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>
-                {t("signIn")} / {t("signUp").replace("Sign Up", "Register")}
-              </Link>
-            </div>
+            <h1 className="heading-font text-4xl font-bold text-white drop-shadow-lg text-center">
+              {t("marketplaceTitle")}
+            </h1>
           </div>
 
           <p className="text-center text-xl mb-8 text-white drop-shadow-md">
@@ -212,9 +183,18 @@ const Marketplace = () => {
           {t("masonry")}
         </TabButton>
         <button
+          onClick={() => {
+            if (!isAuthenticated) {
+              alert("Please sign in to post an ad");
+              navigate("/signin");
+            } else {
+              // TODO: Navigate to create ad page
+              alert("Create ad functionality coming soon!");
+            }
+          }}
           className={`${
             isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
-          } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm`}
+          } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
           dir={isRTL ? "rtl" : "ltr"}
         >
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">

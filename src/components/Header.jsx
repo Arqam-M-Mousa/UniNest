@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState, useRef } from "react";
 
 const navLinksConfig = (t) => [
@@ -22,9 +23,17 @@ const navLinksConfig = (t) => [
 const Header = () => {
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAuthenticated, signout } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const userMenuRef = useRef(null);
+
+  const handleSignOut = () => {
+    signout();
+    setUserMenuOpen(false);
+  };
 
   // Close on route change
   useEffect(() => {
@@ -46,10 +55,17 @@ const Header = () => {
       if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
+      if (
+        userMenuOpen &&
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target)
+      ) {
+        setUserMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, [menuOpen]);
+  }, [menuOpen, userMenuOpen]);
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">
@@ -168,25 +184,80 @@ const Header = () => {
               </svg>
             )}
           </button>
-          <Link
-            to="/signin"
-            className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-            aria-label="Account"
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+
+          {/* User Menu */}
+          {isAuthenticated ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
+                aria-label="Account menu"
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-lg border themed-border shadow-lg themed-surface-alt overflow-hidden z-50">
+                  <div className="px-4 py-3 bg-[var(--color-surface)]">
+                    <p className="text-sm font-medium text-[var(--color-text)]">
+                      {user?.firstName} {user?.lastName}
+                    </p>
+                    <p className="text-xs themed-text-soft">{user?.email}</p>
+                    <p className="text-xs text-[var(--color-accent)] mt-1">
+                      {user?.role}
+                    </p>
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-4 py-2 text-sm themed-text-soft hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
+                    >
+                      {t("myProfile") || "My Profile"}
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-[var(--color-surface)] transition-colors"
+                    >
+                      {t("signOut") || "Sign Out"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/signin"
+              className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
+              aria-label="Account"
             >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </Link>
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </Link>
+          )}
         </div>
       </div>
 

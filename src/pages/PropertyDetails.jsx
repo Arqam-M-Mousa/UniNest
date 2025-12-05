@@ -21,12 +21,12 @@ const PropertyDetails = () => {
   if (!property) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4">
-        <h2>Property not found</h2>
+        <h2>{t("propertyNotFound")}</h2>
         <Link
           to="/marketplace"
           className="text-primary no-underline font-semibold hover:underline"
         >
-          Back to Marketplace
+          {t("backToMarketplace")}
         </Link>
       </div>
     );
@@ -257,13 +257,10 @@ const PropertyDetails = () => {
       <Alert
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        title={t("Log in Required") || "Authentication Required"}
-        message={
-          t("Please Sign In To Message") ||
-          "Please sign in to message the property owner."
-        }
-        confirmText={t("signIn") || "Sign In"}
-        cancelText={t("cancel") || "Cancel"}
+        title={t("signInRequired")}
+        message={t("pleaseSignInToMessage")}
+        confirmText={t("signIn")}
+        cancelText={t("cancel")}
         onConfirm={() => navigate("/signin")}
         type="warning"
       />

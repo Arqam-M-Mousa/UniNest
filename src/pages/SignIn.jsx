@@ -101,7 +101,7 @@ const SignIn = () => {
             disabled={loading}
             className="btn-primary mt-4 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? t("signing In") || "Signing In..." : t("signIn")}
+            {loading ? t("signingIn") || "Signing In..." : t("signIn")}
           </button>
         </form>
 

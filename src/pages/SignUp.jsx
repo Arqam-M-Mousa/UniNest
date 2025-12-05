@@ -255,7 +255,9 @@ const SignUp = () => {
             disabled={loading}
             className="btn-primary mt-6 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Creating Account..." : t("signUp")}
+            {loading
+              ? t("creatingAccount") || "Creating Account..."
+              : t("signUp")}
           </button>
         </form>
 

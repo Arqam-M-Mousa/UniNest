@@ -270,7 +270,7 @@ const Header = () => {
                         />
                       </svg>
                       <span className="font-medium">
-                        {t("Logout") || "Sign Out"}
+                        {t("logout") || "Sign Out"}
                       </span>
                     </button>
                   </div>

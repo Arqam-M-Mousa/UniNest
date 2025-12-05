@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ProfileView = ({ profile, onEdit }) => {
+  const { t } = useLanguage();
   const getInitials = () => {
     return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
   };
@@ -52,11 +54,15 @@ const ProfileView = ({ profile, onEdit }) => {
                   profile.role
                 )}`}
               >
-                {profile.role}
+                {profile.role === "Student"
+                  ? t("student")
+                  : profile.role === "Landlord"
+                  ? t("landlord")
+                  : t("admin")}
               </span>
               {profile.isVerified && (
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-600 border border-green-500/30">
-                  ✓ Verified
+                  ✓ {t("verified")}
                 </span>
               )}
             </div>
@@ -67,7 +73,7 @@ const ProfileView = ({ profile, onEdit }) => {
             onClick={onEdit}
             className="px-6 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition font-medium"
           >
-            Edit Profile
+            {t("editProfile")}
           </button>
         </div>
 
@@ -79,22 +85,24 @@ const ProfileView = ({ profile, onEdit }) => {
           {/* Contact Information */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <span className="text-[var(--color-accent)]">📞</span> Contact
-              Information
+              <span className="text-[var(--color-accent)]">📞</span>{" "}
+              {t("contactInformation")}
             </h3>
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-[var(--color-text)]/60">Email</p>
+                <p className="text-sm text-[var(--color-text)]/60">
+                  {t("email")}
+                </p>
                 <p className="text-[var(--color-text)] font-medium">
                   {profile.email}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-[var(--color-text)]/60">
-                  Phone Number
+                  {t("phoneNumber")}
                 </p>
                 <p className="text-[var(--color-text)] font-medium">
-                  {profile.phoneNumber || "Not provided"}
+                  {profile.phoneNumber || t("notProvided")}
                 </p>
               </div>
             </div>
@@ -103,21 +111,27 @@ const ProfileView = ({ profile, onEdit }) => {
           {/* Personal Information */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <span>👤</span> Personal Information
+              <span>👤</span> {t("personalInformation")}
             </h3>
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-[var(--color-text)]/60">Gender</p>
+                <p className="text-sm text-[var(--color-text)]/60">
+                  {t("gender")}
+                </p>
                 <p className="text-[var(--color-text)] font-medium">
-                  {profile.gender || "Not specified"}
+                  {profile.gender || t("notSpecified")}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-[var(--color-text)]/60">
-                  Preferred Language
+                  {t("preferredLanguageLabel")}
                 </p>
                 <p className="text-[var(--color-text)] font-medium">
-                  {profile.preferredLanguage === "en" ? "English" : "Français"}
+                  {profile.preferredLanguage === "en"
+                    ? t("languageEnglish")
+                    : profile.preferredLanguage === "fr"
+                    ? t("languageFrench")
+                    : t("languageArabic")}
                 </p>
               </div>
             </div>
@@ -126,23 +140,23 @@ const ProfileView = ({ profile, onEdit }) => {
           {/* Student Information */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <span>🎓</span> Student Information
+              <span>🎓</span> {t("studentInformation")}
             </h3>
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-[var(--color-text)]/60">
-                  Student ID
+                  {t("studentIdLabel")}
                 </p>
                 <p className="text-[var(--color-text)] font-medium">
-                  {profile.studentId || "Not provided"}
+                  {profile.studentId || t("notProvided")}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-[var(--color-text)]/60">
-                  University
+                  {t("university")}
                 </p>
                 <p className="text-[var(--color-text)] font-medium">
-                  {profile.universityId || "Not assigned"}
+                  {profile.universityId || t("notAssigned")}
                 </p>
               </div>
             </div>
@@ -152,12 +166,12 @@ const ProfileView = ({ profile, onEdit }) => {
           {profile.role === "Landlord" && (
             <div>
               <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-                <span>⭐</span> Ratings
+                <span>⭐</span> {t("ratings")}
               </h3>
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-[var(--color-text)]/60">
-                    Average Rating
+                    {t("averageRating")}
                   </p>
                   <div className="flex items-center gap-2">
                     <p className="text-2xl font-bold text-[var(--color-accent)]">
@@ -172,7 +186,7 @@ const ProfileView = ({ profile, onEdit }) => {
                 </div>
                 <div>
                   <p className="text-sm text-[var(--color-text)]/60">
-                    Total Reviews
+                    {t("totalReviews")}
                   </p>
                   <p className="text-lg font-semibold text-[var(--color-text)]">
                     {profile.totalReviewsCount}
@@ -189,13 +203,13 @@ const ProfileView = ({ profile, onEdit }) => {
         {/* Account Metadata */}
         <div className="text-xs text-[var(--color-text)]/50">
           <p>
-            Account created{" "}
+            {t("accountCreated")}{" "}
             {formatDistanceToNow(new Date(profile.createdAt), {
               addSuffix: true,
             })}
           </p>
           <p>
-            Last updated{" "}
+            {t("lastUpdated")}{" "}
             {formatDistanceToNow(new Date(profile.updatedAt), {
               addSuffix: true,
             })}

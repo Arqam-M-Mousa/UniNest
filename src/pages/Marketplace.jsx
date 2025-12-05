@@ -31,7 +31,7 @@ const Marketplace = () => {
       setAuthModalMessage("postAd");
       setShowAuthModal(true);
     } else {
-      alert("Create ad functionality coming soon!");
+      alert(t("createAdComingSoon") || "Create ad functionality coming soon!");
     }
   };
 

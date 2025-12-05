@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useLanguage } from "../../context/LanguageContext";
 
 const EditProfileForm = ({ profile, onSave, onCancel }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     firstName: profile.firstName,
     lastName: profile.lastName,
@@ -18,16 +20,16 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
     const newErrors = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
+      newErrors.firstName = t("firstNameRequired");
     }
     if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
+      newErrors.lastName = t("lastNameRequired");
     }
     if (
       formData.phoneNumber &&
       !/^[0-9\-\+\s\(\)]+$/.test(formData.phoneNumber)
     ) {
-      newErrors.phoneNumber = "Invalid phone number format";
+      newErrors.phoneNumber = t("invalidPhone");
     }
 
     setErrors(newErrors);
@@ -67,7 +69,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
   return (
     <div className="themed-surface-alt border border-[var(--color-accent)]/20 rounded-2xl p-8">
       <h2 className="text-2xl font-bold text-[var(--color-text)] mb-8">
-        Edit Profile
+        {t("editProfile")}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -79,7 +81,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               htmlFor="firstName"
               className="block text-sm font-medium text-[var(--color-text)] mb-2"
             >
-              First Name <span className="text-red-500">*</span>
+              {t("firstName")} <span className="text-red-500">*</span>
             </label>
             <input
               id="firstName"
@@ -92,7 +94,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                   ? "border-red-500/50"
                   : "border-[var(--color-accent)]/20"
               } text-[var(--color-text)]`}
-              placeholder="Enter first name"
+              placeholder={t("enterFirstName")}
             />
             {errors.firstName && (
               <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
@@ -105,7 +107,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               htmlFor="lastName"
               className="block text-sm font-medium text-[var(--color-text)] mb-2"
             >
-              Last Name <span className="text-red-500">*</span>
+              {t("lastName")} <span className="text-red-500">*</span>
             </label>
             <input
               id="lastName"
@@ -118,7 +120,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                   ? "border-red-500/50"
                   : "border-[var(--color-accent)]/20"
               } text-[var(--color-text)]`}
-              placeholder="Enter last name"
+              placeholder={t("enterLastName")}
             />
             {errors.lastName && (
               <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
@@ -129,7 +131,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
         {/* Contact Information */}
         <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
           <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>📞</span> Contact Information
+            <span>📞</span> {t("contactInformation")}
           </h3>
 
           <div>
@@ -137,7 +139,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               htmlFor="phoneNumber"
               className="block text-sm font-medium text-[var(--color-text)] mb-2"
             >
-              Phone Number
+              {t("phoneNumber")}
             </label>
             <input
               id="phoneNumber"
@@ -150,7 +152,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                   ? "border-red-500/50"
                   : "border-[var(--color-accent)]/20"
               } text-[var(--color-text)]`}
-              placeholder="e.g., +1 (555) 123-4567"
+              placeholder={t("phonePlaceholder")}
             />
             {errors.phoneNumber && (
               <p className="text-xs text-red-500 mt-1">{errors.phoneNumber}</p>
@@ -161,7 +163,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
         {/* Personal Information */}
         <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
           <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>👤</span> Personal Information
+            <span>👤</span> {t("personalInformation")}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -171,7 +173,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                 htmlFor="gender"
                 className="block text-sm font-medium text-[var(--color-text)] mb-2"
               >
-                Gender
+                {t("gender")}
               </label>
               <select
                 id="gender"
@@ -180,9 +182,9 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
               >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
+                <option value="">{t("selectGender")}</option>
+                <option value="Male">{t("genderMale")}</option>
+                <option value="Female">{t("genderFemale")}</option>
               </select>
             </div>
 
@@ -192,7 +194,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                 htmlFor="preferredLanguage"
                 className="block text-sm font-medium text-[var(--color-text)] mb-2"
               >
-                Preferred Language
+                {t("preferredLanguageLabel")}
               </label>
               <select
                 id="preferredLanguage"
@@ -201,8 +203,9 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
               >
-                <option value="en">English</option>
-                <option value="fr">Français</option>
+                <option value="en">{t("languageEnglish")}</option>
+                <option value="fr">{t("languageFrench")}</option>
+                <option value="ar">{t("languageArabic")}</option>
               </select>
             </div>
           </div>
@@ -211,7 +214,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
         {/* Student Information */}
         <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
           <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>🎓</span> Student Information
+            <span>🎓</span> {t("studentInformation")}
           </h3>
 
           <div>
@@ -219,7 +222,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               htmlFor="studentId"
               className="block text-sm font-medium text-[var(--color-text)] mb-2"
             >
-              Student ID
+              {t("studentIdLabel")}
             </label>
             <input
               id="studentId"
@@ -228,7 +231,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               value={formData.studentId}
               onChange={handleChange}
               className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
-              placeholder="Enter your student ID"
+              placeholder={t("studentIdPlaceholder")}
             />
           </div>
         </div>
@@ -236,7 +239,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
         {/* Avatar URL */}
         <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
           <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>🖼️</span> Profile Picture
+            <span>🖼️</span> {t("profilePicture")}
           </h3>
 
           <div>
@@ -244,7 +247,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               htmlFor="avatarUrl"
               className="block text-sm font-medium text-[var(--color-text)] mb-2"
             >
-              Avatar URL
+              {t("avatarUrlLabel")}
             </label>
             <input
               id="avatarUrl"
@@ -253,12 +256,12 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
               value={formData.avatarUrl}
               onChange={handleChange}
               className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)] mb-3"
-              placeholder="https://example.com/avatar.jpg"
+              placeholder={t("avatarUrlPlaceholder")}
             />
             {formData.avatarUrl && (
               <div className="mt-4">
                 <p className="text-sm text-[var(--color-text)]/60 mb-2">
-                  Preview:
+                  {t("preview")}
                 </p>
                 <img
                   src={formData.avatarUrl}
@@ -284,10 +287,10 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
             {saving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Saving...
+                {`${t("saveChanges")}...`}
               </>
             ) : (
-              "Save Changes"
+              t("saveChanges")
             )}
           </button>
           <button
@@ -296,7 +299,7 @@ const EditProfileForm = ({ profile, onSave, onCancel }) => {
             disabled={saving}
             className="flex-1 px-6 py-3 bg-[var(--color-accent)]/10 text-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent)]/20 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </form>

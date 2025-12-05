@@ -1,13 +1,18 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 import { properties } from "../data/properties";
 import StatsCard from "../components/StatsCard";
 import HeartButton from "../components/HeartButton";
+import Alert from "../components/Alert";
+import { useState } from "react";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const property = properties.find((p) => p.id === parseInt(id));
 
   if (!property) {
@@ -23,6 +28,15 @@ const PropertyDetails = () => {
       </div>
     );
   }
+
+  const handleMessageClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    } else {
+      // Handle messaging logic here
+      console.log("Opening message conversation");
+    }
+  };
 
   return (
     <div className="min-h-screen themed-surface pb-12">
@@ -154,7 +168,10 @@ const PropertyDetails = () => {
           <p className="text-[var(--color-text-soft)] text-sm mb-6">
             {t("ownerOfBuilding")}
           </p>
-          <button className="w-full btn-primary mb-4 text-base">
+          <button
+            onClick={handleMessageClick}
+            className="w-full btn-primary mb-4 text-base"
+          >
             {t("messageNow")}
           </button>
           <a
@@ -165,6 +182,20 @@ const PropertyDetails = () => {
           </a>
         </div>
       </div>
+
+      <Alert
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title={t("Log in Required") || "Authentication Required"}
+        message={
+          t("Please Sign In To Message") ||
+          "Please sign in to message the property owner."
+        }
+        confirmText={t("signIn") || "Sign In"}
+        cancelText={t("cancel") || "Cancel"}
+        onConfirm={() => navigate("/signin")}
+        type="warning"
+      />
     </div>
   );
 };

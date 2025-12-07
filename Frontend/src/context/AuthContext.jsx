@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { authAPI } from "../services/api";
+import { useLanguage } from "./LanguageContext";
 
 const AuthContext = createContext();
 
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { changeLanguage } = useLanguage();
 
   // Initialize auth state from localStorage
   useEffect(() => {
@@ -25,14 +27,19 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       setToken(storedToken);
       try {
-        setUser(JSON.parse(storedUser));
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        // Set language based on user's preferred language
+        if (userData.preferredLanguage) {
+          changeLanguage(userData.preferredLanguage);
+        }
       } catch (e) {
         console.error("Failed to parse user data:", e);
         localStorage.removeItem("user");
       }
     }
     setLoading(false);
-  }, []);
+  }, [changeLanguage]);
 
   const signin = async (email, password) => {
     try {
@@ -51,6 +58,11 @@ export const AuthProvider = ({ children }) => {
         // Update state
         setToken(token);
         setUser(user);
+
+        // Set language based on user's preferred language
+        if (user.preferredLanguage) {
+          changeLanguage(user.preferredLanguage);
+        }
 
         return { success: true };
       } else {

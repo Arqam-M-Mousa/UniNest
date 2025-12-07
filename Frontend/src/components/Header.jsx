@@ -1,5 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleLeftRightIcon,
+  BellIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon,
+  SunIcon,
+  MoonIcon,
+  LanguageIcon,
+  Bars3Icon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
@@ -148,33 +158,9 @@ const Header = () => {
             className="md:hidden inline-flex items-center justify-center rounded-md p-2 border themed-border text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] transition-colors"
           >
             {menuOpen ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <XMarkIcon className="h-5 w-5" />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Bars3Icon className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -213,20 +199,7 @@ const Header = () => {
                   className="relative p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
                   aria-label="Notifications"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
+                  <BellIcon className="h-5 w-5" />
                   {notifUnread > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[18px] px-1 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
                       {notifUnread}
@@ -382,19 +355,7 @@ const Header = () => {
                 className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
                 aria-label="Account menu"
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+                <UserCircleIcon className="h-6 w-6" />
               </button>
 
               {userMenuOpen && (
@@ -424,38 +385,18 @@ const Header = () => {
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
                     >
-                      <svg
-                        className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
+                      <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                       <span className="font-medium">
                         {t("My profile") || "My Profile"}
                       </span>
                     </Link>
                     <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4 text-[var(--color-accent)]"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-7.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707"
-                          />
-                        </svg>
+                        {theme === "dark" ? (
+                          <MoonIcon className="w-4 h-4 text-[var(--color-accent)]" />
+                        ) : (
+                          <SunIcon className="w-4 h-4 text-[var(--color-accent)]" />
+                        )}
                         <span className="font-medium">Theme</span>
                       </div>
                       <button
@@ -469,19 +410,7 @@ const Header = () => {
                     </div>
                     <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4 text-[var(--color-accent)]"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 5v14m7-7H5"
-                          />
-                        </svg>
+                        <LanguageIcon className="w-4 h-4 text-[var(--color-accent)]" />
                         <span className="font-medium">Language</span>
                       </div>
                       <button
@@ -497,19 +426,7 @@ const Header = () => {
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-all group"
                     >
-                      <svg
-                        className="w-4 h-4 group-hover:scale-110 transition-transform"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
+                      <ArrowRightOnRectangleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                       <span className="font-medium">
                         {t("logout") || "Sign Out"}
                       </span>
@@ -524,19 +441,7 @@ const Header = () => {
               className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
               aria-label="Account"
             >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+              <UserCircleIcon className="h-6 w-6" />
             </Link>
           )}
         </div>

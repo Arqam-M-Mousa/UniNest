@@ -53,11 +53,13 @@ app.use("/api/auth", require("./routes/auth"));
 
 // User routes
 app.use("/api/users", require("./routes/users"));
+app.use("/api/universities", require("./routes/universities"));
 
 // Contact route
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/conversations", require("./routes/conversations"));
+app.use("/api/property-listings", require("./routes/propertyListings"));
 
 // Upload routes
 app.use("/api/uploads", require("./routes/uploads"));

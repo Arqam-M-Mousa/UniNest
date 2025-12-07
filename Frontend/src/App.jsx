@@ -21,6 +21,7 @@ import Apartments from "./pages/Apartments";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/profile/Profile";
 import Messages from "./pages/Messages";
+import Admin from "./pages/Admin";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -57,6 +58,7 @@ function ThemedLayout() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Messages />} />
+          <Route path="/admin/universities" element={<Admin />} />
         </Routes>
       </main>
       <Footer />

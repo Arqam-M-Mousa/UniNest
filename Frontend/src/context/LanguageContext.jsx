@@ -337,7 +337,7 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "أخبرنا كيف يمكننا مساعدتك...",
     sendMessage: "إرسال الرسالة",
-    sent: "تم الإرسال! ✅",
+    sent: "تم الإرسال!",
     privacyNotice:
       "نرد خلال 24 ساعة (أيام الأسبوع). تُستخدم بياناتك فقط للرد على هذا الطلب.",
     directContact: "تواصل مباشر",

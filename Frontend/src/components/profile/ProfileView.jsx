@@ -1,5 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { useLanguage } from "../../context/LanguageContext";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
+import CloudinaryImage from "../CloudinaryImage";
 
 const ProfileView = ({ profile, onEdit }) => {
   const { t } = useLanguage();
@@ -20,6 +22,9 @@ const ProfileView = ({ profile, onEdit }) => {
     }
   };
 
+  // Use profilePictureUrl first, then fall back to avatarUrl
+  const displayImage = profile.profilePictureUrl || profile.avatarUrl;
+
   return (
     <div className="space-y-6">
       {/* Main Card */}
@@ -28,11 +33,13 @@ const ProfileView = ({ profile, onEdit }) => {
         <div className="flex gap-8 mb-8 flex-col sm:flex-row items-start sm:items-center">
           {/* Avatar */}
           <div className="relative">
-            {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
+            {displayImage ? (
+              <CloudinaryImage
+                src={displayImage}
                 alt={`${profile.firstName} ${profile.lastName}`}
-                className="w-24 h-24 rounded-full object-cover border-4 border-[var(--color-accent)]/30"
+                width={96}
+                height={96}
+                className="w-24 h-24 rounded-full object-cover border-4 border-[var(--color-accent)]/30 shadow-lg"
               />
             ) : (
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent)]/60 flex items-center justify-center text-white font-bold text-2xl border-4 border-[var(--color-accent)]/30">

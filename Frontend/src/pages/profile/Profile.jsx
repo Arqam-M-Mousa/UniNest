@@ -48,6 +48,8 @@ const Profile = () => {
       setIsEditing(false);
       setSuccessMessage("Profile updated successfully!");
       setTimeout(() => setSuccessMessage(null), 3000);
+      // Refresh profile to get updated image URL
+      await fetchProfile();
     } catch (err) {
       setError(err.message || "Failed to update profile");
     }
@@ -124,6 +126,7 @@ const Profile = () => {
             profile={profile}
             onSave={handleSaveProfile}
             onCancel={() => setIsEditing(false)}
+            onProfileUpdate={fetchProfile}
           />
         ) : (
           <ProfileView profile={profile} onEdit={() => setIsEditing(true)} />

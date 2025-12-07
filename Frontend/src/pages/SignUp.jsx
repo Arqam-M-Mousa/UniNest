@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { authAPI } from "../services/api";
+import { authAPI, universitiesAPI } from "../services/api";
 import Alert from "../components/Alert";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  UserCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/24/solid";
 import PageLoader from "../components/PageLoader";
 
 const SignUp = () => {
@@ -16,6 +20,10 @@ const SignUp = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
+  const [universities, setUniversities] = useState([]);
+  const [universitiesLoading, setUniversitiesLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordAgain, setShowPasswordAgain] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -101,6 +109,26 @@ const SignUp = () => {
       return;
     }
 
+    // Validate student-specific required fields
+    if (formData.role === "Student") {
+      if (!formData.studentId || !formData.studentId.trim()) {
+        setError("Student ID is required for students");
+        return;
+      }
+      if (!formData.universityId) {
+        setError("University selection is required for students");
+        return;
+      }
+    }
+
+    // Validate landlord-specific required fields
+    if (formData.role === "Landlord") {
+      if (!formData.phoneNumber || !formData.phoneNumber.trim()) {
+        setError("Phone number is required for landlords");
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -115,11 +143,10 @@ const SignUp = () => {
         verificationCode: verificationCode,
       };
 
-      // Add optional fields for students
+      // Add required fields for students
       if (formData.role === "Student") {
-        if (formData.studentId) signupData.studentId = formData.studentId;
-        if (formData.universityId)
-          signupData.universityId = formData.universityId;
+        signupData.studentId = formData.studentId;
+        signupData.universityId = formData.universityId;
       }
 
       console.log("Signing up with data:", signupData);
@@ -146,6 +173,22 @@ const SignUp = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  useEffect(() => {
+    const fetchUniversities = async () => {
+      try {
+        setUniversitiesLoading(true);
+        const response = await universitiesAPI.list();
+        setUniversities(response?.data || []);
+      } catch (err) {
+        console.error("Failed to fetch universities:", err);
+      } finally {
+        setUniversitiesLoading(false);
+      }
+    };
+
+    fetchUniversities();
+  }, []);
 
   const pageLoading = loading || sendingCode || verifyingCode;
   const loaderMessage = sendingCode
@@ -296,7 +339,11 @@ const SignUp = () => {
               <div className="relative group">
                 <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
                   {t("phoneNumber")}{" "}
-                  <span className="text-red-500/60">(Optional)</span>
+                  {formData.role === "Landlord" ? (
+                    <span className="text-red-500">*</span>
+                  ) : (
+                    <span className="text-red-500/60">(Optional)</span>
+                  )}
                 </label>
                 <input
                   type="tel"
@@ -304,6 +351,7 @@ const SignUp = () => {
                   placeholder={t("phoneNumber")}
                   value={formData.phoneNumber}
                   onChange={handleChange}
+                  required={formData.role === "Landlord"}
                   className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
                 />
               </div>
@@ -325,8 +373,7 @@ const SignUp = () => {
                 <>
                   <div className="relative group">
                     <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
-                      {t("studentId")}{" "}
-                      <span className="text-red-500/60">(Optional)</span>
+                      {t("studentId")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -334,6 +381,7 @@ const SignUp = () => {
                       placeholder={t("studentId")}
                       value={formData.studentId}
                       onChange={handleChange}
+                      required
                       className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
                     />
                   </div>
@@ -341,20 +389,27 @@ const SignUp = () => {
                   <div className="relative group">
                     <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
                       {t("selectUniversity")}{" "}
-                      <span className="text-red-500/60">(Optional)</span>
+                      <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="universityId"
                       value={formData.universityId}
                       onChange={handleChange}
-                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+                      disabled={universitiesLoading}
+                      required
+                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="">{t("selectUniversity")}</option>
-                      <option value="univ-1">Harvard University</option>
-                      <option value="univ-2">Stanford University</option>
-                      <option value="univ-3">MIT</option>
-                      <option value="univ-4">Oxford University</option>
-                      <option value="univ-5">Cambridge University</option>
+                      <option value="">
+                        {universitiesLoading
+                          ? "Loading universities..."
+                          : t("selectUniversity")}
+                      </option>
+                      {universities.map((uni) => (
+                        <option key={uni.id} value={uni.id}>
+                          {uni.name}
+                          {uni.city ? ` — ${uni.city}` : ""}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </>
@@ -362,26 +417,52 @@ const SignUp = () => {
 
               <div className="relative group">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder={t("password")}
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                  className="input-field text-base w-full pr-12 transition-all duration-300 focus:scale-[1.02]"
+                  autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-soft)] hover:text-[var(--color-text)] transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
               </div>
 
               <div className="relative group">
                 <input
-                  type="password"
+                  type={showPasswordAgain ? "text" : "password"}
                   name="passwordAgain"
                   placeholder={t("passwordAgain")}
                   value={formData.passwordAgain}
                   onChange={handleChange}
                   required
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                  className="input-field text-base w-full pr-12 transition-all duration-300 focus:scale-[1.02]"
+                  autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordAgain(!showPasswordAgain)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-soft)] hover:text-[var(--color-text)] transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPasswordAgain ? (
+                    <EyeSlashIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
               </div>
 
               <button

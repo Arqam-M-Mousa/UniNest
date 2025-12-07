@@ -553,8 +553,12 @@ const Apartments = () => {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
             role="dialog"
             aria-modal="true"
+            onClick={handleCancelModal}
           >
-            <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl themed-surface p-6 shadow-2xl border themed-border overflow-hidden">
+            <div
+              className="w-full max-w-3xl max-h-[90vh] rounded-2xl themed-surface p-6 shadow-2xl border themed-border overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-[var(--color-text-soft)] mb-1">

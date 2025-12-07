@@ -9,6 +9,7 @@ import {
   LanguageIcon,
   Bars3Icon,
   XMarkIcon,
+  BuildingLibraryIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
@@ -423,6 +424,21 @@ const Header = () => {
                         {t("My profile") || "My Profile"}
                       </span>
                     </Link>
+                    {user?.role?.toLowerCase() === "admin" && (
+                      <div className="border-t themed-border">
+                        <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">
+                          Administration
+                        </div>
+                        <Link
+                          to="/admin/universities"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <BuildingLibraryIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Universities</span>
+                        </Link>
+                      </div>
+                    )}
                     <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {theme === "dark" ? (

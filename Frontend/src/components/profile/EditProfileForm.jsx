@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
-import { UserCircleIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import {
+  UserCircleIcon,
+  PhotoIcon,
+  PhoneIcon,
+  UserIcon,
+  AcademicCapIcon,
+} from "@heroicons/react/24/outline";
 import CloudinaryImage from "../CloudinaryImage";
 
 const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
@@ -338,7 +344,8 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
         {/* Contact Information */}
         <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
           <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>📞</span> {t("contactInformation")}
+            <PhoneIcon className="w-5 h-5 text-[var(--color-accent)]" />
+            {t("contactInformation")}
           </h3>
 
           <div>
@@ -370,7 +377,8 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
         {/* Personal Information */}
         <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
           <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>👤</span> {t("personalInformation")}
+            <UserIcon className="w-5 h-5 text-[var(--color-accent)]" />
+            {t("personalInformation")}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -411,37 +419,39 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                 className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
               >
                 <option value="en">{t("languageEnglish")}</option>
-                <option value="fr">{t("languageFrench")}</option>
                 <option value="ar">{t("languageArabic")}</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Student Information */}
-        <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
-          <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <span>🎓</span> {t("studentInformation")}
-          </h3>
+        {/* Student Information - Only for Students */}
+        {profile.role === "Student" && (
+          <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
+            <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+              <AcademicCapIcon className="w-5 h-5 text-[var(--color-accent)]" />
+              {t("studentInformation")}
+            </h3>
 
-          <div>
-            <label
-              htmlFor="studentId"
-              className="block text-sm font-medium text-[var(--color-text)] mb-2"
-            >
-              {t("studentIdLabel")}
-            </label>
-            <input
-              id="studentId"
-              name="studentId"
-              type="text"
-              value={formData.studentId}
-              onChange={handleChange}
-              className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
-              placeholder={t("studentIdPlaceholder")}
-            />
+            <div>
+              <label
+                htmlFor="studentId"
+                className="block text-sm font-medium text-[var(--color-text)] mb-2"
+              >
+                {t("studentIdLabel")}
+              </label>
+              <input
+                id="studentId"
+                name="studentId"
+                type="text"
+                value={formData.studentId}
+                onChange={handleChange}
+                className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
+                placeholder={t("studentIdPlaceholder")}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Form Actions */}
         <div className="flex gap-4 pt-6 border-t border-[var(--color-accent)]/20">

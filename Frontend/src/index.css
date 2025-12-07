@@ -64,18 +64,18 @@ body {
     --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 .dark {
-    /* Refined dark palette (layered navy / slate) */
-    --color-bg: #92a4b1;            /* Base background */
-    --color-bg-alt: #1e2025;        /* Section background (darker) */
-    --color-surface: #1e2025;       /* Primary surface (cards) */
-    --color-surface-alt: #1e2025;   /* Secondary surface */
-    --color-border: #4a5568;        /* Border with enough contrast */
-    --color-text: #ffffff;          /* High contrast white text */
-    --color-text-soft: #e2e8f0;     /* Soft white / secondary text */
+    /* Refined dark palette with clearer surface contrast */
+    --color-bg: #0c121c;            /* Base background */
+    --color-bg-alt: #111827;        /* Section background */
+    --color-surface: #161f2b;       /* Primary surface (cards) */
+    --color-surface-alt: #1e2735;   /* Secondary surface */
+    --color-border: #2f3b4f;        /* Border with contrast on dark */
+    --color-text: #e5e7eb;          /* High contrast text */
+    --color-text-soft: #cbd5e1;     /* Secondary text */
     --color-accent: #5b6ef7;        /* Indigo accent slightly brighter for dark */
     --color-accent-hover: #4a58d8;  /* Hover variant */
     --color-ring: #5b6ef7;          /* Focus ring */
-    --color-hero-overlay: rgba(146,164,177,0.6); /* Dark overlay */
+    --color-hero-overlay: rgba(17,24,39,0.6); /* Dark overlay */
     /* Fonts unchanged */
     --font-sans: 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
     --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;

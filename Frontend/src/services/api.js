@@ -72,6 +72,20 @@ async function apiRequest(endpoint, options = {}) {
  * Authentication API
  */
 export const authAPI = {
+  sendVerificationCode: async (email) => {
+    return apiRequest("/api/auth/send-verification-code", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  verifyCode: async (email, code) => {
+    return apiRequest("/api/auth/verify-code", {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    });
+  },
+
   signin: async (email, password) => {
     return apiRequest("/api/auth/signin", {
       method: "POST",

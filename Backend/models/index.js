@@ -10,6 +10,7 @@ const Review = require("./Review");
 const Conversation = require("./Conversation");
 const Message = require("./Message");
 const Notification = require("./Notification");
+const VerificationCode = require("./VerificationCode");
 
 // User - University relationship
 User.belongsTo(University, { foreignKey: "universityId", allowNull: true });
@@ -121,6 +122,7 @@ const db = {
   Conversation,
   Message,
   Notification,
+  VerificationCode,
 };
 
 module.exports = db;

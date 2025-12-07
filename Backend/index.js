@@ -54,6 +54,9 @@ app.use("/api/auth", require("./routes/auth"));
 // User routes
 app.use("/api/users", require("./routes/users"));
 
+// Contact route
+app.use("/api/contact", require("./routes/contact"));
+
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });

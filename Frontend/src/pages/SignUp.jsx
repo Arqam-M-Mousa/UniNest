@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { authAPI } from "../services/api";
 import Alert from "../components/Alert";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import PageLoader from "../components/PageLoader";
 
 const SignUp = () => {
   const { t } = useLanguage();
@@ -146,263 +147,286 @@ const SignUp = () => {
     });
   };
 
+  const pageLoading = loading || sendingCode || verifyingCode;
+  const loaderMessage = sendingCode
+    ? "Sending verification code..."
+    : verifyingCode
+    ? "Verifying code..."
+    : t("creatingAccount") || "Creating Account...";
+
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 themed-surface relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/5 via-transparent to-[var(--color-accent)]/10 pointer-events-none" />
+    <PageLoader
+      loading={pageLoading}
+      overlay
+      message={loaderMessage}
+      minHeight="min-h-[calc(100vh-200px)]"
+    >
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 themed-surface relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/5 via-transparent to-[var(--color-accent)]/10 pointer-events-none" />
 
-      <div className="themed-surface-alt border border-[var(--color-accent)]/20 rounded-3xl p-8 sm:p-10 max-w-[600px] w-full shadow-2xl shadow-black/5 dark:shadow-black/40 backdrop-blur-sm relative z-10">
-        <div className="flex justify-center mb-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-[var(--color-accent)] blur-2xl opacity-20 rounded-full" />
-            <UserCircleIcon className="w-20 h-20 text-[var(--color-accent)] drop-shadow-lg relative" />
+        <div className="themed-surface-alt border border-[var(--color-accent)]/20 rounded-3xl p-8 sm:p-10 max-w-[600px] w-full shadow-2xl shadow-black/5 dark:shadow-black/40 backdrop-blur-sm relative z-10">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-[var(--color-accent)] blur-2xl opacity-20 rounded-full" />
+              <UserCircleIcon className="w-20 h-20 text-[var(--color-accent)] drop-shadow-lg relative" />
+            </div>
           </div>
-        </div>
 
-        <h1 className="heading-font text-center text-3xl sm:text-4xl mb-3 font-bold bg-gradient-to-r from-[var(--color-text)] to-[var(--color-accent)] bg-clip-text text-transparent leading-tight pb-1">
-          {t("signUp")}
-        </h1>
-        <p className="text-center text-[var(--color-text-soft)] mb-8 text-sm">
-          {t("createYourAccount") || "Create your account to get started"}
-        </p>
+          <h1 className="heading-font text-center text-3xl sm:text-4xl mb-3 font-bold bg-gradient-to-r from-[var(--color-text)] to-[var(--color-accent)] bg-clip-text text-transparent leading-tight pb-1">
+            {t("signUp")}
+          </h1>
+          <p className="text-center text-[var(--color-text-soft)] mb-8 text-sm">
+            {t("createYourAccount") || "Create your account to get started"}
+          </p>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
-            {error}
-          </div>
-        )}
-
-        {/* Step 1: Email Entry */}
-        {step === 1 && (
-          <form onSubmit={handleSendCode} className="flex flex-col gap-5">
-            <div className="relative group">
-              <input
-                type="email"
-                name="email"
-                placeholder={t("email") || "Email"}
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="input-field text-base w-full py-3.5 transition-all duration-300 focus:scale-[1.01]"
-              />
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
+              {error}
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={sendingCode}
-              className="btn-primary mt-2 py-4 text-base font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {sendingCode ? "Sending Code..." : "Send Verification Code"}
-            </button>
-          </form>
-        )}
-
-        {/* Step 2: Verify Code */}
-        {step === 2 && (
-          <form onSubmit={handleVerifyCode} className="flex flex-col gap-5">
-            <p className="text-center text-[var(--color-text-soft)] text-sm">
-              We sent a 6-digit code to{" "}
-              <strong className="text-[var(--color-text)]">
-                {formData.email}
-              </strong>
-            </p>
-
-            <div className="relative group">
-              <input
-                type="text"
-                placeholder="000000"
-                value={verificationCode}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-                  setVerificationCode(value);
-                }}
-                maxLength={6}
-                required
-                className="input-field text-base w-full py-3.5 text-center text-2xl font-mono tracking-[0.5em] transition-all duration-300 focus:scale-[1.01]"
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="text-sm text-[var(--color-accent)] hover:underline font-medium self-start"
-            >
-              ← Change email
-            </button>
-
-            <button
-              type="submit"
-              disabled={verifyingCode}
-              className="btn-primary mt-2 py-4 text-base font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {verifyingCode ? "Verifying..." : "Verify Code"}
-            </button>
-          </form>
-        )}
-
-        {/* Step 3: Complete Signup */}
-        {step === 3 && (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="mb-2 p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl border border-green-500/30 text-sm text-center font-medium animate-in fade-in slide-in-from-top-2 duration-200">
-              ✓ Email verified! Complete your profile below.
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Step 1: Email Entry */}
+          {step === 1 && (
+            <form onSubmit={handleSendCode} className="flex flex-col gap-5">
               <div className="relative group">
                 <input
-                  type="text"
-                  name="firstName"
-                  placeholder={t("firstName")}
-                  value={formData.firstName}
+                  type="email"
+                  name="email"
+                  placeholder={t("email") || "Email"}
+                  value={formData.email}
                   onChange={handleChange}
                   required
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                  className="input-field text-base w-full py-3.5 transition-all duration-300 focus:scale-[1.01]"
                 />
               </div>
 
-              <div className="relative group">
-                <input
-                  type="text"
-                  name="lastName"
-                  placeholder={t("lastName")}
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-                />
-              </div>
-            </div>
-
-            <div className="relative group">
-              <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
-                {t("phoneNumber")}{" "}
-                <span className="text-red-500/60">(Optional)</span>
-              </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                placeholder={t("phoneNumber")}
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-              />
-            </div>
-
-            <div className="relative group">
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-                className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+              <button
+                type="submit"
+                disabled={sendingCode}
+                className="btn-primary mt-2 py-4 text-base font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                <option value="Student">{t("student")}</option>
-                <option value="Landlord">{t("landlord")}</option>
-              </select>
-            </div>
+                {sendingCode && (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                )}
+                {sendingCode ? "Sending Code..." : "Send Verification Code"}
+              </button>
+            </form>
+          )}
 
-            {formData.role === "Student" && (
-              <>
+          {/* Step 2: Verify Code */}
+          {step === 2 && (
+            <form onSubmit={handleVerifyCode} className="flex flex-col gap-5">
+              <p className="text-center text-[var(--color-text-soft)] text-sm">
+                We sent a 6-digit code to{" "}
+                <strong className="text-[var(--color-text)]">
+                  {formData.email}
+                </strong>
+              </p>
+
+              <div className="relative group">
+                <input
+                  type="text"
+                  placeholder="000000"
+                  value={verificationCode}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setVerificationCode(value);
+                  }}
+                  maxLength={6}
+                  required
+                  className="input-field text-base w-full py-3.5 text-center text-2xl font-mono tracking-[0.5em] transition-all duration-300 focus:scale-[1.01]"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-sm text-[var(--color-accent)] hover:underline font-medium self-start"
+              >
+                ← Change email
+              </button>
+
+              <button
+                type="submit"
+                disabled={verifyingCode}
+                className="btn-primary mt-2 py-4 text-base font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                {verifyingCode && (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                )}
+                {verifyingCode ? "Verifying..." : "Verify Code"}
+              </button>
+            </form>
+          )}
+
+          {/* Step 3: Complete Signup */}
+          {step === 3 && (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <div className="mb-2 p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl border border-green-500/30 text-sm text-center font-medium animate-in fade-in slide-in-from-top-2 duration-200">
+                ✓ Email verified! Complete your profile below.
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="relative group">
-                  <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
-                    {t("studentId")}{" "}
-                    <span className="text-red-500/60">(Optional)</span>
-                  </label>
                   <input
                     type="text"
-                    name="studentId"
-                    placeholder={t("studentId")}
-                    value={formData.studentId}
+                    name="firstName"
+                    placeholder={t("firstName")}
+                    value={formData.firstName}
                     onChange={handleChange}
+                    required
                     className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
                   />
                 </div>
 
                 <div className="relative group">
-                  <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
-                    {t("selectUniversity")}{" "}
-                    <span className="text-red-500/60">(Optional)</span>
-                  </label>
-                  <select
-                    name="universityId"
-                    value={formData.universityId}
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder={t("lastName")}
+                    value={formData.lastName}
                     onChange={handleChange}
-                    className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
-                  >
-                    <option value="">{t("selectUniversity")}</option>
-                    <option value="univ-1">Harvard University</option>
-                    <option value="univ-2">Stanford University</option>
-                    <option value="univ-3">MIT</option>
-                    <option value="univ-4">Oxford University</option>
-                    <option value="univ-5">Cambridge University</option>
-                  </select>
+                    required
+                    className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                  />
                 </div>
-              </>
-            )}
+              </div>
 
-            <div className="relative group">
-              <input
-                type="password"
-                name="password"
-                placeholder={t("password")}
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-              />
-            </div>
+              <div className="relative group">
+                <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                  {t("phoneNumber")}{" "}
+                  <span className="text-red-500/60">(Optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  placeholder={t("phoneNumber")}
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                />
+              </div>
 
-            <div className="relative group">
-              <input
-                type="password"
-                name="passwordAgain"
-                placeholder={t("passwordAgain")}
-                value={formData.passwordAgain}
-                onChange={handleChange}
-                required
-                className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-              />
-            </div>
+              <div className="relative group">
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  required
+                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+                >
+                  <option value="Student">{t("student")}</option>
+                  <option value="Landlord">{t("landlord")}</option>
+                </select>
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary mt-6 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading
-                ? t("creatingAccount") || "Creating Account..."
-                : t("signUp")}
-            </button>
-          </form>
-        )}
+              {formData.role === "Student" && (
+                <>
+                  <div className="relative group">
+                    <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                      {t("studentId")}{" "}
+                      <span className="text-red-500/60">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="studentId"
+                      placeholder={t("studentId")}
+                      value={formData.studentId}
+                      onChange={handleChange}
+                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                    />
+                  </div>
 
-        <div className="text-center mt-8 pt-6 border-t border-[var(--color-accent)]/10">
-          <p className="text-[var(--color-text-soft)] text-sm m-0">
-            {t("haveAccount")}{" "}
-            <Link
-              to="/signin"
-              className="font-semibold text-[var(--color-accent)] hover:underline transition-all"
-            >
-              {t("logIn")}
-            </Link>
-          </p>
+                  <div className="relative group">
+                    <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                      {t("selectUniversity")}{" "}
+                      <span className="text-red-500/60">(Optional)</span>
+                    </label>
+                    <select
+                      name="universityId"
+                      value={formData.universityId}
+                      onChange={handleChange}
+                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+                    >
+                      <option value="">{t("selectUniversity")}</option>
+                      <option value="univ-1">Harvard University</option>
+                      <option value="univ-2">Stanford University</option>
+                      <option value="univ-3">MIT</option>
+                      <option value="univ-4">Oxford University</option>
+                      <option value="univ-5">Cambridge University</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              <div className="relative group">
+                <input
+                  type="password"
+                  name="password"
+                  placeholder={t("password")}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                />
+              </div>
+
+              <div className="relative group">
+                <input
+                  type="password"
+                  name="passwordAgain"
+                  placeholder={t("passwordAgain")}
+                  value={formData.passwordAgain}
+                  onChange={handleChange}
+                  required
+                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary mt-6 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                )}
+                {loading
+                  ? t("creatingAccount") || "Creating Account..."
+                  : t("signUp")}
+              </button>
+            </form>
+          )}
+
+          <div className="text-center mt-8 pt-6 border-t border-[var(--color-accent)]/10">
+            <p className="text-[var(--color-text-soft)] text-sm m-0">
+              {t("haveAccount")}{" "}
+              <Link
+                to="/signin"
+                className="font-semibold text-[var(--color-accent)] hover:underline transition-all"
+              >
+                {t("logIn")}
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Success Alert */}
-      <Alert
-        isOpen={showSuccessAlert}
-        onClose={() => {
-          setShowSuccessAlert(false);
-          navigate("/signin");
-        }}
-        title="Account Created!"
-        message="Your account has been created successfully. Please sign in to continue."
-        type="success"
-        confirmText="Sign In Now"
-        onConfirm={() => navigate("/signin")}
-      />
-    </div>
+        {/* Success Alert */}
+        <Alert
+          isOpen={showSuccessAlert}
+          onClose={() => {
+            setShowSuccessAlert(false);
+            navigate("/signin");
+          }}
+          title="Account Created!"
+          message="Your account has been created successfully. Please sign in to continue."
+          type="success"
+          confirmText="Sign In Now"
+          onConfirm={() => navigate("/signin")}
+        />
+      </div>
+    </PageLoader>
   );
 };
 

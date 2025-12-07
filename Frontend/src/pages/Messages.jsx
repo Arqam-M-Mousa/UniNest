@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { conversationsAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import PageLoader from "../components/PageLoader";
+import { useRef } from "react";
 
 const MessageBubble = ({ message, isMine }) => {
   return (
@@ -135,6 +137,7 @@ const Messages = () => {
   const [activeId, setActiveId] = useState(id || null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const messageCache = useRef({});
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeId) || null,
@@ -156,13 +159,24 @@ const Messages = () => {
     }
   };
 
-  const loadMessages = async (conversationId) => {
+  const loadMessages = async (conversationId, { force = false } = {}) => {
     if (!conversationId) return;
-    const res = await conversationsAPI.listMessages(conversationId, 200, 0);
-    const msgs = Array.isArray(res.data) ? res.data : [];
-    setMessages(msgs);
+
+    // Serve from cache unless forced
+    if (!force && messageCache.current[conversationId]) {
+      setMessages(messageCache.current[conversationId]);
+    } else {
+      const res = await conversationsAPI.listMessages(conversationId, 200, 0);
+      const msgs = Array.isArray(res.data) ? res.data : [];
+      messageCache.current[conversationId] = msgs;
+      setMessages(msgs);
+    }
+
+    // Mark as read without refetching all conversations; update local state
     await conversationsAPI.markRead(conversationId);
-    await loadConversations();
+    setConversations((prev) =>
+      prev.map((c) => (c.id === conversationId ? { ...c, unreadCount: 0 } : c))
+    );
   };
 
   const handleSend = async (content) => {
@@ -170,7 +184,7 @@ const Messages = () => {
     setSending(true);
     try {
       await conversationsAPI.sendMessage(activeId, { content });
-      await loadMessages(activeId);
+      await loadMessages(activeId, { force: true });
     } finally {
       setSending(false);
     }
@@ -194,35 +208,40 @@ const Messages = () => {
   };
 
   return (
-    <div className="themed-surface min-h-[calc(100vh-140px)] px-6 py-8">
-      <div className="max-w-6xl mx-auto grid lg:grid-cols-[320px_1fr] gap-6">
-        <div className="lg:h-[75vh]">
-          <ConversationList
-            items={conversations}
-            activeId={activeId}
-            onSelect={handleSelect}
-          />
-        </div>
-        <div className="lg:h-[75vh]">
-          {activeConversation ? (
-            <ThreadView
-              conversation={activeConversation}
-              messages={messages}
-              onSend={handleSend}
-              sending={sending}
+    <PageLoader
+      loading={loading && conversations.length === 0}
+      message="Loading conversations..."
+    >
+      <div className="themed-surface min-h-[calc(100vh-140px)] px-6 py-8">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[320px_1fr] gap-6">
+          <div className="lg:h-[75vh]">
+            <ConversationList
+              items={conversations}
+              activeId={activeId}
+              onSelect={handleSelect}
             />
-          ) : loading ? (
-            <div className="h-full rounded-2xl border themed-border themed-surface shadow-card flex items-center justify-center text-sm themed-text-soft">
-              Loading conversations...
-            </div>
-          ) : (
-            <div className="h-full rounded-2xl border themed-border themed-surface shadow-card flex items-center justify-center text-sm themed-text-soft">
-              Select a conversation
-            </div>
-          )}
+          </div>
+          <div className="lg:h-[75vh]">
+            {activeConversation ? (
+              <ThreadView
+                conversation={activeConversation}
+                messages={messages}
+                onSend={handleSend}
+                sending={sending}
+              />
+            ) : loading ? (
+              <div className="h-full rounded-2xl border themed-border themed-surface shadow-card flex items-center justify-center text-sm themed-text-soft">
+                Loading conversations...
+              </div>
+            ) : (
+              <div className="h-full rounded-2xl border themed-border themed-surface shadow-card flex items-center justify-center text-sm themed-text-soft">
+                Select a conversation
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </PageLoader>
   );
 };
 

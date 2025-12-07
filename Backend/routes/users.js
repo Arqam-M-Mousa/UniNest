@@ -20,6 +20,8 @@ router.get("/profile", authenticate, async (req, res) => {
         "role",
         "phoneNumber",
         "avatarUrl",
+        "profilePictureUrl",
+        "profilePicturePublicId",
         "studentId",
         "gender",
         "preferredLanguage",

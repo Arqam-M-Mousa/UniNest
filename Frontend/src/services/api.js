@@ -175,12 +175,32 @@ export const conversationsAPI = {
  */
 export const universitiesAPI = {
   list: async () => apiRequest("/api/universities"),
+  create: async (data) =>
+    apiRequest("/api/universities", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 /**
  * Uploads API
  */
 export const uploadsAPI = {
+  uploadProfilePicture: async (file) => {
+    const formData = new FormData();
+    formData.append("profilePicture", file);
+
+    return apiRequest("/api/uploads/profile-picture", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  deleteProfilePicture: async () =>
+    apiRequest("/api/uploads/profile-picture", {
+      method: "DELETE",
+    }),
+
   uploadListingImages: async (files) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("images", file));

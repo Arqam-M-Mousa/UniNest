@@ -360,15 +360,27 @@ export const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState(() => {
+    // Initialize from localStorage or default to 'en'
+    return localStorage.getItem("preferredLanguage") || "en";
+  });
 
   useEffect(() => {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.documentElement.lang = language;
+    // Persist language to localStorage
+    localStorage.setItem("preferredLanguage", language);
   }, [language]);
 
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === "en" ? "ar" : "en"));
+  };
+
+  const changeLanguage = (lang) => {
+    if (lang === "en" || lang === "ar") {
+      console.log("Changing language to:", lang);
+      setLanguage(lang);
+    }
   };
 
   const t = (key) => {
@@ -376,7 +388,9 @@ export const LanguageProvider = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+    <LanguageContext.Provider
+      value={{ language, toggleLanguage, changeLanguage, t }}
+    >
       {children}
     </LanguageContext.Provider>
   );

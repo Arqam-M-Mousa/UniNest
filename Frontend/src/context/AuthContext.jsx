@@ -72,21 +72,16 @@ export const AuthProvider = ({ children }) => {
 
       const response = await authAPI.signup(userData);
 
-      if (response.success && response.data) {
-        const { token, user } = response.data;
-
-        // Store in localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-
-        // Update state
-        setToken(token);
-        setUser(user);
-
-        return { success: true };
-      } else {
-        throw new Error(response.message || "Sign up failed");
+      if (response.success) {
+        // Backend signup response does not issue a session token; direct the
+        // caller to move to the sign-in flow instead of storing empty auth state.
+        return {
+          success: true,
+          message: response.message || "Account created. Please sign in.",
+        };
       }
+
+      throw new Error(response.message || "Sign up failed");
     } catch (err) {
       const errorMessage = err.message || "Failed to sign up";
       setError(errorMessage);

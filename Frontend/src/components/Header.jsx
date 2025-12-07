@@ -1,8 +1,10 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState, useRef } from "react";
+import { notificationsAPI, conversationsAPI } from "../services/api";
 
 const navLinksConfig = (t) => [
   { to: "/", label: t("home"), match: (p) => p === "/" },
@@ -24,32 +26,79 @@ const Header = () => {
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, signout } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notifUnread, setNotifUnread] = useState(0);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [msgOpen, setMsgOpen] = useState(false);
+  const [conversations, setConversations] = useState([]);
+  const [msgLoading, setMsgLoading] = useState(false);
   const menuRef = useRef(null);
   const userMenuRef = useRef(null);
+  const notifRef = useRef(null);
+  const msgRef = useRef(null);
+  const totalUnreadMessages = conversations.reduce(
+    (sum, c) => sum + (c.unreadCount || 0),
+    0
+  );
 
   const handleSignOut = () => {
     signout();
     setUserMenuOpen(false);
   };
 
+  const loadNotifications = async () => {
+    try {
+      setNotifLoading(true);
+      const res = await notificationsAPI.list();
+      setNotifications(res.data?.items || []);
+      setNotifUnread(res.data?.unreadCount || 0);
+    } catch (err) {
+      console.error("Failed to load notifications", err);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  const loadConversations = async () => {
+    try {
+      setMsgLoading(true);
+      const res = await conversationsAPI.list();
+      const items = Array.isArray(res.data) ? res.data : [];
+      setConversations(items);
+    } catch (err) {
+      console.error("Failed to load conversations", err);
+    } finally {
+      setMsgLoading(false);
+    }
+  };
+
   // Close on route change
   useEffect(() => {
     setMenuOpen(false);
+    setNotifOpen(false);
+    setMsgOpen(false);
   }, [location.pathname]);
 
-  // Escape key to close
+  // Escape key to close menus
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setNotifOpen(false);
+        setMsgOpen(false);
+        setUserMenuOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Click outside to close
+  // Click outside to close menus
   useEffect(() => {
     const onClick = (e) => {
       if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) {
@@ -62,10 +111,20 @@ const Header = () => {
       ) {
         setUserMenuOpen(false);
       }
+      if (
+        notifOpen &&
+        notifRef.current &&
+        !notifRef.current.contains(e.target)
+      ) {
+        setNotifOpen(false);
+      }
+      if (msgOpen && msgRef.current && !msgRef.current.contains(e.target)) {
+        setMsgOpen(false);
+      }
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, [menuOpen, userMenuOpen]);
+  }, [menuOpen, userMenuOpen, notifOpen, msgOpen]);
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">
@@ -140,50 +199,180 @@ const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={toggleLanguage}
-            className="px-3 py-1.5 rounded-md bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-          >
-            {language === "en" ? "العربية" : "English"}
-          </button>
-          <button
-            onClick={toggleTheme}
-            aria-label="Toggle dark mode"
-            className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-          >
-            {theme === "light" ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0-1.414 1.414M7.05 16.95l-1.414 1.414"
-                />
-                <circle cx="12" cy="12" r="5" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                />
-              </svg>
-            )}
-          </button>
+          {isAuthenticated && (
+            <>
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => {
+                    const next = !notifOpen;
+                    setNotifOpen(next);
+                    if (next) loadNotifications();
+                    setMsgOpen(false);
+                    setUserMenuOpen(false);
+                  }}
+                  className="relative p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
+                  aria-label="Notifications"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                  {notifUnread > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] px-1 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
+                      {notifUnread}
+                    </span>
+                  )}
+                </button>
+                {notifOpen && (
+                  <div className="absolute right-0 mt-3 w-80 max-h-[70vh] overflow-y-auto rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="flex items-center justify-between px-4 py-3 border-b themed-border">
+                      <p className="text-sm font-semibold text-[var(--color-text)]">
+                        Notifications
+                      </p>
+                      <button
+                        className="text-xs text-[var(--color-accent)] hover:underline"
+                        onClick={() =>
+                          notificationsAPI.markAllRead().then(loadNotifications)
+                        }
+                      >
+                        Mark all read
+                      </button>
+                    </div>
+                    <div className="divide-y divide-[var(--color-border)]">
+                      {notifLoading ? (
+                        <p className="p-4 text-sm themed-text-soft">
+                          Loading...
+                        </p>
+                      ) : notifications.length === 0 ? (
+                        <p className="p-4 text-sm themed-text-soft">
+                          No notifications yet.
+                        </p>
+                      ) : (
+                        notifications.map((n) => (
+                          <button
+                            key={n.id}
+                            className={`w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors ${
+                              n.isRead ? "themed-text-soft" : ""
+                            }`}
+                            onClick={() => {
+                              notificationsAPI
+                                .markRead(n.id)
+                                .then(loadNotifications);
+                              if (n.actionUrl)
+                                window.location.href = n.actionUrl;
+                            }}
+                          >
+                            <p className="text-sm font-semibold text-[var(--color-text)] line-clamp-1">
+                              {n.title}
+                            </p>
+                            <p className="text-xs themed-text-soft line-clamp-2">
+                              {n.message}
+                            </p>
+                            <p className="text-[10px] themed-text-soft mt-1">
+                              {new Date(n.createdAt).toLocaleString()}
+                            </p>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative" ref={msgRef}>
+                <button
+                  onClick={() => {
+                    const next = !msgOpen;
+                    setMsgOpen(next);
+                    if (next) loadConversations();
+                    setNotifOpen(false);
+                    setUserMenuOpen(false);
+                  }}
+                  className={`relative p-2 rounded-md border themed-border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] ${
+                    msgOpen || totalUnreadMessages > 0
+                      ? "bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
+                      : "themed-text-soft hover:bg-[var(--color-surface-alt)]"
+                  }`}
+                  aria-label="Messages"
+                >
+                  <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                  {totalUnreadMessages > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] px-1 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
+                      {totalUnreadMessages}
+                    </span>
+                  )}
+                </button>
+                {msgOpen && (
+                  <div className="absolute right-0 mt-3 w-96 max-h-[70vh] overflow-y-auto rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-4 py-3 border-b themed-border flex items-center justify-between">
+                      <p className="text-sm font-semibold text-[var(--color-text)]">
+                        Messages
+                      </p>
+                    </div>
+                    <div className="divide-y divide-[var(--color-border)]">
+                      {msgLoading ? (
+                        <p className="p-4 text-sm themed-text-soft">
+                          Loading...
+                        </p>
+                      ) : conversations.length === 0 ? (
+                        <p className="p-4 text-sm themed-text-soft">
+                          No conversations yet.
+                        </p>
+                      ) : (
+                        conversations.map((c) => (
+                          <button
+                            key={c.id}
+                            className="w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors"
+                            onClick={() => {
+                              setMsgOpen(false);
+                              navigate(`/messages/${c.id}`);
+                            }}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="w-9 h-9 rounded-full bg-[var(--color-accent)] text-white text-xs font-semibold flex items-center justify-center">
+                                {c.landlord && c.landlord.firstName?.[0]}
+                                {c.landlord && c.landlord.lastName?.[0]}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+                                  {c.property?.title || "Conversation"}
+                                </p>
+                                <p className="text-xs themed-text-soft line-clamp-2">
+                                  {c.lastMessage?.content || "No messages yet"}
+                                </p>
+                                <p className="text-[10px] themed-text-soft mt-1">
+                                  {c.lastMessage?.createdAt
+                                    ? new Date(
+                                        c.lastMessage.createdAt
+                                      ).toLocaleString()
+                                    : new Date(c.createdAt).toLocaleString()}
+                                </p>
+                              </div>
+                              {c.unreadCount > 0 && (
+                                <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[11px] font-semibold h-fit">
+                                  {c.unreadCount}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           {/* User Menu */}
           {isAuthenticated ? (
@@ -252,6 +441,58 @@ const Header = () => {
                         {t("My profile") || "My Profile"}
                       </span>
                     </Link>
+                    <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4 text-[var(--color-accent)]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-7.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707"
+                          />
+                        </svg>
+                        <span className="font-medium">Theme</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          toggleTheme();
+                        }}
+                        className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
+                      >
+                        {theme === "dark" ? "Dark" : "Light"}
+                      </button>
+                    </div>
+                    <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4 text-[var(--color-accent)]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 5v14m7-7H5"
+                          />
+                        </svg>
+                        <span className="font-medium">Language</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          toggleLanguage();
+                        }}
+                        className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
+                      >
+                        {language === "en" ? "English" : "Arabic"}
+                      </button>
+                    </div>
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-all group"
@@ -333,52 +574,6 @@ const Header = () => {
               </Link>
             ))}
           </nav>
-          <div className="flex justify-between items-center gap-2 px-4 py-4 bg-[var(--color-surface)]">
-            <button
-              onClick={toggleLanguage}
-              className="flex-1 px-3 py-2 rounded-md bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-            >
-              {language === "en" ? "العربية" : "English"}
-            </button>
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle dark mode"
-              className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-            >
-              {theme === "light" ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0-1.414 1.414M7.05 16.95l-1.414 1.414"
-                  />
-                  <circle cx="12" cy="12" r="5" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
         </div>
       </div>
     </header>

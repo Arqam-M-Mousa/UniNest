@@ -23,14 +23,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
+    const storedLanguage = localStorage.getItem("preferredLanguage");
 
     if (storedToken && storedUser) {
       setToken(storedToken);
       try {
         const userData = JSON.parse(storedUser);
         setUser(userData);
-        // Set language based on user's preferred language
-        if (userData.preferredLanguage) {
+        // Respect existing language choice; only set if none was saved
+        if (!storedLanguage && userData.preferredLanguage) {
           changeLanguage(userData.preferredLanguage);
         }
       } catch (e) {
@@ -50,6 +51,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.success && response.data) {
         const { token, user } = response.data;
+        const storedLanguage = localStorage.getItem("preferredLanguage");
 
         // Store in localStorage
         localStorage.setItem("token", token);
@@ -59,8 +61,8 @@ export const AuthProvider = ({ children }) => {
         setToken(token);
         setUser(user);
 
-        // Set language based on user's preferred language
-        if (user.preferredLanguage) {
+        // Respect existing language choice; only set if none was saved
+        if (!storedLanguage && user.preferredLanguage) {
           changeLanguage(user.preferredLanguage);
         }
 

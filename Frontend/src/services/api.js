@@ -105,4 +105,41 @@ export const userAPI = {
   },
 };
 
+/**
+ * Notifications API
+ */
+export const notificationsAPI = {
+  list: async (limit = 20, offset = 0) =>
+    apiRequest(`/api/notifications?limit=${limit}&offset=${offset}`),
+  markRead: async (id) =>
+    apiRequest(`/api/notifications/${id}/read`, { method: "PATCH" }),
+  markAllRead: async () =>
+    apiRequest(`/api/notifications/read-all`, { method: "PATCH" }),
+};
+
+/**
+ * Conversations & Messages API
+ */
+export const conversationsAPI = {
+  list: async () => apiRequest("/api/conversations"),
+  create: async ({ studentId, landlordId, propertyId }) =>
+    apiRequest(`/api/conversations`, {
+      method: "POST",
+      body: JSON.stringify({ studentId, landlordId, propertyId }),
+    }),
+  listMessages: async (conversationId, limit = 50, offset = 0) =>
+    apiRequest(
+      `/api/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`
+    ),
+  sendMessage: async (conversationId, { content, attachmentsJson }) =>
+    apiRequest(`/api/conversations/${conversationId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content, attachmentsJson }),
+    }),
+  markRead: async (conversationId) =>
+    apiRequest(`/api/conversations/${conversationId}/read`, {
+      method: "PATCH",
+    }),
+};
+
 export default apiRequest;

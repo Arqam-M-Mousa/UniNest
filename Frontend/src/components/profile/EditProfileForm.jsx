@@ -286,58 +286,104 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
           </div>
         </div>
 
-        {/* Name Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* First Name */}
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-[var(--color-text)] mb-2"
-            >
-              {t("firstName")} <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              value={formData.firstName}
-              onChange={handleChange}
-              className={`w-full px-4 py-3 themed-surface border rounded-lg outline-none transition focus:border-[var(--color-accent)] ${
-                errors.firstName
-                  ? "border-red-500/50"
-                  : "border-[var(--color-accent)]/20"
-              } text-[var(--color-text)]`}
-              placeholder={t("enterFirstName")}
-            />
-            {errors.firstName && (
-              <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
-            )}
+        {/* Personal Information */}
+        <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
+          <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+            <UserIcon className="w-5 h-5 text-[var(--color-accent)]" />
+            {t("personalInformation")}
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* First Name */}
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-[var(--color-text)] mb-2"
+              >
+                {t("firstName")} <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={handleChange}
+                className={`w-full input-field ${
+                  errors.firstName ? "border-red-500/60" : ""
+                }`}
+                placeholder={t("enterFirstName")}
+              />
+              {errors.firstName && (
+                <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
+              )}
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-[var(--color-text)] mb-2"
+              >
+                {t("lastName")} <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={handleChange}
+                className={`w-full input-field ${
+                  errors.lastName ? "border-red-500/60" : ""
+                }`}
+                placeholder={t("enterLastName")}
+              />
+              {errors.lastName && (
+                <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+              )}
+            </div>
           </div>
 
-          {/* Last Name */}
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-[var(--color-text)] mb-2"
-            >
-              {t("lastName")} <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              value={formData.lastName}
-              onChange={handleChange}
-              className={`w-full px-4 py-3 themed-surface border rounded-lg outline-none transition focus:border-[var(--color-accent)] ${
-                errors.lastName
-                  ? "border-red-500/50"
-                  : "border-[var(--color-accent)]/20"
-              } text-[var(--color-text)]`}
-              placeholder={t("enterLastName")}
-            />
-            {errors.lastName && (
-              <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            {/* Gender */}
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-[var(--color-text)] mb-2"
+              >
+                {t("gender")}
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full input-field"
+              >
+                <option value="">{t("selectGender")}</option>
+                <option value="Male">{t("genderMale")}</option>
+                <option value="Female">{t("genderFemale")}</option>
+              </select>
+            </div>
+
+            {/* Preferred Language */}
+            <div>
+              <label
+                htmlFor="preferredLanguage"
+                className="block text-sm font-medium text-[var(--color-text)] mb-2"
+              >
+                {t("preferredLanguageLabel")}
+              </label>
+              <select
+                id="preferredLanguage"
+                name="preferredLanguage"
+                value={formData.preferredLanguage}
+                onChange={handleChange}
+                className="w-full input-field"
+              >
+                <option value="en">{t("languageEnglish")}</option>
+                <option value="ar">{t("languageArabic")}</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -361,67 +407,14 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
               type="tel"
               value={formData.phoneNumber}
               onChange={handleChange}
-              className={`w-full px-4 py-3 themed-surface border rounded-lg outline-none transition focus:border-[var(--color-accent)] ${
-                errors.phoneNumber
-                  ? "border-red-500/50"
-                  : "border-[var(--color-accent)]/20"
-              } text-[var(--color-text)]`}
+              className={`w-full input-field ${
+                errors.phoneNumber ? "border-red-500/60" : ""
+              }`}
               placeholder={t("phonePlaceholder")}
             />
             {errors.phoneNumber && (
               <p className="text-xs text-red-500 mt-1">{errors.phoneNumber}</p>
             )}
-          </div>
-        </div>
-
-        {/* Personal Information */}
-        <div className="bg-[var(--color-accent)]/5 rounded-lg p-4 border border-[var(--color-accent)]/10">
-          <h3 className="font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-[var(--color-accent)]" />
-            {t("personalInformation")}
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Gender */}
-            <div>
-              <label
-                htmlFor="gender"
-                className="block text-sm font-medium text-[var(--color-text)] mb-2"
-              >
-                {t("gender")}
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
-              >
-                <option value="">{t("selectGender")}</option>
-                <option value="Male">{t("genderMale")}</option>
-                <option value="Female">{t("genderFemale")}</option>
-              </select>
-            </div>
-
-            {/* Preferred Language */}
-            <div>
-              <label
-                htmlFor="preferredLanguage"
-                className="block text-sm font-medium text-[var(--color-text)] mb-2"
-              >
-                {t("preferredLanguageLabel")}
-              </label>
-              <select
-                id="preferredLanguage"
-                name="preferredLanguage"
-                value={formData.preferredLanguage}
-                onChange={handleChange}
-                className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
-              >
-                <option value="en">{t("languageEnglish")}</option>
-                <option value="ar">{t("languageArabic")}</option>
-              </select>
-            </div>
           </div>
         </div>
 
@@ -446,7 +439,7 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                 type="text"
                 value={formData.studentId}
                 onChange={handleChange}
-                className="w-full px-4 py-3 themed-surface border border-[var(--color-accent)]/20 rounded-lg outline-none transition focus:border-[var(--color-accent)] text-[var(--color-text)]"
+                className="w-full input-field"
                 placeholder={t("studentIdPlaceholder")}
               />
             </div>

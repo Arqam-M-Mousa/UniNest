@@ -48,10 +48,12 @@ const Header = () => {
   const [msgOpen, setMsgOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [msgLoading, setMsgLoading] = useState(false);
+  const [guestMenuOpen, setGuestMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const userMenuRef = useRef(null);
   const notifRef = useRef(null);
   const msgRef = useRef(null);
+  const guestMenuRef = useRef(null);
   const totalUnreadMessages = conversations.reduce(
     (sum, c) => sum + (c.unreadCount || 0),
     0
@@ -60,6 +62,7 @@ const Header = () => {
   const handleSignOut = () => {
     signout();
     setUserMenuOpen(false);
+    navigate("/");
   };
 
   const loadNotifications = async () => {
@@ -93,6 +96,7 @@ const Header = () => {
     setMenuOpen(false);
     setNotifOpen(false);
     setMsgOpen(false);
+    setGuestMenuOpen(false);
   }, [location.pathname]);
 
   // Escape key to close menus
@@ -103,6 +107,7 @@ const Header = () => {
         setNotifOpen(false);
         setMsgOpen(false);
         setUserMenuOpen(false);
+        setGuestMenuOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -132,10 +137,17 @@ const Header = () => {
       if (msgOpen && msgRef.current && !msgRef.current.contains(e.target)) {
         setMsgOpen(false);
       }
+      if (
+        guestMenuOpen &&
+        guestMenuRef.current &&
+        !guestMenuRef.current.contains(e.target)
+      ) {
+        setGuestMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, [menuOpen, userMenuOpen, notifOpen, msgOpen]);
+  }, [menuOpen, userMenuOpen, notifOpen, msgOpen, guestMenuOpen]);
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">
@@ -457,13 +469,64 @@ const Header = () => {
               )}
             </div>
           ) : (
-            <Link
-              to="/signin"
-              className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-              aria-label="Account"
-            >
-              <UserCircleIcon className="h-6 w-6" />
-            </Link>
+            <div className="relative" ref={guestMenuRef}>
+              <button
+                onClick={() => setGuestMenuOpen(!guestMenuOpen)}
+                className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
+                aria-label="Guest menu"
+              >
+                <UserCircleIcon className="h-6 w-6" />
+              </button>
+
+              {guestMenuOpen && (
+                <div className="absolute right-0 mt-3 w-64 rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="py-2">
+                    <Link
+                      to="/signin"
+                      onClick={() => setGuestMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                    >
+                      <ArrowRightOnRectangleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                      <span className="font-medium">
+                        {t("signIn") || "Sign In"}
+                      </span>
+                    </Link>
+                    <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {theme === "dark" ? (
+                          <MoonIcon className="w-4 h-4 text-[var(--color-accent)]" />
+                        ) : (
+                          <SunIcon className="w-4 h-4 text-[var(--color-accent)]" />
+                        )}
+                        <span className="font-medium">Theme</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          toggleTheme();
+                        }}
+                        className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
+                      >
+                        {theme === "dark" ? "Dark" : "Light"}
+                      </button>
+                    </div>
+                    <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <LanguageIcon className="w-4 h-4 text-[var(--color-accent)]" />
+                        <span className="font-medium">Language</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          toggleLanguage();
+                        }}
+                        className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
+                      >
+                        {language === "en" ? "English" : "Arabic"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

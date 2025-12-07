@@ -106,6 +106,12 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const updateUser = (updatedUserData) => {
+    const updatedUser = { ...user, ...updatedUserData };
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   const value = {
     user,
     token,
@@ -115,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     signout,
     clearError,
+    updateUser,
     isAuthenticated: !!token && !!user,
   };
 

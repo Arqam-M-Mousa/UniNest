@@ -15,6 +15,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState, useRef } from "react";
 import { notificationsAPI, conversationsAPI } from "../services/api";
+import CloudinaryImage from "./CloudinaryImage";
 
 const navLinksConfig = (t) => [
   { to: "/", label: t("home"), match: (p) => p === "/" },
@@ -355,17 +356,37 @@ const Header = () => {
                 className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
                 aria-label="Account menu"
               >
-                <UserCircleIcon className="h-6 w-6" />
+                {user?.profilePictureUrl ? (
+                  <CloudinaryImage
+                    src={user.profilePictureUrl}
+                    alt="Profile"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <UserCircleIcon className="h-6 w-6" />
+                )}
               </button>
 
               {userMenuOpen && (
                 <div className="absolute right-0 mt-3 w-64 rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-5 py-4 bg-gradient-to-br from-[var(--color-accent)]/10 to-transparent border-b themed-border">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white font-semibold">
-                        {user?.firstName?.[0]}
-                        {user?.lastName?.[0]}
-                      </div>
+                      {user?.profilePictureUrl ? (
+                        <CloudinaryImage
+                          src={user.profilePictureUrl}
+                          alt="Profile"
+                          width={40}
+                          height={40}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-[var(--color-accent)]/30"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white font-semibold">
+                          {user?.firstName?.[0]}
+                          {user?.lastName?.[0]}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-[var(--color-text)] truncate">
                           {user?.firstName} {user?.lastName}

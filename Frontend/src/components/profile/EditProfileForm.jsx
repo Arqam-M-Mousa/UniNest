@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
+import { uploadsAPI } from "../../services/api";
+import Alert from "../Alert";
 import {
   UserCircleIcon,
   PhotoIcon,
@@ -29,6 +31,10 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
   const [profilePictureUrl, setProfilePictureUrl] = useState(
     profile.profilePictureUrl || ""
   );
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -50,6 +56,15 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -69,6 +84,9 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Reset any pending deletion if user picks a new file
+    setPendingDelete(false);
+
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setErrors((prev) => ({
@@ -87,98 +105,39 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("profilePicture", file);
-
-    setUploading(true);
+    // Clear any previous errors
     setErrors((prev) => ({ ...prev, profilePicture: "" }));
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:8080/api/uploads/profile-picture",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+    // Store the file for later upload
+    setSelectedFile(file);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to upload image");
-      }
-
-      if (result.success) {
-        setProfilePictureUrl(result.data.url);
-        // Update the user context immediately
-        updateUser({ profilePictureUrl: result.data.url });
-        // Refresh the profile to get updated data
-        if (onProfileUpdate) {
-          await onProfileUpdate();
-        }
-        // Show success feedback
-        alert("Profile picture uploaded successfully!");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      setErrors((prev) => ({
-        ...prev,
-        profilePicture: error.message || "Failed to upload image",
-      }));
-    } finally {
-      setUploading(false);
-    }
+    // Create a local preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
   };
 
   const handleDeleteProfilePicture = async () => {
-    if (!profilePictureUrl) return;
-
-    if (!confirm("Are you sure you want to delete your profile picture?")) {
+    // If there's a pending file, just clear it and the preview
+    if (selectedFile || previewUrl) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setPendingDelete(false);
       return;
     }
 
-    setUploading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:8080/api/uploads/profile-picture",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to delete image");
-      }
-
-      if (result.success) {
-        setProfilePictureUrl("");
-        // Update the user context immediately
-        updateUser({ profilePictureUrl: null });
-        // Refresh the profile to get updated data
-        if (onProfileUpdate) {
-          await onProfileUpdate();
-        }
-        alert("Profile picture deleted successfully!");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      setErrors((prev) => ({
-        ...prev,
-        profilePicture: error.message || "Failed to delete image",
-      }));
-    } finally {
-      setUploading(false);
+    // If there's an existing profile picture, mark it for deletion
+    if (profilePictureUrl) {
+      setShowDeleteConfirm(true);
     }
+  };
+
+  const confirmDeleteProfilePicture = () => {
+    setProfilePictureUrl("");
+    setPendingDelete(true);
+    setShowDeleteConfirm(false);
   };
 
   const handleSubmit = async (e) => {
@@ -189,8 +148,63 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
     }
 
     setSaving(true);
+    let nextProfilePictureUrl =
+      profilePictureUrl || profile.profilePictureUrl || "";
+
     try {
-      await onSave(formData);
+      // Perform deletion only when Save is clicked and a delete was queued
+      if (pendingDelete && profile.profilePictureUrl) {
+        setUploading(true);
+        try {
+          const result = await uploadsAPI.deleteProfilePicture();
+          if (!result?.success) {
+            throw new Error(result?.message || "Failed to delete image");
+          }
+          nextProfilePictureUrl = "";
+        } catch (error) {
+          console.error("Delete error:", error);
+          setErrors((prev) => ({
+            ...prev,
+            profilePicture: error.message || "Failed to delete image",
+          }));
+          return;
+        } finally {
+          setUploading(false);
+          setPendingDelete(false);
+        }
+      }
+
+      // Upload only when Save is clicked and a file is queued
+      if (selectedFile) {
+        setUploading(true);
+        try {
+          const result = await uploadsAPI.uploadProfilePicture(selectedFile);
+          if (!result?.success || !result?.data?.url) {
+            throw new Error(result?.message || "Failed to upload image");
+          }
+
+          nextProfilePictureUrl = result.data.url;
+          setProfilePictureUrl(nextProfilePictureUrl);
+
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+          }
+          setPreviewUrl(null);
+          setSelectedFile(null);
+        } catch (error) {
+          console.error("Upload error:", error);
+          setErrors((prev) => ({
+            ...prev,
+            profilePicture: error.message || "Failed to upload image",
+          }));
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Save profile data along with the latest image URL snapshot
+      await onSave({ ...formData, profilePictureUrl: nextProfilePictureUrl });
     } finally {
       setSaving(false);
     }
@@ -213,14 +227,22 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Profile Picture Preview */}
             <div className="relative">
-              {profilePictureUrl ? (
-                <CloudinaryImage
-                  src={profilePictureUrl}
-                  alt="Profile"
-                  width={128}
-                  height={128}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-[var(--color-accent)]/30 shadow-lg"
-                />
+              {previewUrl || profilePictureUrl ? (
+                previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="Profile preview"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-[var(--color-accent)]/30 shadow-lg"
+                  />
+                ) : (
+                  <CloudinaryImage
+                    src={profilePictureUrl}
+                    alt="Profile"
+                    width={128}
+                    height={128}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-[var(--color-accent)]/30 shadow-lg"
+                  />
+                )
               ) : (
                 <div className="w-32 h-32 rounded-full bg-[var(--color-accent)]/20 border-4 border-[var(--color-accent)]/30 flex items-center justify-center">
                   <UserCircleIcon className="w-20 h-20 text-[var(--color-accent)]/40" />
@@ -229,6 +251,11 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
               {uploading && (
                 <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
                   <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+              )}
+              {selectedFile && !uploading && (
+                <div className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">
+                  Pending
                 </div>
               )}
             </div>
@@ -250,7 +277,9 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                   ) : (
                     <span className="flex items-center gap-2">
                       <PhotoIcon className="w-5 h-5" />
-                      {profilePictureUrl ? "Change Picture" : "Upload Picture"}
+                      {previewUrl || profilePictureUrl
+                        ? "Change Picture"
+                        : "Upload Picture"}
                     </span>
                   )}
                 </label>
@@ -264,15 +293,27 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                 />
               </div>
 
-              {profilePictureUrl && (
+              {(previewUrl || profilePictureUrl) && (
                 <button
                   type="button"
                   onClick={handleDeleteProfilePicture}
                   disabled={uploading}
                   className="px-6 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Delete Picture
+                  {selectedFile ? "Cancel" : "Delete Picture"}
                 </button>
+              )}
+
+              {selectedFile && (
+                <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                  ⚠️ Picture will be uploaded when you click "Save Changes"
+                </p>
+              )}
+
+              {pendingDelete && !selectedFile && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  ⚠️ Picture will be removed when you click "Save Changes"
+                </p>
               )}
 
               <p className="text-xs text-[var(--color-text)]/60">
@@ -472,6 +513,32 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
           </button>
         </div>
       </form>
+
+      <Alert
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete profile picture"
+        message="This will remove your current picture. The change only applies after you click Save Changes."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="warning"
+        iconOverride={
+          <svg
+            className="w-8 h-8 animate-pulse"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        }
+        onConfirm={confirmDeleteProfilePicture}
+      />
     </div>
   );
 };

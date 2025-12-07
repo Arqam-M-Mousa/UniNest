@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -14,6 +20,21 @@ import Contact from "./pages/Contact";
 import Apartments from "./pages/Apartments";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/profile/Profile";
+
+// Scroll to top on route change to avoid preserving scroll between pages
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 50);
+
+    return () => window.clearTimeout(id);
+  }, [pathname]);
+
+  return null;
+}
 
 // Separate inner app so we can access theme after providers
 function ThemedLayout() {
@@ -46,6 +67,7 @@ function App() {
       <LanguageProvider>
         <AuthProvider>
           <Router>
+            <ScrollToTop />
             <ThemedLayout />
           </Router>
         </AuthProvider>

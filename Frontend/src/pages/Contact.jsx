@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import apiRequest from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const faqs = [
   { q: "faqQ1", a: "faqA1" },
@@ -137,6 +138,9 @@ const Contact = () => {
                 className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2 anim-btn-pulse disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-live="polite"
               >
+                {sending && (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                )}
                 {sending
                   ? t("sending") || "Sending..."
                   : submitted

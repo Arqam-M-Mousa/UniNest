@@ -1,6 +1,16 @@
 import { formatDistanceToNow } from "date-fns";
 import { useLanguage } from "../../context/LanguageContext";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
+import {
+  UserCircleIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  UserIcon,
+  LanguageIcon,
+  AcademicCapIcon,
+  BuildingLibraryIcon,
+  StarIcon,
+  IdentificationIcon,
+} from "@heroicons/react/24/outline";
 import CloudinaryImage from "../CloudinaryImage";
 
 const ProfileView = ({ profile, onEdit }) => {
@@ -92,23 +102,25 @@ const ProfileView = ({ profile, onEdit }) => {
           {/* Contact Information */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <span className="text-[var(--color-accent)]">📞</span>{" "}
+              <PhoneIcon className="w-5 h-5 text-[var(--color-accent)]" />
               {t("contactInformation")}
             </h3>
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-[var(--color-text)]/60">
+                <p className="text-sm text-[var(--color-text)]/60 flex items-center gap-2">
+                  <EnvelopeIcon className="w-4 h-4" />
                   {t("email")}
                 </p>
-                <p className="text-[var(--color-text)] font-medium">
+                <p className="text-[var(--color-text)] font-medium ml-6">
                   {profile.email}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-[var(--color-text)]/60">
+                <p className="text-sm text-[var(--color-text)]/60 flex items-center gap-2">
+                  <PhoneIcon className="w-4 h-4" />
                   {t("phoneNumber")}
                 </p>
-                <p className="text-[var(--color-text)] font-medium">
+                <p className="text-[var(--color-text)] font-medium ml-6">
                   {profile.phoneNumber || t("notProvided")}
                 </p>
               </div>
@@ -118,62 +130,69 @@ const ProfileView = ({ profile, onEdit }) => {
           {/* Personal Information */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <span>👤</span> {t("personalInformation")}
+              <UserIcon className="w-5 h-5 text-[var(--color-accent)]" />
+              {t("personalInformation")}
             </h3>
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-[var(--color-text)]/60">
+                <p className="text-sm text-[var(--color-text)]/60 flex items-center gap-2">
+                  <IdentificationIcon className="w-4 h-4" />
                   {t("gender")}
                 </p>
-                <p className="text-[var(--color-text)] font-medium">
+                <p className="text-[var(--color-text)] font-medium ml-6">
                   {profile.gender || t("notSpecified")}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-[var(--color-text)]/60">
+                <p className="text-sm text-[var(--color-text)]/60 flex items-center gap-2">
+                  <LanguageIcon className="w-4 h-4" />
                   {t("preferredLanguageLabel")}
                 </p>
-                <p className="text-[var(--color-text)] font-medium">
+                <p className="text-[var(--color-text)] font-medium ml-6">
                   {profile.preferredLanguage === "en"
                     ? t("languageEnglish")
-                    : profile.preferredLanguage === "fr"
-                    ? t("languageFrench")
                     : t("languageArabic")}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Student Information */}
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <span>🎓</span> {t("studentInformation")}
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-[var(--color-text)]/60">
-                  {t("studentIdLabel")}
-                </p>
-                <p className="text-[var(--color-text)] font-medium">
-                  {profile.studentId || t("notProvided")}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-[var(--color-text)]/60">
-                  {t("university")}
-                </p>
-                <p className="text-[var(--color-text)] font-medium">
-                  {profile.universityId || t("notAssigned")}
-                </p>
+          {/* Student Information - Only for Students */}
+          {profile.role === "Student" && (
+            <div>
+              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                <AcademicCapIcon className="w-5 h-5 text-[var(--color-accent)]" />
+                {t("studentInformation")}
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-[var(--color-text)]/60 flex items-center gap-2">
+                    <AcademicCapIcon className="w-4 h-4" />
+                    {t("studentIdLabel")}
+                  </p>
+                  <p className="text-[var(--color-text)] font-medium ml-6">
+                    {profile.studentId || t("notProvided")}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-[var(--color-text)]/60 flex items-center gap-2">
+                    <BuildingLibraryIcon className="w-4 h-4" />
+                    {t("university")}
+                  </p>
+                  <p className="text-[var(--color-text)] font-medium ml-6">
+                    {profile.universityId || t("notAssigned")}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Rating Information */}
           {profile.role === "Landlord" && (
             <div>
               <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-                <span>⭐</span> {t("ratings")}
+                <StarIcon className="w-5 h-5 text-[var(--color-accent)]" />
+                {t("ratings")}
               </h3>
               <div className="space-y-3">
                 <div>
@@ -184,7 +203,7 @@ const ProfileView = ({ profile, onEdit }) => {
                     <p className="text-2xl font-bold text-[var(--color-accent)]">
                       {profile.averageRating
                         ? profile.averageRating.toFixed(1)
-                        : "N/A"}
+                        : "0.0"}
                     </p>
                     <span className="text-sm text-[var(--color-text)]/60">
                       / 5.0
@@ -196,7 +215,7 @@ const ProfileView = ({ profile, onEdit }) => {
                     {t("totalReviews")}
                   </p>
                   <p className="text-lg font-semibold text-[var(--color-text)]">
-                    {profile.totalReviewsCount}
+                    {profile.totalReviewsCount || 0}
                   </p>
                 </div>
               </div>

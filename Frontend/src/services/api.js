@@ -16,9 +16,11 @@ async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem("token");
   console.log("Token present:", !!token);
 
+  const isFormData = options.body instanceof FormData;
+
   const config = {
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
     },
     ...options,
@@ -120,6 +122,18 @@ export const userAPI = {
 };
 
 /**
+ * Property Listings API
+ */
+export const propertyListingsAPI = {
+  create: async (payload) => {
+    return apiRequest("/api/property-listings", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
+/**
  * Notifications API
  */
 export const notificationsAPI = {
@@ -154,6 +168,28 @@ export const conversationsAPI = {
     apiRequest(`/api/conversations/${conversationId}/read`, {
       method: "PATCH",
     }),
+};
+
+/**
+ * Universities API
+ */
+export const universitiesAPI = {
+  list: async () => apiRequest("/api/universities"),
+};
+
+/**
+ * Uploads API
+ */
+export const uploadsAPI = {
+  uploadListingImages: async (files) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
+
+    return apiRequest("/api/uploads/listing-images", {
+      method: "POST",
+      body: formData,
+    });
+  },
 };
 
 export default apiRequest;

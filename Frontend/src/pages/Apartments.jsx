@@ -12,13 +12,17 @@ import PageLoader from "../components/PageLoader";
 
 const Apartments = () => {
   const { t, language } = useLanguage();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const isRTL = language === "ar";
   const [activeTab, setActiveTab] = useState("lastListings");
   const [selectedPrice, setSelectedPrice] = useState("all");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMessage, setAuthModalMessage] = useState("");
+
+  const canPostAd = Boolean(
+    user?.role && ["landlord", "admin"].includes(user.role.toLowerCase())
+  );
 
   const priceRanges = [
     { label: "Arqam", count: 15 },
@@ -28,12 +32,9 @@ const Apartments = () => {
   ];
 
   const handlePostAdClick = () => {
-    if (!isAuthenticated) {
-      setAuthModalMessage("postAd");
-      setShowAuthModal(true);
-    } else {
-      alert(t("createAdComingSoon") || "Create ad functionality coming soon!");
-    }
+    if (!canPostAd) return;
+
+    alert(t("createAdComingSoon") || "Create ad functionality coming soon!");
   };
 
   const handleMessageClick = (e) => {
@@ -202,23 +203,25 @@ const Apartments = () => {
           >
             {t("masonry")}
           </TabButton>
-          <button
-            onClick={handlePostAdClick}
-            className={`${
-              isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
-            } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
-            dir={isRTL ? "rtl" : "ltr"}
-          >
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M10 5v10M5 10h10"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            {t("postAd")}
-          </button>
+          {canPostAd && (
+            <button
+              onClick={handlePostAdClick}
+              className={`${
+                isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
+              } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
+              dir={isRTL ? "rtl" : "ltr"}
+            >
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M10 5v10M5 10h10"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              {t("postAd")}
+            </button>
+          )}
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12 grid lg:grid-cols-[250px_1fr] gap-8">

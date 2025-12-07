@@ -365,7 +365,7 @@ const Header = () => {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
+                className="p-2 h-10 w-10 flex items-center justify-center rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
                 aria-label="Account menu"
               >
                 {user?.profilePictureUrl ? (
@@ -374,7 +374,7 @@ const Header = () => {
                     alt="Profile"
                     width={24}
                     height={24}
-                    className="h-6 w-6 rounded-full object-cover"
+                    className="h-6 w-6 rounded-md object-contain bg-[var(--color-surface)]"
                   />
                 ) : (
                   <UserCircleIcon className="h-6 w-6" />
@@ -389,12 +389,12 @@ const Header = () => {
                         <CloudinaryImage
                           src={user.profilePictureUrl}
                           alt="Profile"
-                          width={40}
-                          height={40}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-[var(--color-accent)]/30"
+                          width={48}
+                          height={48}
+                          className="w-12 h-12 rounded-md object-contain bg-[var(--color-surface)] border-2 border-[var(--color-accent)]/30"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white font-semibold">
+                        <div className="w-12 h-12 rounded-md bg-[var(--color-accent)] flex items-center justify-center text-white font-semibold">
                           {user?.firstName?.[0]}
                           {user?.lastName?.[0]}
                         </div>

@@ -28,6 +28,14 @@ Listing.hasMany(ListingImage, {
 });
 ListingImage.belongsTo(Listing, { foreignKey: "listingId" });
 
+// Listing - PropertyListing relationship
+Listing.hasOne(PropertyListing, {
+  foreignKey: "listingId",
+  as: "propertyDetails",
+  onDelete: "CASCADE",
+});
+PropertyListing.belongsTo(Listing, { foreignKey: "listingId", as: "listing" });
+
 // Listing - Favorite relationship
 Listing.hasMany(Favorite, {
   foreignKey: "listingId",

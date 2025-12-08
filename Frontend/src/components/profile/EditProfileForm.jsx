@@ -204,7 +204,14 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
       }
 
       // Save profile data along with the latest image URL snapshot
-      await onSave({ ...formData, profilePictureUrl: nextProfilePictureUrl });
+      const payload = { ...formData, profilePictureUrl: nextProfilePictureUrl };
+
+      if (profile.role === "Student") {
+        // Preserve server-trusted studentId for students
+        delete payload.studentId;
+      }
+
+      await onSave(payload);
     } finally {
       setSaving(false);
     }
@@ -479,10 +486,14 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                 name="studentId"
                 type="text"
                 value={formData.studentId}
-                onChange={handleChange}
-                className="w-full input-field"
+                readOnly
+                className="w-full input-field bg-gray-100/60 dark:bg-white/5 cursor-not-allowed"
                 placeholder={t("studentIdPlaceholder")}
               />
+              <p className="text-xs text-[var(--color-text)]/70 mt-1">
+                {t("studentIdLocked") ||
+                  "Your student ID comes from your verified university email and cannot be changed."}
+              </p>
             </div>
           </div>
         )}

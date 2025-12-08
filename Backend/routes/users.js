@@ -83,7 +83,12 @@ router.put("/profile", authenticate, async (req, res) => {
     if (gender !== undefined) user.gender = gender;
     if (preferredLanguage !== undefined)
       user.preferredLanguage = preferredLanguage;
-    if (studentId !== undefined) user.studentId = studentId;
+
+    // Lock studentId edits for students; allow for other roles if present
+    if (user.role !== "Student" && studentId !== undefined) {
+      user.studentId = studentId;
+    }
+
     if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
 
     await user.save();

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useLanguage } from "../../context/LanguageContext";
 import {
@@ -11,11 +12,13 @@ import {
   StarIcon,
   IdentificationIcon,
   TrashIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import CloudinaryImage from "../CloudinaryImage";
 
 const ProfileView = ({ profile, onEdit, onDelete }) => {
   const { t } = useLanguage();
+  const [isDangerOpen, setIsDangerOpen] = useState(false);
   const getInitials = () => {
     return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
   };
@@ -79,7 +82,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
                   : t("admin")}
               </span>
               {profile.isVerified && (
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-600 border border-green-500/30">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 shadow-sm">
                   ✓ {t("verified")}
                 </span>
               )}
@@ -89,7 +92,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
           {/* Edit Button */}
           <button
             onClick={onEdit}
-            className="px-6 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition font-medium"
+            className="px-5 py-2 bg-[var(--color-accent)] text-white rounded-full shadow-md shadow-[var(--color-accent)]/20 hover:shadow-lg hover:shadow-[var(--color-accent)]/30 transition font-medium"
           >
             {t("editProfile")}
           </button>
@@ -230,26 +233,59 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/20 to-transparent my-8" />
 
         {/* Danger Zone */}
-        <div className="p-4 bg-red-500/5 border border-red-500/30 rounded-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-red-600 flex items-center gap-2">
+        <div className="rounded-2xl border border-red-300 dark:border-red-500/40 bg-white dark:bg-zinc-800 overflow-hidden shadow-sm transition">
+          <button
+            type="button"
+            onClick={() => setIsDangerOpen((prev) => !prev)}
+            className="w-full px-5 py-4 flex items-center justify-between gap-3 bg-red-50 dark:bg-zinc-800 border-b border-red-200 dark:border-red-500/30 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            aria-expanded={isDangerOpen}
+            aria-controls="danger-zone-panel"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
                 <TrashIcon className="w-5 h-5" />
-                {t("deleteAccount") || "Delete account"}
-              </h3>
-              <p className="text-sm text-red-600/80">
-                {t("deleteAccountWarning") ||
-                  "Permanently deletes your account and all data. This action cannot be undone."}
-              </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-red-600 dark:text-red-400 font-medium">
+                  {t("dangerZone") || "Danger zone"}
+                </p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  {t("deleteAccount") || "Delete account"}
+                </p>
+              </div>
             </div>
-            <button
-              onClick={onDelete}
-              className="px-4 py-2 border border-red-500 text-red-600 bg-white/60 rounded-lg hover:bg-red-500/10 transition font-medium flex items-center gap-2 self-start sm:self-auto"
+            <ChevronDownIcon
+              className={`w-5 h-5 text-red-500 dark:text-red-400 transition-transform ${
+                isDangerOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {isDangerOpen && (
+            <div
+              id="danger-zone-panel"
+              className="p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-gray-50 dark:bg-zinc-900"
             >
-              <TrashIcon className="w-4 h-4" />
-              {t("delete") || "Delete"}
-            </button>
-          </div>
+              <div className="space-y-2 text-sm">
+                <p className="text-gray-700 dark:text-gray-200">
+                  {t("deleteAccountWarning") ||
+                    "Permanently deletes your account and all data. This action cannot be undone."}
+                </p>
+                <ul className="text-xs text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
+                  <li>Removes conversations, favorites, and listings.</li>
+                  <li>You will be signed out immediately.</li>
+                </ul>
+              </div>
+
+              <button
+                onClick={onDelete}
+                className="px-5 py-2 text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 rounded-lg font-semibold shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 flex items-center gap-2 self-start sm:self-auto"
+              >
+                <TrashIcon className="w-4 h-4" />
+                {t("delete") || "Delete"}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Account Metadata */}

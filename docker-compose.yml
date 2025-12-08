@@ -4,15 +4,15 @@ services:
     image: postgres:16-alpine
     container_name: uninest-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-uninest_db}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,15 +32,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: 3000
-      POSTGRES_DB: ${POSTGRES_DB:-uninest_db}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      JWT_SECRET: ${JWT_SECRET:-6ab4105abc8f47a9df710557211980127849bbe8475226ec77bbfba14662e672}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
     ports:
       - "8080:3000"
     networks:
@@ -55,6 +55,8 @@ services:
     container_name: uninest-frontend
     env_file:
       - ./.env
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
     depends_on:
       - backend
     ports:

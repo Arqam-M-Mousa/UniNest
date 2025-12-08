@@ -10,10 +10,11 @@ import {
   BuildingLibraryIcon,
   StarIcon,
   IdentificationIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import CloudinaryImage from "../CloudinaryImage";
 
-const ProfileView = ({ profile, onEdit }) => {
+const ProfileView = ({ profile, onEdit, onDelete }) => {
   const { t } = useLanguage();
   const getInitials = () => {
     return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
@@ -96,7 +97,6 @@ const ProfileView = ({ profile, onEdit }) => {
 
         {/* Divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/20 to-transparent mb-8" />
-
         {/* Information Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Information */}
@@ -180,7 +180,10 @@ const ProfileView = ({ profile, onEdit }) => {
                     {t("university")}
                   </p>
                   <p className="text-[var(--color-text)] font-medium ml-6">
-                    {profile.universityId || t("notAssigned")}
+                    {profile.university?.name ||
+                      profile.universityName ||
+                      profile.universityId ||
+                      t("notAssigned")}
                   </p>
                 </div>
               </div>
@@ -225,6 +228,29 @@ const ProfileView = ({ profile, onEdit }) => {
 
         {/* Divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/20 to-transparent my-8" />
+
+        {/* Danger Zone */}
+        <div className="p-4 bg-red-500/5 border border-red-500/30 rounded-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-red-600 flex items-center gap-2">
+                <TrashIcon className="w-5 h-5" />
+                {t("deleteAccount") || "Delete account"}
+              </h3>
+              <p className="text-sm text-red-600/80">
+                {t("deleteAccountWarning") ||
+                  "Permanently deletes your account and all data. This action cannot be undone."}
+              </p>
+            </div>
+            <button
+              onClick={onDelete}
+              className="px-4 py-2 border border-red-500 text-red-600 bg-white/60 rounded-lg hover:bg-red-500/10 transition font-medium flex items-center gap-2 self-start sm:self-auto"
+            >
+              <TrashIcon className="w-4 h-4" />
+              {t("delete") || "Delete"}
+            </button>
+          </div>
+        </div>
 
         {/* Account Metadata */}
         <div className="text-xs text-[var(--color-text)]/50">

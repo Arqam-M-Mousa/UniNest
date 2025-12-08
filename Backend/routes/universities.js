@@ -60,4 +60,66 @@ router.post("/", authenticate, authorize(["Admin"]), async (req, res) => {
   }
 });
 
+// Update university
+router.put("/:id", authenticate, authorize(["Admin"]), async (req, res) => {
+  const { id } = req.params;
+  const { name, city, domain, latitude, longitude } = req.body;
+
+  if (!name || !name.trim()) {
+    return sendError(
+      res,
+      "University name is required",
+      HTTP_STATUS.BAD_REQUEST
+    );
+  }
+
+  try {
+    const university = await University.findByPk(id);
+    if (!university) {
+      return sendError(res, "University not found", HTTP_STATUS.NOT_FOUND);
+    }
+
+    await university.update({
+      name: name.trim(),
+      city: city?.trim() || null,
+      domain: domain?.trim() || null,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
+    });
+
+    return sendSuccess(res, university, "University updated successfully");
+  } catch (error) {
+    console.error("Failed to update university", error);
+    return sendError(
+      res,
+      "Failed to update university",
+      HTTP_STATUS.SERVER_ERROR,
+      error
+    );
+  }
+});
+
+// Delete university
+router.delete("/:id", authenticate, authorize(["Admin"]), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const university = await University.findByPk(id);
+    if (!university) {
+      return sendError(res, "University not found", HTTP_STATUS.NOT_FOUND);
+    }
+
+    await university.destroy();
+    return sendSuccess(res, null, "University deleted successfully");
+  } catch (error) {
+    console.error("Failed to delete university", error);
+    return sendError(
+      res,
+      "Failed to delete university",
+      HTTP_STATUS.SERVER_ERROR,
+      error
+    );
+  }
+});
+
 module.exports = router;

@@ -13,8 +13,12 @@ const Notification = require("./Notification");
 const VerificationCode = require("./VerificationCode");
 
 // User - University relationship
-User.belongsTo(University, { foreignKey: "universityId", allowNull: true });
-University.hasMany(User, { foreignKey: "universityId" });
+User.belongsTo(University, {
+  foreignKey: "universityId",
+  as: "university",
+  allowNull: true,
+});
+University.hasMany(User, { foreignKey: "universityId", as: "users" });
 
 // User - Listings relationship
 User.hasMany(Listing, { foreignKey: "ownerId", as: "listings" });

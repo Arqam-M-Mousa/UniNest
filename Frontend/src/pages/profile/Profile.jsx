@@ -5,6 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import ProfileView from "../../components/profile/ProfileView";
 import EditProfileForm from "../../components/profile/EditProfileForm";
 import PageLoader from "../../components/PageLoader";
+import Alert from "../../components/Alert";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -14,6 +15,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -60,6 +62,16 @@ const Profile = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/signin");
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setError(null);
+      await userAPI.deleteProfile();
+      handleLogout();
+    } catch (err) {
+      setError(err.message || "Failed to delete account");
+    }
   };
 
   return (
@@ -117,10 +129,25 @@ const Profile = () => {
               onProfileUpdate={fetchProfile}
             />
           ) : (
-            <ProfileView profile={profile} onEdit={() => setIsEditing(true)} />
+            <ProfileView
+              profile={profile}
+              onEdit={() => setIsEditing(true)}
+              onDelete={() => setShowDeleteConfirm(true)}
+            />
           )}
         </div>
       </div>
+
+      <Alert
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete account"
+        message="This will permanently delete your account. This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="warning"
+        onConfirm={handleDeleteAccount}
+      />
     </PageLoader>
   );
 };

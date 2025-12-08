@@ -119,6 +119,12 @@ export const userAPI = {
       body: JSON.stringify(userData),
     });
   },
+
+  deleteProfile: async () => {
+    return apiRequest("/api/users/profile", {
+      method: "DELETE",
+    });
+  },
 };
 
 /**
@@ -179,6 +185,15 @@ export const universitiesAPI = {
     apiRequest("/api/universities", {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+  update: async (id, data) =>
+    apiRequest(`/api/universities/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  remove: async (id) =>
+    apiRequest(`/api/universities/${id}`, {
+      method: "DELETE",
     }),
 };
 

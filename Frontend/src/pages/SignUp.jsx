@@ -30,6 +30,7 @@ const SignUp = () => {
     passwordAgain: "",
     firstName: "",
     lastName: "",
+    gender: "",
     role: "Student",
     phoneNumber: "",
     studentId: "",
@@ -129,6 +130,11 @@ const SignUp = () => {
       }
     }
 
+    if (!formData.gender) {
+      setError("Please select your gender");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -138,6 +144,7 @@ const SignUp = () => {
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        gender: formData.gender,
         role: formData.role,
         phoneNumber: formData.phoneNumber,
         verificationCode: verificationCode,
@@ -196,6 +203,16 @@ const SignUp = () => {
     : verifyingCode
     ? "Verifying code..."
     : t("creatingAccount") || "Creating Account...";
+
+  // Auto-dismiss success modal after 3 seconds and go to signin
+  useEffect(() => {
+    if (!showSuccessAlert) return;
+    const id = setTimeout(() => {
+      setShowSuccessAlert(false);
+      navigate("/signin");
+    }, 3000);
+    return () => clearTimeout(id);
+  }, [showSuccessAlert, navigate]);
 
   return (
     <PageLoader
@@ -333,6 +350,27 @@ const SignUp = () => {
                     required
                     className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
                   />
+                </div>
+
+                <div className="relative group">
+                  <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                    {t("gender")}
+                    <span className="text-red-500"> *</span>
+                  </label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                    className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+                  >
+                    <option value="">{t("selectGender") || "Select"}</option>
+                    <option value="Male">{t("genderMale") || "Male"}</option>
+                    <option value="Female">
+                      {t("genderFemale") || "Female"}
+                    </option>
+                    <option value="Other">{t("genderOther") || "Other"}</option>
+                  </select>
                 </div>
               </div>
 

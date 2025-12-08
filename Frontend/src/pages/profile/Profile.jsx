@@ -82,16 +82,15 @@ const Profile = () => {
       <div className="min-h-[calc(100vh-200px)] themed-surface py-8 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-[var(--color-text)]">
-              {t("profile")}
-            </h1>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition"
-            >
-              {t("logout")}
-            </button>
+          <div className="flex items-start mb-8">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-soft)]/80 mb-1">
+                {t("account") || "Account"}
+              </p>
+              <h1 className="text-3xl font-bold text-[var(--color-text)]">
+                {t("profile")}
+              </h1>
+            </div>
           </div>
 
           {/* Success Message */}

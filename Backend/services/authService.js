@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { User, VerificationCode } = require("../models");
+const { User, VerificationCode, University } = require("../models");
 const {
   HTTP_STATUS,
   sendSuccess,
@@ -10,6 +10,42 @@ const {
 const { sendVerificationEmail } = require("./emailService");
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+const deriveStudentDetailsFromEmail = async (email) => {
+  if (!email || !email.includes("@")) {
+    return { studentId: null, universityId: null };
+  }
+
+  const [localPartRaw, domainPartRaw] = email.trim().toLowerCase().split("@");
+  const localMatch = localPartRaw.match(/^s(\d{5,})$/);
+  if (!localMatch) {
+    return { studentId: null, universityId: null };
+  }
+
+  const studentId = localMatch[1];
+
+  let universityId = null;
+  if (domainPartRaw) {
+    const cleanDomain = domainPartRaw.replace(/^www\./, "");
+    const domainParts = cleanDomain.split(".");
+    const emailRoot = domainParts.slice(-2).join(".");
+
+    const universities = await University.findAll({
+      attributes: ["id", "domain"],
+    });
+
+    const matchedUniversity = universities.find((uni) => {
+      if (!uni.domain) return false;
+      const uniDomain = uni.domain.toLowerCase().replace(/^www\./, "");
+      const uniRoot = uniDomain.split(".").slice(-2).join(".");
+      return emailRoot === uniRoot || cleanDomain.endsWith(uniDomain);
+    });
+
+    universityId = matchedUniversity ? matchedUniversity.id : null;
+  }
+
+  return { studentId, universityId };
+};
 
 /**
  * Generate a 6-digit verification code
@@ -181,19 +217,49 @@ const signup = async (req, res) => {
       return sendError(res, "Email already registered", HTTP_STATUS.CONFLICT);
     }
 
+    const derivedEmailDetails = await deriveStudentDetailsFromEmail(email);
+    const isStudentEmail = !!derivedEmailDetails.studentId;
+    const isStudentRole = role === "Student" || isStudentEmail;
+
+    let finalStudentId = studentId || null;
+    let finalUniversityId = universityId || null;
+    let finalRole = role;
+
+    if (isStudentRole) {
+      const { studentId: derivedStudentId, universityId: derivedUniversityId } =
+        derivedEmailDetails;
+
+      if (!derivedStudentId) {
+        return sendValidationError(res, [
+          "Use your university student email (e.g., s123456@stu.najah.edu)",
+        ]);
+      }
+
+      if (!derivedUniversityId) {
+        return sendValidationError(res, [
+          "We could not match your email domain to a university. Contact support if this is unexpected.",
+        ]);
+      }
+
+      finalStudentId = derivedStudentId;
+      finalUniversityId = derivedUniversityId;
+      finalRole = "Student";
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({
       email,
       passwordHash,
       firstName,
       lastName,
-      role,
+      role: finalRole,
       phoneNumber,
       avatarUrl,
-      studentId,
+      studentId: finalStudentId,
       gender,
       preferredLanguage,
-      universityId,
+      universityId: finalUniversityId,
+      isVerified: true,
     });
 
     return sendSuccess(

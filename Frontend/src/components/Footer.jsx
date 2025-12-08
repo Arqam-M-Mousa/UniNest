@@ -66,11 +66,11 @@ const Footer = () => {
               {t("connect")}
             </h3>
             <a
-              href="mailto:UniNest@hotmail.com"
+              href="mailto:arqam.mousa@gmail.com"
               className="no-underline text-[var(--color-text-soft)] hover:text-[var(--color-accent)] transition-colors break-all"
               aria-label="Email UniNest"
             >
-              UniNest@hotmail.com
+              arqam.mousa@gmail.com
             </a>
           </div>
         </div>

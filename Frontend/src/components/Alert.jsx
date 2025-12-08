@@ -9,6 +9,7 @@ const Alert = ({
   cancelText = "Cancel",
   onConfirm,
   type = "info", // info, warning, success, error
+  iconOverride,
 }) => {
   useEffect(() => {
     const handleEscape = (e) => {
@@ -103,6 +104,7 @@ const Alert = ({
   };
 
   const config = iconConfig[type];
+  const iconNode = iconOverride || config.icon;
 
   return (
     <div
@@ -118,7 +120,7 @@ const Alert = ({
           <div
             className={`w-16 h-16 rounded-full ${config.bg} flex items-center justify-center`}
           >
-            <div className={config.color}>{config.icon}</div>
+            <div className={config.color}>{iconNode}</div>
           </div>
 
           {/* Title */}

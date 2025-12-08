@@ -16,9 +16,11 @@ async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem("token");
   console.log("Token present:", !!token);
 
+  const isFormData = options.body instanceof FormData;
+
   const config = {
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
     },
     ...options,
@@ -72,6 +74,20 @@ async function apiRequest(endpoint, options = {}) {
  * Authentication API
  */
 export const authAPI = {
+  sendVerificationCode: async (email) => {
+    return apiRequest("/api/auth/send-verification-code", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  verifyCode: async (email, code) => {
+    return apiRequest("/api/auth/verify-code", {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    });
+  },
+
   signin: async (email, password) => {
     return apiRequest("/api/auth/signin", {
       method: "POST",
@@ -101,6 +117,112 @@ export const userAPI = {
     return apiRequest("/api/users/profile", {
       method: "PUT",
       body: JSON.stringify(userData),
+    });
+  },
+
+  deleteProfile: async () => {
+    return apiRequest("/api/users/profile", {
+      method: "DELETE",
+    });
+  },
+};
+
+/**
+ * Property Listings API
+ */
+export const propertyListingsAPI = {
+  create: async (payload) => {
+    return apiRequest("/api/property-listings", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
+/**
+ * Notifications API
+ */
+export const notificationsAPI = {
+  list: async (limit = 20, offset = 0) =>
+    apiRequest(`/api/notifications?limit=${limit}&offset=${offset}`),
+  markRead: async (id) =>
+    apiRequest(`/api/notifications/${id}/read`, { method: "PATCH" }),
+  markAllRead: async () =>
+    apiRequest(`/api/notifications/read-all`, { method: "PATCH" }),
+};
+
+/**
+ * Conversations & Messages API
+ */
+export const conversationsAPI = {
+  list: async () => apiRequest("/api/conversations"),
+  create: async ({ studentId, landlordId, propertyId }) =>
+    apiRequest(`/api/conversations`, {
+      method: "POST",
+      body: JSON.stringify({ studentId, landlordId, propertyId }),
+    }),
+  listMessages: async (conversationId, limit = 50, offset = 0) =>
+    apiRequest(
+      `/api/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`
+    ),
+  sendMessage: async (conversationId, { content, attachmentsJson }) =>
+    apiRequest(`/api/conversations/${conversationId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content, attachmentsJson }),
+    }),
+  markRead: async (conversationId) =>
+    apiRequest(`/api/conversations/${conversationId}/read`, {
+      method: "PATCH",
+    }),
+};
+
+/**
+ * Universities API
+ */
+export const universitiesAPI = {
+  list: async () => apiRequest("/api/universities"),
+  create: async (data) =>
+    apiRequest("/api/universities", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: async (id, data) =>
+    apiRequest(`/api/universities/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  remove: async (id) =>
+    apiRequest(`/api/universities/${id}`, {
+      method: "DELETE",
+    }),
+};
+
+/**
+ * Uploads API
+ */
+export const uploadsAPI = {
+  uploadProfilePicture: async (file) => {
+    const formData = new FormData();
+    formData.append("profilePicture", file);
+
+    return apiRequest("/api/uploads/profile-picture", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  deleteProfilePicture: async () =>
+    apiRequest("/api/uploads/profile-picture", {
+      method: "DELETE",
+    }),
+
+  uploadListingImages: async (files) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
+
+    return apiRequest("/api/uploads/listing-images", {
+      method: "POST",
+      body: formData,
     });
   },
 };

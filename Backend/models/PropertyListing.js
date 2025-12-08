@@ -10,6 +10,15 @@ const PropertyListing = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    listingId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "listings",
+        key: "id",
+      },
+      unique: true,
+    },
     propertyType: {
       type: DataTypes.ENUM("Apartment", "House", "Room", "Studio"),
       allowNull: false,
@@ -20,7 +29,7 @@ const PropertyListing = sequelize.define(
     },
     currency: {
       type: DataTypes.STRING(3),
-      defaultValue: "USD",
+      defaultValue: "NIS",
     },
     city: {
       type: DataTypes.STRING,

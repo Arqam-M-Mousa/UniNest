@@ -21,6 +21,14 @@ const University = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    latitude: {
+      type: DataTypes.DECIMAL(9, 6),
+      allowNull: true,
+    },
+    longitude: {
+      type: DataTypes.DECIMAL(9, 6),
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

@@ -126,6 +126,11 @@ export const translations = {
     totalReviews: "Total Reviews",
     accountCreated: "Account created",
     lastUpdated: "Last updated",
+    deleteAccount: "Delete account",
+    deleteAccountWarning:
+      "Permanently deletes your account and all associated data. This action cannot be undone.",
+    delete: "Delete",
+    Delete: "Delete",
     verified: "Verified",
     ctaBrowseSubtitle:
       "Browse hundreds of verified student-friendly apartments and find your perfect home today",
@@ -160,13 +165,13 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "Tell us how we can help...",
     sendMessage: "Send Message",
-    sent: "Sent! ✅",
+    sent: "Sent!",
     privacyNotice:
       "We reply within 24h (weekdays). Your data is only used to respond to this inquiry.",
     directContact: "Direct Contact",
     supportLabel: "Support:",
     responseTimeLabel: "Response Time:",
-    supportHours: "Mon–Fri, 9am–6pm (GMT+2)",
+    supportHours: "Sun–Thur, 9am–6pm (GMT+2)",
     usualResponse: "Usually under 4 hours",
     faqs: "FAQs",
     faqQ1: "How are listings verified?",
@@ -304,6 +309,11 @@ export const translations = {
     totalReviews: "إجمالي المراجعات",
     accountCreated: "تم إنشاء الحساب",
     lastUpdated: "آخر تحديث",
+    deleteAccount: "حذف الحساب",
+    deleteAccountWarning:
+      "سيتم حذف حسابك وجميع البيانات المرتبطة به نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+    delete: "حذف",
+    Delete: "حذف",
     verified: "موثّق",
     ctaBrowseSubtitle:
       "تصفح مئات الشقق الموثوقة والصديقة للطلاب وابحث عن منزلك المثالي اليوم",
@@ -337,13 +347,13 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "أخبرنا كيف يمكننا مساعدتك...",
     sendMessage: "إرسال الرسالة",
-    sent: "تم الإرسال! ✅",
+    sent: "تم الإرسال!",
     privacyNotice:
       "نرد خلال 24 ساعة (أيام الأسبوع). تُستخدم بياناتك فقط للرد على هذا الطلب.",
     directContact: "تواصل مباشر",
     supportLabel: "الدعم:",
     responseTimeLabel: "زمن الاستجابة:",
-    supportHours: "الإثنين–الجمعة، 9ص–6م (GMT+2)",
+    supportHours: "الأحد–الخميس، 9ص–6م (GMT+2)",
     usualResponse: "عادة أقل من 4 ساعات",
     faqs: "الأسئلة الشائعة",
     faqQ1: "كيف يتم توثيق القوائم؟",
@@ -360,15 +370,27 @@ export const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState(() => {
+    // Initialize from localStorage or default to 'en'
+    return localStorage.getItem("preferredLanguage") || "en";
+  });
 
   useEffect(() => {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.documentElement.lang = language;
+    // Persist language to localStorage
+    localStorage.setItem("preferredLanguage", language);
   }, [language]);
 
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === "en" ? "ar" : "en"));
+  };
+
+  const changeLanguage = (lang) => {
+    if (lang === "en" || lang === "ar") {
+      console.log("Changing language to:", lang);
+      setLanguage(lang);
+    }
   };
 
   const t = (key) => {
@@ -376,7 +398,9 @@ export const LanguageProvider = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+    <LanguageContext.Provider
+      value={{ language, toggleLanguage, changeLanguage, t }}
+    >
       {children}
     </LanguageContext.Provider>
   );

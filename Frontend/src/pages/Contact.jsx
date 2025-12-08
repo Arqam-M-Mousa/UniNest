@@ -1,19 +1,12 @@
-import { useLanguage } from "../context/LanguageContext";
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import apiRequest from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const faqs = [
-  {
-    q: "faqQ1",
-    a: "faqA1",
-  },
-  {
-    q: "faqQ2",
-    a: "faqA2",
-  },
-  {
-    q: "faqQ3",
-    a: "faqA3",
-  },
+  { q: "faqQ1", a: "faqA1" },
+  { q: "faqQ2", a: "faqA2" },
+  { q: "faqQ3", a: "faqA3" },
 ];
 
 const Contact = () => {
@@ -21,21 +14,37 @@ const Contact = () => {
   const isRTL = language === "ar";
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate send
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setSending(true);
+    setError("");
+
+    try {
+      await apiRequest("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+
+      setSubmitted(true);
+      setForm({ name: "", email: "", message: "" });
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to send message. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <div className="themed-surface">
-      {/* Hero */}
       <section className="px-8 pt-12 pb-10 text-center">
         <h1 className="heading-font text-5xl font-bold mb-6 text-[var(--color-text)]">
           {t("contact")}
@@ -45,10 +54,8 @@ const Contact = () => {
         </p>
       </section>
 
-      {/* Contact Grid */}
       <section className="px-8 pb-16">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
-          {/* Form */}
           <form
             onSubmit={handleSubmit}
             className={`themed-surface-alt rounded-3xl p-8 shadow-card flex flex-col gap-6 ${
@@ -63,14 +70,9 @@ const Contact = () => {
             >
               {t("sendMessageHeading")}
             </h2>
-            <div className={`grid gap-6 sm:grid-cols-2 ${isRTL ? "" : ""}`}>
-              {" "}
-              {/* grid itself can remain neutral */}
-              <div
-                className={`flex flex-col ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
-              >
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="flex flex-col">
                 <label
                   htmlFor="name"
                   className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
@@ -87,11 +89,8 @@ const Contact = () => {
                   placeholder={t("namePlaceholder")}
                 />
               </div>
-              <div
-                className={`flex flex-col ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
-              >
+
+              <div className="flex flex-col">
                 <label
                   htmlFor="email"
                   className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
@@ -110,9 +109,8 @@ const Contact = () => {
                 />
               </div>
             </div>
-            <div
-              className={`flex flex-col ${isRTL ? "text-right" : "text-left"}`}
-            >
+
+            <div className="flex flex-col">
               <label
                 htmlFor="message"
                 className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
@@ -126,26 +124,57 @@ const Contact = () => {
                 onChange={handleChange}
                 required
                 rows={6}
-                className="px-4 py-3 rounded-xl resize-y bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)]"
+                className="px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)] resize-none"
                 placeholder={t("messagePlaceholder")}
               />
             </div>
-            <button
-              type="submit"
-              className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2 anim-btn-pulse"
-              aria-live="polite"
+
+            <div
+              className={`flex flex-col ${isRTL ? "items-end" : "items-start"}`}
             >
-              {submitted ? t("sent") : t("sendMessage")}
-            </button>
-            <p
-              className={`text-xs text-[var(--color-text-soft)] m-0 ${
-                isRTL ? "text-right" : "text-left"
-              }`}
-            >
-              {t("privacyNotice")}
-            </p>
+              <button
+                type="submit"
+                disabled={sending}
+                className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2 anim-btn-pulse disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-live="polite"
+              >
+                {sending && (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                )}
+                {sending
+                  ? t("sending") || "Sending..."
+                  : submitted
+                  ? t("sent")
+                  : t("sendMessage")}
+              </button>
+              {error && (
+                <p className="text-red-500 text-sm m-0 mt-2" role="alert">
+                  {error}
+                </p>
+              )}
+              {submitted && !error && (
+                <p className="text-green-500 text-sm m-0 mt-2" role="status">
+                  {t("messageSentSuccess") || "Message sent successfully!"}
+                </p>
+              )}
+              <p className="text-xs text-[var(--color-text-soft)] m-0 mt-2">
+                {t("privacyNotice")}
+              </p>
+              <a
+                href={`mailto:arqam.mousa@gmail.com?subject=${encodeURIComponent(
+                  `UniNest Contact from ${form.name || "Visitor"}`
+                )}&body=${encodeURIComponent(
+                  `From: ${form.email || "(no email provided)"}\n\n${
+                    form.message
+                  }`
+                )}`}
+                className="mt-3 text-xs text-[var(--color-accent)] underline"
+              >
+                {t("orEmailDirectly") || "Or email us directly"}
+              </a>
+            </div>
           </form>
-          {/* Info + FAQ */}
+
           <div className="space-y-10">
             <div
               className={`themed-surface-alt rounded-3xl p-8 shadow-card ${
@@ -154,34 +183,36 @@ const Contact = () => {
               dir={isRTL ? "rtl" : "ltr"}
             >
               <h2 className="heading-font text-2xl font-bold mb-4 text-[var(--color-text)]">
-                {t("directContact")}
+                {t("contactInfo") || "Contact Information"}
               </h2>
-              <ul
-                className={`space-y-2 text-sm text-[var(--color-text-soft)] ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
-              >
+              <ul className="space-y-3 text-[var(--color-text-soft)]">
                 <li>
                   <strong className="text-[var(--color-text)]">
                     {t("emailLabel")}:
                   </strong>{" "}
-                  UniNest@hotmail.com
+                  <a
+                    href="mailto:arqam.mousa@gmail.com"
+                    className="text-[var(--color-accent)] font-semibold"
+                  >
+                    arqam.mousa@gmail.com
+                  </a>
                 </li>
                 <li>
                   <strong className="text-[var(--color-text)]">
-                    {t("supportLabel")}
+                    {t("supportLabel") || "Support"}:
                   </strong>{" "}
-                  {t("supportHours")}
+                  {t("supportHours") || "Sunday - Thursday"}
                 </li>
                 <li>
                   <strong className="text-[var(--color-text)]">
-                    {t("responseTimeLabel")}
+                    {t("responseTimeLabel") || "Response time"}:
                   </strong>{" "}
-                  {t("usualResponse")}
+                  {t("usualResponse") ||
+                    "We typically respond within 24 hours."}
                 </li>
               </ul>
-              {/* Removed tag pills section as requested */}
             </div>
+
             <div
               className={`themed-surface-alt rounded-3xl p-8 shadow-card ${
                 isRTL ? "text-right" : "text-left"

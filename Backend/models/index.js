@@ -10,10 +10,15 @@ const Review = require("./Review");
 const Conversation = require("./Conversation");
 const Message = require("./Message");
 const Notification = require("./Notification");
+const VerificationCode = require("./VerificationCode");
 
 // User - University relationship
-User.belongsTo(University, { foreignKey: "universityId", allowNull: true });
-University.hasMany(User, { foreignKey: "universityId" });
+User.belongsTo(University, {
+  foreignKey: "universityId",
+  as: "university",
+  allowNull: true,
+});
+University.hasMany(User, { foreignKey: "universityId", as: "users" });
 
 // User - Listings relationship
 User.hasMany(Listing, { foreignKey: "ownerId", as: "listings" });
@@ -26,6 +31,14 @@ Listing.hasMany(ListingImage, {
   onDelete: "CASCADE",
 });
 ListingImage.belongsTo(Listing, { foreignKey: "listingId" });
+
+// Listing - PropertyListing relationship
+Listing.hasOne(PropertyListing, {
+  foreignKey: "listingId",
+  as: "propertyDetails",
+  onDelete: "CASCADE",
+});
+PropertyListing.belongsTo(Listing, { foreignKey: "listingId", as: "listing" });
 
 // Listing - Favorite relationship
 Listing.hasMany(Favorite, {
@@ -121,6 +134,7 @@ const db = {
   Conversation,
   Message,
   Notification,
+  VerificationCode,
 };
 
 module.exports = db;

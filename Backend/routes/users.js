@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middleware/auth").authenticate;
-const { User } = require("../models");
+const { User, University } = require("../models");
 const { sendSuccess, sendError } = require("../utils/responses");
 
 /**
@@ -20,6 +20,8 @@ router.get("/profile", authenticate, async (req, res) => {
         "role",
         "phoneNumber",
         "avatarUrl",
+        "profilePictureUrl",
+        "profilePicturePublicId",
         "studentId",
         "gender",
         "preferredLanguage",
@@ -29,6 +31,13 @@ router.get("/profile", authenticate, async (req, res) => {
         "createdAt",
         "updatedAt",
         "universityId",
+      ],
+      include: [
+        {
+          model: University,
+          as: "university",
+          attributes: ["id", "name", "city", "domain", "latitude", "longitude"],
+        },
       ],
     });
 
@@ -83,6 +92,26 @@ router.put("/profile", authenticate, async (req, res) => {
   } catch (error) {
     console.error("Error updating profile:", error);
     return sendError(res, error.message, 500);
+  }
+});
+
+/**
+ * DELETE /api/users/profile
+ * Delete current authenticated user's account
+ */
+router.delete("/profile", authenticate, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+
+    if (!user) {
+      return sendError(res, "User not found", 404);
+    }
+
+    await user.destroy();
+    return sendSuccess(res, null, "Account deleted successfully", 200);
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    return sendError(res, error.message || "Failed to delete account", 500);
   }
 });
 

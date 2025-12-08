@@ -16,6 +16,7 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showEmailVerifiedBanner, setShowEmailVerifiedBanner] = useState(false);
   const [step, setStep] = useState(1); // 1: email, 2: verify code, 3: complete signup
   const [verificationCode, setVerificationCode] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
@@ -85,6 +86,7 @@ const SignUp = () => {
       if (response.success) {
         setStep(3);
         setError(null);
+        setShowEmailVerifiedBanner(true);
       } else {
         setError(response.message || "Invalid verification code");
       }
@@ -214,6 +216,13 @@ const SignUp = () => {
     return () => clearTimeout(id);
   }, [showSuccessAlert, navigate]);
 
+  // Auto-hide the email verified banner after 3 seconds
+  useEffect(() => {
+    if (!showEmailVerifiedBanner) return;
+    const id = setTimeout(() => setShowEmailVerifiedBanner(false), 3000);
+    return () => clearTimeout(id);
+  }, [showEmailVerifiedBanner]);
+
   return (
     <PageLoader
       loading={pageLoading}
@@ -323,9 +332,11 @@ const SignUp = () => {
           {/* Step 3: Complete Signup */}
           {step === 3 && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="mb-2 p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl border border-green-500/30 text-sm text-center font-medium animate-in fade-in slide-in-from-top-2 duration-200">
-                ✓ Email verified! Complete your profile below.
-              </div>
+              {showEmailVerifiedBanner && (
+                <div className="mb-2 p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl border border-green-500/30 text-sm text-center font-medium animate-in fade-in slide-in-from-top-2 duration-200">
+                  ✓ Email verified! Complete your profile below.
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="relative group">
@@ -369,7 +380,6 @@ const SignUp = () => {
                     <option value="Female">
                       {t("genderFemale") || "Female"}
                     </option>
-                    <option value="Other">{t("genderOther") || "Other"}</option>
                   </select>
                 </div>
               </div>

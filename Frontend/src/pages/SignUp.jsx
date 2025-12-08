@@ -25,6 +25,11 @@ const SignUp = () => {
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordAgain, setShowPasswordAgain] = useState(false);
+  const [emailDerivedMeta, setEmailDerivedMeta] = useState({
+    studentIdLocked: false,
+    universityLocked: false,
+    roleLocked: false,
+  });
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -37,6 +42,35 @@ const SignUp = () => {
     studentId: "",
     universityId: "",
   });
+
+  const deriveStudentDetailsFromEmail = (emailValue) => {
+    if (!emailValue || !emailValue.includes("@")) return {};
+
+    const trimmed = emailValue.trim().toLowerCase();
+    const match = trimmed.match(/^s(\d{5,})@([\w.-]+)$/);
+    if (!match) {
+      return { studentId: "", universityId: "", domainRoot: "" };
+    }
+
+    const studentId = match[1];
+    const domainPartRaw = match[2];
+    const cleanDomain = domainPartRaw.replace(/^www\./, "");
+    const parts = cleanDomain.split(".");
+    const domainRoot = parts.slice(-2).join("."); // e.g., najah.edu
+
+    const matchedUniversity = universities.find((uni) => {
+      if (!uni.domain) return false;
+      const uniDomain = uni.domain.toLowerCase().replace(/^www\./, "");
+      const uniRoot = uniDomain.split(".").slice(-2).join(".");
+      return domainRoot === uniRoot || cleanDomain.endsWith(uniDomain);
+    });
+
+    return {
+      studentId,
+      universityId: matchedUniversity?.id || "",
+      domainRoot,
+    };
+  };
 
   const handleSendCode = async (e) => {
     e.preventDefault();
@@ -98,6 +132,22 @@ const SignUp = () => {
     }
   };
 
+  const handleChangeEmail = () => {
+    setStep(1);
+    setVerificationCode("");
+    setEmailDerivedMeta({
+      studentIdLocked: false,
+      universityLocked: false,
+      roleLocked: false,
+    });
+    setFormData((prev) => ({
+      ...prev,
+      studentId: "",
+      universityId: "",
+      role: "Student",
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -112,16 +162,28 @@ const SignUp = () => {
       return;
     }
 
-    // Validate student-specific required fields
+    // Validate student-specific required fields and enforce email-derived data
     if (formData.role === "Student") {
-      if (!formData.studentId || !formData.studentId.trim()) {
-        setError("Student ID is required for students");
+      const derived = deriveStudentDetailsFromEmail(formData.email);
+      if (!derived.studentId) {
+        setError(
+          "Use your university student email (e.g., s123456@stu.najah.edu)."
+        );
         return;
       }
-      if (!formData.universityId) {
-        setError("University selection is required for students");
+      if (!derived.universityId) {
+        setError(
+          "We could not match your email domain to a university. Please use your official university email."
+        );
         return;
       }
+      // Ensure formData reflects derived values
+      setFormData((prev) => ({
+        ...prev,
+        studentId: derived.studentId,
+        universityId: derived.universityId,
+        role: "Student",
+      }));
     }
 
     // Validate landlord-specific required fields
@@ -154,8 +216,9 @@ const SignUp = () => {
 
       // Add required fields for students
       if (formData.role === "Student") {
-        signupData.studentId = formData.studentId;
-        signupData.universityId = formData.universityId;
+        const derived = deriveStudentDetailsFromEmail(formData.email);
+        signupData.studentId = derived.studentId;
+        signupData.universityId = derived.universityId;
       }
 
       console.log("Signing up with data:", signupData);
@@ -177,6 +240,9 @@ const SignUp = () => {
   };
 
   const handleChange = (e) => {
+    if (emailDerivedMeta.roleLocked && e.target.name === "role") {
+      return;
+    }
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -198,6 +264,52 @@ const SignUp = () => {
 
     fetchUniversities();
   }, []);
+
+  useEffect(() => {
+    if (step < 2) {
+      setEmailDerivedMeta((prev) =>
+        prev.studentIdLocked || prev.universityLocked || prev.roleLocked
+          ? {
+              studentIdLocked: false,
+              universityLocked: false,
+              roleLocked: false,
+            }
+          : prev
+      );
+      return;
+    }
+
+    const { studentId, universityId } = deriveStudentDetailsFromEmail(
+      formData.email
+    );
+
+    const nextStudentId = studentId || "";
+    const nextUniversityId = universityId || "";
+    const shouldLockRole = !!studentId;
+
+    setFormData((prev) => {
+      const role = shouldLockRole ? "Student" : prev.role;
+      if (
+        prev.studentId === nextStudentId &&
+        prev.universityId === nextUniversityId &&
+        prev.role === role
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        studentId: nextStudentId,
+        universityId: nextUniversityId,
+        role,
+      };
+    });
+
+    setEmailDerivedMeta({
+      studentIdLocked: !!studentId,
+      universityLocked: !!universityId,
+      roleLocked: shouldLockRole,
+    });
+  }, [step, formData.email, universities]);
 
   const pageLoading = loading || sendingCode || verifyingCode;
   const loaderMessage = sendingCode
@@ -310,7 +422,7 @@ const SignUp = () => {
 
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={handleChangeEmail}
                 className="text-sm text-[var(--color-accent)] hover:underline font-medium self-start"
               >
                 ← Change email
@@ -410,11 +522,17 @@ const SignUp = () => {
                   value={formData.role}
                   onChange={handleChange}
                   required
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+                  disabled={emailDerivedMeta.roleLocked}
+                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <option value="Student">{t("student")}</option>
                   <option value="Landlord">{t("landlord")}</option>
                 </select>
+                {emailDerivedMeta.roleLocked && (
+                  <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
+                    Role locked to Student based on your university email.
+                  </p>
+                )}
               </div>
 
               {formData.role === "Student" && (
@@ -428,10 +546,15 @@ const SignUp = () => {
                       name="studentId"
                       placeholder={t("studentId")}
                       value={formData.studentId}
-                      onChange={handleChange}
+                      readOnly
                       required
-                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
+                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-not-allowed opacity-90"
                     />
+                    <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
+                      {emailDerivedMeta.studentIdLocked
+                        ? "Auto-filled from your verified student email."
+                        : "Verify your student email to auto-fill this ID."}
+                    </p>
                   </div>
 
                   <div className="relative group">
@@ -443,7 +566,7 @@ const SignUp = () => {
                       name="universityId"
                       value={formData.universityId}
                       onChange={handleChange}
-                      disabled={universitiesLoading}
+                      disabled={true}
                       required
                       className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -459,6 +582,13 @@ const SignUp = () => {
                         </option>
                       ))}
                     </select>
+                    {formData.role === "Student" && (
+                      <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
+                        {emailDerivedMeta.universityLocked
+                          ? "Auto-selected from your email domain."
+                          : "Your university is auto-selected from your student email domain."}
+                      </p>
+                    )}
                   </div>
                 </>
               )}

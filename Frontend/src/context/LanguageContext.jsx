@@ -126,6 +126,11 @@ export const translations = {
     totalReviews: "Total Reviews",
     accountCreated: "Account created",
     lastUpdated: "Last updated",
+    deleteAccount: "Delete account",
+    deleteAccountWarning:
+      "Permanently deletes your account and all associated data. This action cannot be undone.",
+    delete: "Delete",
+    Delete: "Delete",
     verified: "Verified",
     ctaBrowseSubtitle:
       "Browse hundreds of verified student-friendly apartments and find your perfect home today",
@@ -304,6 +309,11 @@ export const translations = {
     totalReviews: "إجمالي المراجعات",
     accountCreated: "تم إنشاء الحساب",
     lastUpdated: "آخر تحديث",
+    deleteAccount: "حذف الحساب",
+    deleteAccountWarning:
+      "سيتم حذف حسابك وجميع البيانات المرتبطة به نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+    delete: "حذف",
+    Delete: "حذف",
     verified: "موثّق",
     ctaBrowseSubtitle:
       "تصفح مئات الشقق الموثوقة والصديقة للطلاب وابحث عن منزلك المثالي اليوم",

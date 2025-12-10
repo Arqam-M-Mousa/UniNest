@@ -58,7 +58,7 @@ const Contact = () => {
         <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.2fr_1fr] gap-10 md:gap-12 items-start">
           <form
             onSubmit={handleSubmit}
-            className={`themed-surface-alt rounded-3xl p-8 md:p-10 shadow-xl border border-[var(--color-border)] flex flex-col gap-7 ${isRTL ? "text-right" : "text-left"
+            className={`themed-surface-alt p-8 sm:p-10 rounded-2xl shadow-lg border border-[var(--color-border)] flex flex-col gap-7 ${isRTL ? "text-right" : "text-left"
               }`}
             aria-labelledby="contactFormTitle"
             dir={isRTL ? "rtl" : "ltr"}
@@ -66,20 +66,20 @@ const Contact = () => {
             <div>
               <h2
                 id="contactFormTitle"
-                className="heading-font text-3xl sm:text-4xl font-bold m-0 text-[var(--color-text)] mb-2"
+                className="heading-font text-2xl sm:text-3xl font-bold mb-2 text-[var(--color-text)]"
               >
                 {t("sendMessageHeading")}
               </h2>
               <p className="text-[var(--color-text-soft)] text-base">
-                We'd love to hear from you
+                {t("contactSubtitle")}
               </p>
             </div>
 
             {(submitted || error) && (
               <div
                 className={`p-4 rounded-xl text-base font-medium ${submitted
-                    ? "bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400"
-                    : "bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400"
+                  ? "bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400"
+                  : "bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400"
                   }`}
                 role={submitted ? "status" : "alert"}
               >
@@ -263,8 +263,8 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </section>
-    </div>
+      </section >
+    </div >
   );
 };
 

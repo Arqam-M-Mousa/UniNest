@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { ar, enUS } from "date-fns/locale";
 import { useLanguage } from "../../context/LanguageContext";
 import {
   UserCircleIcon,
@@ -17,8 +18,9 @@ import {
 import CloudinaryImage from "../CloudinaryImage";
 
 const ProfileView = ({ profile, onEdit, onDelete }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isDangerOpen, setIsDangerOpen] = useState(false);
+
   const getInitials = () => {
     return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
   };
@@ -36,8 +38,28 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
     }
   };
 
+  // Helper to translate role
+  const getTranslatedRole = (role) => {
+    const roles = {
+      Student: "student",
+      Landlord: "landlord",
+      Admin: "admin",
+    };
+    return t(roles[role] || role.toLowerCase());
+  };
+
+  // Helper to translate gender
+  const getTranslatedGender = (gender) => {
+    if (!gender) return t("notSpecified");
+    if (gender === "Male") return t("genderMale");
+    if (gender === "Female") return t("genderFemale");
+    return gender;
+  };
+
   // Use profilePictureUrl first, then fall back to avatarUrl
   const displayImage = profile.profilePictureUrl || profile.avatarUrl;
+
+  const dateLocale = language === "ar" ? ar : enUS;
 
   return (
     <div className="space-y-6">
@@ -75,11 +97,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
                   profile.role
                 )}`}
               >
-                {profile.role === "Student"
-                  ? t("student")
-                  : profile.role === "Landlord"
-                  ? t("landlord")
-                  : t("admin")}
+                {getTranslatedRole(profile.role)}
               </span>
               {profile.isVerified && (
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 shadow-sm">
@@ -143,7 +161,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
                   {t("gender")}
                 </p>
                 <p className="text-[var(--color-text)] font-medium ml-6">
-                  {profile.gender || t("notSpecified")}
+                  {getTranslatedGender(profile.gender)}
                 </p>
               </div>
               <div>
@@ -255,9 +273,8 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
               </div>
             </div>
             <ChevronDownIcon
-              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
-                isDangerOpen ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isDangerOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -272,8 +289,8 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
                     "Permanently deletes your account and all associated data. This action cannot be undone."}
                 </p>
                 <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• Removes conversations, favorites, and listings.</li>
-                  <li>• You will be signed out immediately.</li>
+                  <li>• {t("deleteAccountBullet1")}</li>
+                  <li>• {t("deleteAccountBullet2")}</li>
                 </ul>
               </div>
 
@@ -294,12 +311,14 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
             {t("accountCreated")}{" "}
             {formatDistanceToNow(new Date(profile.createdAt), {
               addSuffix: true,
+              locale: dateLocale,
             })}
           </p>
           <p>
             {t("lastUpdated")}{" "}
             {formatDistanceToNow(new Date(profile.updatedAt), {
               addSuffix: true,
+              locale: dateLocale,
             })}
           </p>
         </div>

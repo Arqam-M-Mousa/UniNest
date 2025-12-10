@@ -94,9 +94,9 @@ const Admin = () => {
     } catch (err) {
       setError(
         err.message ||
-          (mode === "edit"
-            ? "Failed to update university"
-            : "Failed to add university")
+        (mode === "edit"
+          ? "Failed to update university"
+          : "Failed to add university")
       );
     } finally {
       setSubmitting(false);
@@ -284,13 +284,13 @@ const Admin = () => {
                 <div>
                   <h3 className="text-xl font-semibold text-[var(--color-text)]">
                     {mode === "edit"
-                      ? t("Edit University") || "Edit University"
-                      : t("Add University") || "Add University"}
+                      ? t("editUniversity")
+                      : t("addUniversity")}
                   </h3>
                   <p className="text-xs text-[var(--color-text-soft)] mt-1">
                     {mode === "edit"
-                      ? "Update the details below"
-                      : "Fill in the details below"}
+                      ? t("updateDetails") || "Update the details below"
+                      : t("fillDetails") || "Fill in the details below"}
                   </p>
                 </div>
               </div>
@@ -304,7 +304,7 @@ const Admin = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                    {t("University name") || "University name"}{" "}
+                    {t("universityName")}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -321,7 +321,7 @@ const Admin = () => {
 
                 <div>
                   <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                    {t("City") || "City"}
+                    {t("city")}
                   </label>
                   <input
                     type="text"
@@ -336,7 +336,7 @@ const Admin = () => {
 
                 <div>
                   <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                    {t("Domain") || "Domain"}
+                    {t("domain")}
                   </label>
                   <input
                     type="text"
@@ -352,7 +352,7 @@ const Admin = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                      {t("Latitude") || "Latitude"}
+                      {t("latitude")}
                     </label>
                     <input
                       type="number"
@@ -368,7 +368,7 @@ const Admin = () => {
 
                   <div>
                     <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                      {t("Longitude") || "Longitude"}
+                      {t("longitude")}
                     </label>
                     <input
                       type="number"
@@ -393,7 +393,7 @@ const Admin = () => {
                     >
                       <div className="flex items-center gap-2 justify-center">
                         <TrashIcon className="w-4 h-4" />
-                        <span>{t("Delete") || "Delete"}</span>
+                        <span>{t("delete")}</span>
                       </div>
                     </button>
                   )}
@@ -404,7 +404,7 @@ const Admin = () => {
                       onClick={handleCancel}
                       className="px-4 py-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition"
                     >
-                      {t("cancel") || "Cancel"}
+                      {t("cancel")}
                     </button>
                     <button
                       type="submit"
@@ -413,11 +413,11 @@ const Admin = () => {
                     >
                       {submitting
                         ? mode === "edit"
-                          ? t("Saving...") || "Saving..."
-                          : t("Adding...") || "Adding..."
+                          ? t("saving")
+                          : t("adding")
                         : mode === "edit"
-                        ? t("Save") || "Save"
-                        : t("Add") || "Add"}
+                          ? t("save")
+                          : t("add")}
                     </button>
                   </div>
                 </div>
@@ -429,10 +429,10 @@ const Admin = () => {
         <Alert
           isOpen={showDeleteConfirm}
           onClose={() => setShowDeleteConfirm(false)}
-          title="Delete university"
-          message="This action cannot be undone. Are you sure you want to delete this university?"
-          confirmText="Delete"
-          cancelText="Cancel"
+          title={t("deleteUniversity")}
+          message={t("deleteUniversityMessage")}
+          confirmText={t("delete")}
+          cancelText={t("cancel")}
           type="warning"
           iconOverride={
             <svg

@@ -42,9 +42,9 @@ export const translations = {
     studentId: "Student ID",
     university: "University",
     selectUniversity: "Select your university",
-    forgotPassword: "Did you forget your password?",
-    sendResetLink: "Send Reset Link",
-    resetLinkSent: "If this email exists, a reset link was sent.",
+    forgotPassword: "Forgot Password?",
+    sendResetCode: "Send Reset Code",
+    resetLinkSent: "If this email exists, a reset code was sent.",
     noAccount: "You don't have an account?",
     createOne: "Create one",
     passwordAgain: "Password Again",
@@ -130,8 +130,38 @@ export const translations = {
     deleteAccountWarning:
       "Permanently deletes your account and all associated data. This action cannot be undone.",
     delete: "Delete",
+    deleteAccountBullet1: "Removes conversations, favorites, and listings.",
+    deleteAccountBullet2: "You will be signed out immediately.",
     Delete: "Delete",
+    // Alert Modals
+    deleteProfilePictureTitle: "Delete profile picture",
+    deleteProfilePictureMessage: "This will remove your current picture. The change only applies after you click Save Changes.",
+    confirm: "Confirm",
+    delete: "Delete",
+    cancel: "Cancel",
+    // Admin Page
+    addUniversity: "Add University",
+    editUniversity: "Edit University",
+    universityName: "University name",
+    city: "City",
+    domain: "Domain",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    deleteUniversity: "Delete university",
+    deleteUniversityMessage: "This action cannot be undone. Are you sure you want to delete this university?",
+    saving: "Saving...",
+    adding: "Adding...",
+    save: "Save",
+    add: "Add",
     verified: "Verified",
+    // Auth Alerts
+    accountCreatedTitle: "Account Created!",
+    accountCreatedMessage: "Your account has been created successfully. Please sign in to continue.",
+    signInNow: "Sign In Now",
+    signInRequired: "Sign In Required",
+    signInRequiredMessage: "Please sign in to access this feature.",
+    pleaseSignInToMessage: "Please sign in to message the property owner.",
+    pleaseSignInToPostAd: "Please sign in to your account to post an ad and connect with students.",
     ctaBrowseSubtitle:
       "Browse hundreds of verified student-friendly apartments and find your perfect home today",
     // About Page
@@ -165,14 +195,16 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "Tell us how we can help...",
     sendMessage: "Send Message",
+    sending: "Sending",
     sent: "Sent!",
     privacyNotice:
       "We reply within 24h (weekdays). Your data is only used to respond to this inquiry.",
-    directContact: "Direct Contact",
-    supportLabel: "Support:",
-    responseTimeLabel: "Response Time:",
-    supportHours: "Sun–Thur, 9am–6pm (GMT+2)",
-    usualResponse: "Usually under 4 hours",
+    orEmailDirectly: "Or email us directly",
+    contactInfo: "Contact Information",
+    supportLabel: "Support",
+    responseTimeLabel: "Response time",
+    supportHours: "Sunday - Thursday",
+    usualResponse: "We typically respond within 24 hours.",
     faqs: "FAQs",
     faqQ1: "How are listings verified?",
     faqA1:
@@ -182,10 +214,38 @@ export const translations = {
       "Yes. Use the message feature on a listing to request viewing times directly.",
     faqQ3: "Do you support roommate matching?",
     faqA3: "We're introducing a matching beta soon—stay tuned!",
+    messageSentSuccess: "Message sent successfully!",
     // About Feature Descriptions
     aboutDesc1: "Trust & safety first in every listing we verify.",
     aboutDesc2: "Designed for student life: proximity, community, balance.",
     aboutDesc3: "Affordability matters—options for different budgets.",
+    // Forgot Password
+    forgotPasswordInstructions: "Enter your email address and we'll send you a code to reset your password.",
+    rememberPassword: "Remember your password?",
+    backToSignIn: "Back to Sign In",
+    // Header
+    theme: "Theme",
+    language: "Language",
+    dark: "Dark",
+    light: "Light",
+    english: "English",
+    arabic: "Arabic",
+    notifications: "Notifications",
+    markAllRead: "Mark all read",
+    noNotifications: "No notifications yet.",
+    messages: "Messages",
+    noConversations: "No conversations yet.",
+    conversation: "Conversation",
+    noMessagesYet: "No messages yet",
+    loading: "Loading...",
+    // Profile Page
+    uploadPicture: "Upload Picture",
+    dangerZone: "Danger Zone",
+    administration: "Administration",
+    universities: "Universities",
+    accountMenu: "Account menu",
+    guestMenu: "Guest menu",
+    myProfile: "My Profile",
   },
   ar: {
     apartments: "الشقق",
@@ -226,9 +286,9 @@ export const translations = {
     university: "الجامعة",
     selectUniversity: "اختر جامعتك",
     forgotPassword: "هل نسيت كلمة المرور؟",
-    sendResetLink: "إرسال رابط إعادة التعيين",
+    sendResetCode: "إرسال رمز إعادة التعيين",
     resetLinkSent:
-      "إذا كان هذا البريد موجودًا، فقد تم إرسال رابط إعادة التعيين.",
+      "إذا كان هذا البريد موجودًا، فقد تم إرسال رمز إعادة التعيين.",
     noAccount: "ليس لديك حساب؟",
     createOne: "إنشاء واحد",
     passwordAgain: "كلمة المرور مرة أخرى",
@@ -313,8 +373,38 @@ export const translations = {
     deleteAccountWarning:
       "سيتم حذف حسابك وجميع البيانات المرتبطة به نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
     delete: "حذف",
+    deleteAccountBullet1: "يزيل المحادثات والمفضلة والقوائم.",
+    deleteAccountBullet2: "سيتم تسجيل خروجك على الفور.",
     Delete: "حذف",
+    // Alert Modals
+    deleteProfilePictureTitle: "حذف الصورة الشخصية",
+    deleteProfilePictureMessage: "سيتم إزالة صورتك الحالية. لن يتم تطبيق التغيير إلا بعد النقر على حفظ التغييرات.",
+    confirm: "تأكيد",
+    delete: "حذف",
+    cancel: "إلغاء",
+    // Admin Page
+    addUniversity: "إضافة جامعة",
+    editUniversity: "تعديل جامعة",
+    universityName: "اسم الجامعة",
+    city: "المدينة",
+    domain: "النطاق",
+    latitude: "خط العرض",
+    longitude: "خط الطول",
+    deleteUniversity: "حذف الجامعة",
+    deleteUniversityMessage: "لا يمكن التراجع عن هذا الإجراء. هل أنت متأكد أنك تريد حذف هذه الجامعة؟",
+    saving: "جارٍ الحفظ...",
+    adding: "جارٍ الإضافة...",
+    save: "حفظ",
+    add: "إضافة",
     verified: "موثّق",
+    // Auth Alerts
+    accountCreatedTitle: "تم إنشاء الحساب!",
+    accountCreatedMessage: "تم إنشاء حسابك بنجاح. يرجى تسجيل الدخول للمتابعة.",
+    signInNow: "سجل الدخول الآن",
+    signInRequired: "يتطلب تسجيل الدخول",
+    signInRequiredMessage: "يرجى تسجيل الدخول للوصول إلى هذه الميزة.",
+    pleaseSignInToMessage: "يرجى تسجيل الدخول لمراسلة مالك العقار.",
+    pleaseSignInToPostAd: "يرجى تسجيل الدخول لنشر إعلان والتواصل مع الطلاب.",
     ctaBrowseSubtitle:
       "تصفح مئات الشقق الموثوقة والصديقة للطلاب وابحث عن منزلك المثالي اليوم",
     // About Page
@@ -332,7 +422,7 @@ export const translations = {
     hiwDiscoverDesc: "تصفح قوائم موثقة وملائمة للطلاب بالقرب من الجامعة.",
     hiwCompareTitle: "قارن",
     hiwCompareDesc:
-      "صفِّ حسب الميزانية، والمسافة، والمرافق، وخيارات السكن المشترك.",
+      "صفِّ حسب الميزانية، والمسافة، والمرافق، وخيارات السكن المشترك.",
     hiwConnectTitle: "تواصل",
     hiwConnectDesc: "راسل الملاك بأمان وحدد مواعيد الزيارات بسرعة.",
     hiwMoveInTitle: "انتقل",
@@ -347,14 +437,16 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "أخبرنا كيف يمكننا مساعدتك...",
     sendMessage: "إرسال الرسالة",
+    sending: "جارٍ الإرسال",
     sent: "تم الإرسال!",
     privacyNotice:
       "نرد خلال 24 ساعة (أيام الأسبوع). تُستخدم بياناتك فقط للرد على هذا الطلب.",
-    directContact: "تواصل مباشر",
-    supportLabel: "الدعم:",
-    responseTimeLabel: "زمن الاستجابة:",
-    supportHours: "الأحد–الخميس، 9ص–6م (GMT+2)",
-    usualResponse: "عادة أقل من 4 ساعات",
+    orEmailDirectly: "أو راسلنا مباشرة",
+    contactInfo: "معلومات التواصل",
+    supportLabel: "الدعم",
+    responseTimeLabel: "زمن الاستجابة",
+    supportHours: "الأحد - الخميس",
+    usualResponse: "عادة نرد خلال 24 ساعة.",
     faqs: "الأسئلة الشائعة",
     faqQ1: "كيف يتم توثيق القوائم؟",
     faqA1: "نراجع يدويًا مستندات الملكية ونجري فحوصات الاتساق قبل النشر.",
@@ -362,10 +454,38 @@ export const translations = {
     faqA2: "نعم. استخدم ميزة الرسائل في القائمة لطلب أوقات الزيارة مباشرة.",
     faqQ3: "هل تدعمون مطابقة زملاء السكن؟",
     faqA3: "نُطلق قريبًا نسخة تجريبية للمطابقة — ترقب!",
+    messageSentSuccess: "تم إرسال الرسالة بنجاح!",
     // About Feature Descriptions
     aboutDesc1: "الثقة والأمان أولاً في كل قائمة نتحقق منها.",
     aboutDesc2: "مصمم لحياة الطالب: قرب، مجتمع، توازن.",
     aboutDesc3: "نهتم بالقدرة المالية — خيارات لميزانيات مختلفة.",
+    // Forgot Password
+    forgotPasswordInstructions: "أدخل عنوان بريدك الإلكتروني وسنرسل لك رمزًا لإعادة تعيين كلمة المرور.",
+    rememberPassword: "هل تتذكر كلمة المرور؟",
+    backToSignIn: "العودة لتسجيل الدخول",
+    // Header
+    theme: "المظهر",
+    language: "اللغة",
+    dark: "داكن",
+    light: "فاتح",
+    english: "الإنجليزية",
+    arabic: "العربية",
+    notifications: "الإشعارات",
+    markAllRead: "تحديد الكل كمقروء",
+    noNotifications: "لا توجد إشعارات بعد.",
+    messages: "الرسائل",
+    noConversations: "لا توجد محادثات بعد.",
+    conversation: "محادثة",
+    noMessagesYet: "لا توجد رسائل بعد",
+    loading: "جارٍ التحميل...",
+    // Profile Page
+    uploadPicture: "رفع صورة",
+    dangerZone: "منطقة الخطر",
+    administration: "الإدارة",
+    universities: "الجامعات",
+    accountMenu: "قائمة الحساب",
+    guestMenu: "قائمة الضيف",
+    myProfile: "ملفي الشخصي",
   },
 };
 
@@ -374,6 +494,7 @@ export const LanguageProvider = ({ children }) => {
     // Initialize from localStorage or default to 'en'
     return localStorage.getItem("preferredLanguage") || "en";
   });
+  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
 
   useEffect(() => {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
@@ -383,13 +504,26 @@ export const LanguageProvider = ({ children }) => {
   }, [language]);
 
   const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "ar" : "en"));
+    setIsChangingLanguage(true);
+    // Small delay for smooth transition
+    setTimeout(() => {
+      setLanguage((prev) => (prev === "en" ? "ar" : "en"));
+      setTimeout(() => {
+        setIsChangingLanguage(false);
+      }, 100);
+    }, 150);
   };
 
   const changeLanguage = (lang) => {
     if (lang === "en" || lang === "ar") {
-      console.log("Changing language to:", lang);
-      setLanguage(lang);
+      setIsChangingLanguage(true);
+      setTimeout(() => {
+        console.log("Changing language to:", lang);
+        setLanguage(lang);
+        setTimeout(() => {
+          setIsChangingLanguage(false);
+        }, 100);
+      }, 150);
     }
   };
 
@@ -399,8 +533,18 @@ export const LanguageProvider = ({ children }) => {
 
   return (
     <LanguageContext.Provider
-      value={{ language, toggleLanguage, changeLanguage, t }}
+      value={{ language, toggleLanguage, changeLanguage, t, isChangingLanguage }}
     >
+      {isChangingLanguage && (
+        <div className="fixed inset-0 z-[9999] bg-[var(--color-surface)]/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-[var(--color-accent)]/30 border-t-[var(--color-accent)] rounded-full animate-spin"></div>
+            <p className="text-[var(--color-text)] font-medium">
+              {language === "en" ? "Switching language..." : "جارٍ تبديل اللغة..."}
+            </p>
+          </div>
+        </div>
+      )}
       {children}
     </LanguageContext.Provider>
   );

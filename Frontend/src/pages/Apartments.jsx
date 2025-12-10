@@ -381,9 +381,8 @@ const Apartments = () => {
           {canPostAd && (
             <button
               onClick={handlePostAdClick}
-              className={`${
-                isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
-              } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
+              className={`${isRTL ? "mr-auto flex-row-reverse" : "ml-auto"
+                } flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
@@ -471,22 +470,20 @@ const Apartments = () => {
                   {priceRanges.map((range, index) => (
                     <button
                       key={`filter-${sectionIdx}-${index}`}
-                      className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition-all ${
-                        selectedPrice === range.label && sectionIdx === 0
+                      className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition-all ${selectedPrice === range.label && sectionIdx === 0
                           ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
                           : "bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-white hover:border-[var(--color-accent)]"
-                      }`}
+                        }`}
                       onClick={() =>
                         sectionIdx === 0 && setSelectedPrice(range.label)
                       }
                     >
                       <span className="font-medium text-sm">{range.label}</span>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          selectedPrice === range.label && sectionIdx === 0
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedPrice === range.label && sectionIdx === 0
                             ? "bg-white text-[var(--color-accent)]"
                             : "bg-white dark:bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
-                        }`}
+                          }`}
                       >
                         {range.count}
                       </span>
@@ -656,9 +653,9 @@ const Apartments = () => {
                           <option value="" disabled>
                             {universitiesLoading
                               ? t("Loading universities...") ||
-                                "Loading universities..."
+                              "Loading universities..."
                               : t("Select a university") ||
-                                "Select a university"}
+                              "Select a university"}
                           </option>
                           {universities.map((uni) => (
                             <option key={uni.id} value={uni.id}>
@@ -873,17 +870,15 @@ const Apartments = () => {
         <Alert
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          title={t("Sign In Required") || "Sign In Required"}
+          title={t("signInRequired")}
           message={
             authModalMessage === "message"
-              ? t("Please Sign in To Message") ||
-                "Please sign in to message the property owner."
-              : t("Please Sign in To Post Ad") ||
-                "Please sign in to your account to post an ad and connect with students."
+              ? t("pleaseSignInToMessage")
+              : t("pleaseSignInToPostAd")
           }
           type="warning"
-          confirmText={t("signIn") || "Sign In"}
-          cancelText={t("cancel") || "Cancel"}
+          confirmText={t("signIn")}
+          cancelText={t("cancel")}
           onConfirm={() => navigate("/signin")}
         />
       </div>

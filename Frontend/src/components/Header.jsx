@@ -224,7 +224,7 @@ const Header = () => {
                   <div className="absolute right-0 mt-3 w-80 max-h-[70vh] overflow-y-auto rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="flex items-center justify-between px-4 py-3 border-b themed-border">
                       <p className="text-sm font-semibold text-[var(--color-text)]">
-                        Notifications
+                        {t("notifications")}
                       </p>
                       <button
                         className="text-xs text-[var(--color-accent)] hover:underline"
@@ -232,25 +232,24 @@ const Header = () => {
                           notificationsAPI.markAllRead().then(loadNotifications)
                         }
                       >
-                        Mark all read
+                        {t("markAllRead")}
                       </button>
                     </div>
                     <div className="divide-y divide-[var(--color-border)]">
                       {notifLoading ? (
                         <p className="p-4 text-sm themed-text-soft">
-                          Loading...
+                          {t("loading")}
                         </p>
                       ) : notifications.length === 0 ? (
                         <p className="p-4 text-sm themed-text-soft">
-                          No notifications yet.
+                          {t("noNotifications")}
                         </p>
                       ) : (
                         notifications.map((n) => (
                           <button
                             key={n.id}
-                            className={`w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors ${
-                              n.isRead ? "themed-text-soft" : ""
-                            }`}
+                            className={`w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors ${n.isRead ? "themed-text-soft" : ""
+                              }`}
                             onClick={() => {
                               notificationsAPI
                                 .markRead(n.id)
@@ -285,11 +284,10 @@ const Header = () => {
                     setNotifOpen(false);
                     setUserMenuOpen(false);
                   }}
-                  className={`relative p-2 rounded-md border themed-border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] ${
-                    msgOpen || totalUnreadMessages > 0
-                      ? "bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
-                      : "themed-text-soft hover:bg-[var(--color-surface-alt)]"
-                  }`}
+                  className={`relative p-2 rounded-md border themed-border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] ${msgOpen || totalUnreadMessages > 0
+                    ? "bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
+                    : "themed-text-soft hover:bg-[var(--color-surface-alt)]"
+                    }`}
                   aria-label="Messages"
                 >
                   <ChatBubbleLeftRightIcon className="h-5 w-5" />
@@ -303,17 +301,17 @@ const Header = () => {
                   <div className="absolute right-0 mt-3 w-96 max-h-[70vh] overflow-y-auto rounded-xl border themed-border shadow-2xl themed-surface backdrop-blur-sm z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="px-4 py-3 border-b themed-border flex items-center justify-between">
                       <p className="text-sm font-semibold text-[var(--color-text)]">
-                        Messages
+                        {t("messages")}
                       </p>
                     </div>
                     <div className="divide-y divide-[var(--color-border)]">
                       {msgLoading ? (
                         <p className="p-4 text-sm themed-text-soft">
-                          Loading...
+                          {t("loading")}
                         </p>
                       ) : conversations.length === 0 ? (
                         <p className="p-4 text-sm themed-text-soft">
-                          No conversations yet.
+                          {t("noConversations")}
                         </p>
                       ) : (
                         conversations.map((c) => (
@@ -332,16 +330,16 @@ const Header = () => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-[var(--color-text)] truncate">
-                                  {c.property?.title || "Conversation"}
+                                  {c.property?.title || t("conversation")}
                                 </p>
                                 <p className="text-xs themed-text-soft line-clamp-2">
-                                  {c.lastMessage?.content || "No messages yet"}
+                                  {c.lastMessage?.content || t("noMessagesYet")}
                                 </p>
                                 <p className="text-[10px] themed-text-soft mt-1">
                                   {c.lastMessage?.createdAt
                                     ? new Date(
-                                        c.lastMessage.createdAt
-                                      ).toLocaleString()
+                                      c.lastMessage.createdAt
+                                    ).toLocaleString()
                                     : new Date(c.createdAt).toLocaleString()}
                                 </p>
                               </div>
@@ -367,7 +365,7 @@ const Header = () => {
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="p-2 h-10 w-10 flex items-center justify-center rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-                aria-label="Account menu"
+                aria-label={t("accountMenu")}
               >
                 {user?.profilePictureUrl ? (
                   <CloudinaryImage
@@ -410,7 +408,11 @@ const Header = () => {
                       </div>
                     </div>
                     <span className="inline-flex items-center px-2 py-1 rounded-md bg-[var(--color-accent)]/20 text-[var(--color-accent)] text-xs font-medium">
-                      {user?.role}
+                      {user?.role === "Student"
+                        ? t("student")
+                        : user?.role === "Landlord"
+                          ? t("landlord")
+                          : t("admin")}
                     </span>
                   </div>
                   <div className="py-2">
@@ -421,13 +423,13 @@ const Header = () => {
                     >
                       <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                       <span className="font-medium">
-                        {t("My profile") || "My Profile"}
+                        {t("myProfile")}
                       </span>
                     </Link>
                     {user?.role?.toLowerCase() === "admin" && (
                       <div className="border-t themed-border">
                         <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">
-                          Administration
+                          {t("administration")}
                         </div>
                         <Link
                           to="/admin/universities"
@@ -435,7 +437,7 @@ const Header = () => {
                           className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
                         >
                           <BuildingLibraryIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Universities</span>
+                          <span className="font-medium">{t("universities")}</span>
                         </Link>
                       </div>
                     )}
@@ -446,7 +448,7 @@ const Header = () => {
                         ) : (
                           <SunIcon className="w-4 h-4 text-[var(--color-accent)]" />
                         )}
-                        <span className="font-medium">Theme</span>
+                        <span className="font-medium">{t("theme")}</span>
                       </div>
                       <button
                         onClick={() => {
@@ -454,13 +456,13 @@ const Header = () => {
                         }}
                         className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
                       >
-                        {theme === "dark" ? "Dark" : "Light"}
+                        {theme === "dark" ? t("dark") : t("light")}
                       </button>
                     </div>
                     <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <LanguageIcon className="w-4 h-4 text-[var(--color-accent)]" />
-                        <span className="font-medium">Language</span>
+                        <span className="font-medium">{t("language")}</span>
                       </div>
                       <button
                         onClick={() => {
@@ -468,7 +470,7 @@ const Header = () => {
                         }}
                         className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
                       >
-                        {language === "en" ? "English" : "Arabic"}
+                        {language === "en" ? t("english") : t("arabic")}
                       </button>
                     </div>
                     <button
@@ -489,7 +491,7 @@ const Header = () => {
               <button
                 onClick={() => setGuestMenuOpen(!guestMenuOpen)}
                 className="p-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-                aria-label="Guest menu"
+                aria-label={t("guestMenu")}
               >
                 <UserCircleIcon className="h-6 w-6" />
               </button>
@@ -514,7 +516,7 @@ const Header = () => {
                         ) : (
                           <SunIcon className="w-4 h-4 text-[var(--color-accent)]" />
                         )}
-                        <span className="font-medium">Theme</span>
+                        <span className="font-medium">{t("theme")}</span>
                       </div>
                       <button
                         onClick={() => {
@@ -522,13 +524,13 @@ const Header = () => {
                         }}
                         className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
                       >
-                        {theme === "dark" ? "Dark" : "Light"}
+                        {theme === "dark" ? t("dark") : t("light")}
                       </button>
                     </div>
                     <div className="px-4 py-3 text-sm border-t themed-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <LanguageIcon className="w-4 h-4 text-[var(--color-accent)]" />
-                        <span className="font-medium">Language</span>
+                        <span className="font-medium">{t("language")}</span>
                       </div>
                       <button
                         onClick={() => {
@@ -536,7 +538,7 @@ const Header = () => {
                         }}
                         className="px-3 py-1 rounded-full border themed-border text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
                       >
-                        {language === "en" ? "English" : "Arabic"}
+                        {language === "en" ? t("english") : t("arabic")}
                       </button>
                     </div>
                   </div>

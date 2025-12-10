@@ -60,6 +60,7 @@ app.use("/api/contact", require("./routes/contact"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/conversations", require("./routes/conversations"));
 app.use("/api/property-listings", require("./routes/propertyListings"));
+app.use("/api/favorites", require("./routes/favorites"));
 
 // Upload routes
 app.use("/api/uploads", require("./routes/uploads"));

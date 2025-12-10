@@ -45,39 +45,57 @@ const Contact = () => {
 
   return (
     <div className="themed-surface">
-      <section className="px-8 pt-12 pb-10 text-center">
-        <h1 className="heading-font text-5xl font-bold mb-6 text-[var(--color-text)]">
+      <section className="px-6 sm:px-8 pt-16 pb-12 text-center">
+        <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-[var(--color-text)]">
           {t("contact")}
         </h1>
-        <p className="text-lg max-w-3xl mx-auto leading-relaxed text-[var(--color-text-soft)]">
+        <p className="text-lg sm:text-xl max-w-3xl mx-auto leading-relaxed text-[var(--color-text-soft)]">
           {t("contactSubtitle")}
         </p>
       </section>
 
-      <section className="px-8 pb-16">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
+      <section className="px-6 sm:px-8 pb-20">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.2fr_1fr] gap-10 md:gap-12 items-start">
           <form
             onSubmit={handleSubmit}
-            className={`themed-surface-alt rounded-3xl p-8 shadow-card flex flex-col gap-6 ${
-              isRTL ? "text-right" : "text-left"
-            }`}
+            className={`themed-surface-alt rounded-3xl p-8 md:p-10 shadow-xl border border-[var(--color-border)] flex flex-col gap-7 ${isRTL ? "text-right" : "text-left"
+              }`}
             aria-labelledby="contactFormTitle"
             dir={isRTL ? "rtl" : "ltr"}
           >
-            <h2
-              id="contactFormTitle"
-              className="heading-font text-2xl font-bold m-0 text-[var(--color-text)]"
-            >
-              {t("sendMessageHeading")}
-            </h2>
+            <div>
+              <h2
+                id="contactFormTitle"
+                className="heading-font text-3xl sm:text-4xl font-bold m-0 text-[var(--color-text)] mb-2"
+              >
+                {t("sendMessageHeading")}
+              </h2>
+              <p className="text-[var(--color-text-soft)] text-base">
+                We'd love to hear from you
+              </p>
+            </div>
+
+            {(submitted || error) && (
+              <div
+                className={`p-4 rounded-xl text-base font-medium ${submitted
+                    ? "bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400"
+                    : "bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400"
+                  }`}
+                role={submitted ? "status" : "alert"}
+              >
+                {submitted
+                  ? t("messageSentSuccess") || "Message sent successfully!"
+                  : error}
+              </div>
+            )}
 
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="flex flex-col">
                 <label
                   htmlFor="name"
-                  className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
+                  className="mb-2 text-sm font-semibold tracking-wide text-[var(--color-text)]"
                 >
-                  {t("nameLabel")}
+                  {t("nameLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="name"
@@ -85,7 +103,8 @@ const Contact = () => {
                   value={form.name}
                   onChange={handleChange}
                   required
-                  className="px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)]"
+                  disabled={sending}
+                  className="px-4 py-3.5 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder={t("namePlaceholder")}
                 />
               </div>
@@ -93,9 +112,9 @@ const Contact = () => {
               <div className="flex flex-col">
                 <label
                   htmlFor="email"
-                  className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
+                  className="mb-2 text-sm font-semibold tracking-wide text-[var(--color-text)]"
                 >
-                  {t("emailLabel")}
+                  {t("emailLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="email"
@@ -104,7 +123,8 @@ const Contact = () => {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)]"
+                  disabled={sending}
+                  className="px-4 py-3.5 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder={t("emailPlaceholder")}
                 />
               </div>
@@ -113,9 +133,9 @@ const Contact = () => {
             <div className="flex flex-col">
               <label
                 htmlFor="message"
-                className="mb-1 text-xs font-semibold tracking-wide uppercase text-[var(--color-text-soft)]"
+                className="mb-2 text-sm font-semibold tracking-wide text-[var(--color-text)]"
               >
-                {t("messageLabel")}
+                {t("messageLabel")} <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="message"
@@ -123,8 +143,9 @@ const Contact = () => {
                 value={form.message}
                 onChange={handleChange}
                 required
+                disabled={sending}
                 rows={6}
-                className="px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)] resize-none"
+                className="px-4 py-3.5 rounded-xl bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-[var(--color-text)] resize-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder={t("messagePlaceholder")}
               />
             </div>
@@ -135,7 +156,7 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={sending}
-                className="btn-primary px-8 py-3 rounded-full font-semibold inline-flex items-center justify-center gap-2 anim-btn-pulse disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary px-10 py-4 rounded-full font-semibold text-lg inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-all shadow-xl"
                 aria-live="polite"
               >
                 {sending && (
@@ -143,108 +164,95 @@ const Contact = () => {
                 )}
                 {sending
                   ? t("sending") || "Sending..."
-                  : submitted
-                  ? t("sent")
                   : t("sendMessage")}
               </button>
-              {error && (
-                <p className="text-red-500 text-sm m-0 mt-2" role="alert">
-                  {error}
-                </p>
-              )}
-              {submitted && !error && (
-                <p className="text-green-500 text-sm m-0 mt-2" role="status">
-                  {t("messageSentSuccess") || "Message sent successfully!"}
-                </p>
-              )}
-              <p className="text-xs text-[var(--color-text-soft)] m-0 mt-2">
+              <p className="text-xs text-[var(--color-text-soft)] m-0 mt-3">
                 {t("privacyNotice")}
               </p>
               <a
                 href={`mailto:arqam.mousa@gmail.com?subject=${encodeURIComponent(
                   `UniNest Contact from ${form.name || "Visitor"}`
                 )}&body=${encodeURIComponent(
-                  `From: ${form.email || "(no email provided)"}\n\n${
-                    form.message
+                  `From: ${form.email || "(no email provided)"}\n\n${form.message
                   }`
                 )}`}
-                className="mt-3 text-xs text-[var(--color-accent)] underline"
+                className="mt-3 text-sm text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] underline transition-all"
               >
                 {t("orEmailDirectly") || "Or email us directly"}
               </a>
             </div>
           </form>
 
-          <div className="space-y-10">
+          <div className="space-y-8">
             <div
-              className={`themed-surface-alt rounded-3xl p-8 shadow-card ${
-                isRTL ? "text-right" : "text-left"
-              }`}
+              className={`themed-surface-alt rounded-3xl p-8 shadow-xl border border-[var(--color-border)] ${isRTL ? "text-right" : "text-left"
+                }`}
               dir={isRTL ? "rtl" : "ltr"}
             >
-              <h2 className="heading-font text-2xl font-bold mb-4 text-[var(--color-text)]">
+              <h2 className="heading-font text-2xl sm:text-3xl font-bold mb-6 text-[var(--color-text)]">
                 {t("contactInfo") || "Contact Information"}
               </h2>
-              <ul className="space-y-3 text-[var(--color-text-soft)]">
-                <li>
-                  <strong className="text-[var(--color-text)]">
+              <ul className="space-y-4 text-[var(--color-text-soft)]">
+                <li className="flex flex-col gap-1">
+                  <strong className="text-[var(--color-text)] text-sm font-semibold">
                     {t("emailLabel")}:
-                  </strong>{" "}
+                  </strong>
                   <a
                     href="mailto:arqam.mousa@gmail.com"
-                    className="text-[var(--color-accent)] font-semibold"
+                    className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium transition-all"
                   >
                     arqam.mousa@gmail.com
                   </a>
                 </li>
-                <li>
-                  <strong className="text-[var(--color-text)]">
+                <li className="flex flex-col gap-1">
+                  <strong className="text-[var(--color-text)] text-sm font-semibold">
                     {t("supportLabel") || "Support"}:
-                  </strong>{" "}
-                  {t("supportHours") || "Sunday - Thursday"}
+                  </strong>
+                  <span>{t("supportHours") || "Sunday - Thursday"}</span>
                 </li>
-                <li>
-                  <strong className="text-[var(--color-text)]">
+                <li className="flex flex-col gap-1">
+                  <strong className="text-[var(--color-text)] text-sm font-semibold">
                     {t("responseTimeLabel") || "Response time"}:
-                  </strong>{" "}
-                  {t("usualResponse") ||
-                    "We typically respond within 24 hours."}
+                  </strong>
+                  <span>
+                    {t("usualResponse") ||
+                      "We typically respond within 24 hours."}
+                  </span>
                 </li>
               </ul>
             </div>
 
             <div
-              className={`themed-surface-alt rounded-3xl p-8 shadow-card ${
-                isRTL ? "text-right" : "text-left"
-              }`}
+              className={`themed-surface-alt rounded-3xl p-8 shadow-xl border border-[var(--color-border)] ${isRTL ? "text-right" : "text-left"
+                }`}
               dir={isRTL ? "rtl" : "ltr"}
             >
-              <h2 className="heading-font text-2xl font-bold mb-6 text-[var(--color-text)]">
+              <h2 className="heading-font text-2xl sm:text-3xl font-bold mb-6 text-[var(--color-text)]">
                 {t("faqs")}
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {faqs.map((f, i) => {
                   const open = openFaq === i;
                   return (
                     <div
                       key={f.q}
-                      className="border border-[var(--color-border)] rounded-xl overflow-hidden"
+                      className="border border-[var(--color-border)] rounded-xl overflow-hidden transition-all hover:border-[var(--color-accent)]/30"
                     >
                       <button
                         type="button"
                         onClick={() => setOpenFaq(open ? null : i)}
-                        className="w-full flex justify-between items-center px-5 py-3 bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-left cursor-pointer"
+                        className="w-full flex justify-between items-center px-5 py-4 bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-left cursor-pointer hover:bg-[var(--color-surface)] transition-all"
                         aria-expanded={open}
                       >
-                        <span className="font-medium text-sm text-[var(--color-text)]">
+                        <span className="font-semibold text-base text-[var(--color-text)] pr-4">
                           {t(f.q)}
                         </span>
-                        <span className="text-[var(--color-text-soft)] text-xs">
+                        <span className="text-[var(--color-accent)] text-xl font-bold flex-shrink-0">
                           {open ? "−" : "+"}
                         </span>
                       </button>
                       {open && (
-                        <div className="px-5 pb-4 text-xs text-[var(--color-text-soft)] leading-relaxed">
+                        <div className="px-5 py-4 text-sm text-[var(--color-text-soft)] leading-relaxed bg-[var(--color-surface)] border-t border-[var(--color-border)]">
                           {t(f.a)}
                         </div>
                       )}

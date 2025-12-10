@@ -22,6 +22,21 @@ const Apartments = () => {
   const navigate = useNavigate();
   const isRTL = language === "ar";
 
+  // Constants
+  const SEARCH_DELAY_MS = 500;
+  const FILTER_APPLY_DELAY_MS = 500;
+  const FILTER_CLEAR_DELAY_MS = 250;
+
+  const EMPTY_FILTERS = {
+    propertyType: "",
+    minPrice: "",
+    maxPrice: "",
+    bedrooms: "",
+    bathrooms: "",
+    city: "",
+    acceptsPartners: false,
+  };
+
   // Listings state
   const [listings, setListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -32,24 +47,8 @@ const Apartments = () => {
   const [activeTab, setActiveTab] = useState("lastListings");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState("");
-  const [filters, setFilters] = useState({
-    propertyType: "",
-    minPrice: "",
-    maxPrice: "",
-    bedrooms: "",
-    bathrooms: "",
-    city: "",
-    acceptsPartners: false,
-  });
-  const [pendingFilters, setPendingFilters] = useState({
-    propertyType: "",
-    minPrice: "",
-    maxPrice: "",
-    bedrooms: "",
-    bathrooms: "",
-    city: "",
-    acceptsPartners: false,
-  });
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [pendingFilters, setPendingFilters] = useState(EMPTY_FILTERS);
   const [filterOptions, setFilterOptions] = useState({
     propertyTypes: ["Apartment", "House", "Room", "Studio"],
     priceRange: { min: 0, max: 10000 },
@@ -183,8 +182,7 @@ const Apartments = () => {
   const applyFilters = async () => {
     setFilterApplyLoading(true);
     setFilters(pendingFilters);
-    // Brief delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, FILTER_APPLY_DELAY_MS));
     setFilterApplyLoading(false);
   };
 
@@ -206,8 +204,7 @@ const Apartments = () => {
     if (e.key === 'Enter') {
       setSearchLoading(true);
       setActiveSearchQuery(searchQuery);
-      // Simulate search delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, SEARCH_DELAY_MS));
       setSearchLoading(false);
     }
   };
@@ -218,21 +215,11 @@ const Apartments = () => {
 
   const clearFilters = async () => {
     setFilterApplyLoading(true);
-    const emptyFilters = {
-      propertyType: "",
-      minPrice: "",
-      maxPrice: "",
-      bedrooms: "",
-      bathrooms: "",
-      city: "",
-      acceptsPartners: false,
-    };
-    setPendingFilters(emptyFilters);
-    setFilters(emptyFilters);
+    setPendingFilters(EMPTY_FILTERS);
+    setFilters(EMPTY_FILTERS);
     setSearchQuery("");
     setActiveSearchQuery("");
-    // Brief delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 250));
+    await new Promise(resolve => setTimeout(resolve, FILTER_CLEAR_DELAY_MS));
     setFilterApplyLoading(false);
   };
 

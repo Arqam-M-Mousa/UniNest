@@ -19,12 +19,17 @@ const PropertyDetails = () => {
     property ? property.images?.[0] : null
   );
 
+  // Determine if we're on apartments or marketplace route
+  const isApartmentsRoute = window.location.pathname.startsWith("/apartments");
+  const parentRoute = isApartmentsRoute ? "/apartments" : "/marketplace";
+  const parentLabel = isApartmentsRoute ? t("apartments") : t("marketplace");
+
   if (!property) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4">
         <h2>{t("propertyNotFound")}</h2>
         <Link
-          to="/marketplace"
+          to={parentRoute}
           className="text-primary no-underline font-semibold hover:underline"
         >
           {t("backToMarketplace")}
@@ -55,10 +60,10 @@ const PropertyDetails = () => {
             </Link>
             <span className="text-[var(--color-text-soft)]"> / </span>
             <Link
-              to="/marketplace"
+              to={parentRoute}
               className="text-primary no-underline hover:underline"
             >
-              {t("marketplace")}
+              {parentLabel}
             </Link>
             <span className="text-[var(--color-text-soft)]"> / </span>
             <span className="text-[var(--color-text-soft)]">
@@ -112,8 +117,8 @@ const PropertyDetails = () => {
                       type="button"
                       onClick={() => setActiveImage(image)}
                       className={`relative pt-[75%] rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 transition-transform hover:scale-[1.02] border ${activeImage === image
-                          ? "border-[var(--color-accent)] shadow-lg"
-                          : "border-[var(--color-border)]"
+                        ? "border-[var(--color-accent)] shadow-lg"
+                        : "border-[var(--color-border)]"
                         }`}
                     >
                       <img

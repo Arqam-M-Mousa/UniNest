@@ -471,8 +471,8 @@ const Apartments = () => {
                     <button
                       key={`filter-${sectionIdx}-${index}`}
                       className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition-all ${selectedPrice === range.label && sectionIdx === 0
-                          ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-                          : "bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-white hover:border-[var(--color-accent)]"
+                        ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+                        : "bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-white hover:border-[var(--color-accent)]"
                         }`}
                       onClick={() =>
                         sectionIdx === 0 && setSelectedPrice(range.label)
@@ -481,8 +481,8 @@ const Apartments = () => {
                       <span className="font-medium text-sm">{range.label}</span>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedPrice === range.label && sectionIdx === 0
-                            ? "bg-white text-[var(--color-accent)]"
-                            : "bg-white dark:bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
+                          ? "bg-white text-[var(--color-accent)]"
+                          : "bg-white dark:bg-[var(--color-surface-alt)] text-[var(--color-accent)]"
                           }`}
                       >
                         {range.count}
@@ -498,7 +498,7 @@ const Apartments = () => {
             {properties.map((property, idx) => (
               <Reveal key={property.id} delay={idx * 70} className="w-full">
                 <Link
-                  to={`/marketplace/${property.id}`}
+                  to={`/apartments/${property.id}`}
                   className="market-card themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit shadow-card ring-0 hover:ring-2 hover:ring-[var(--color-accent)] transition-shadow"
                 >
                   <div className="market-card-img-wrapper relative pt-[75%] bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)]">

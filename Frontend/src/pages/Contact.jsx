@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import apiRequest from "../services/api";
-import LoadingSpinner from "../components/LoadingSpinner";
 
 const faqs = [
   { q: "faqQ1", a: "faqA1" },

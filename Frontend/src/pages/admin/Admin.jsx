@@ -164,7 +164,7 @@ const Admin = () => {
   };
 
   return (
-    <PageLoader loading={loading} message="Loading universities...">
+    <PageLoader sessionKey="admin_visited" loading={loading} message={t("loadingUniversities")}>
       <div className="min-h-screen themed-surface py-12 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}

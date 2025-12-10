@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { conversationsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import PageLoader from "../../components/common/PageLoader";
-import { useRef } from "react";
 
 const MessageBubble = ({ message, isMine }) => {
   return (
@@ -128,6 +128,7 @@ const Messages = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const viewerId = user?.id;
 
   const [conversations, setConversations] = useState([]);
@@ -207,8 +208,9 @@ const Messages = () => {
 
   return (
     <PageLoader
+      sessionKey="messages_visited"
       loading={loading && conversations.length === 0}
-      message="Loading conversations..."
+      message={t("loadingMessages")}
     >
       <div className="themed-surface min-h-[calc(100vh-140px)] px-6 py-8">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[320px_1fr] gap-6">

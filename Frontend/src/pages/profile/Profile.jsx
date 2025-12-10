@@ -76,8 +76,9 @@ const Profile = () => {
 
   return (
     <PageLoader
+      sessionKey="profile_visited"
       loading={loading}
-      message={t("loadingProfile") || "Loading profile..."}
+      message={t("loadingProfile")}
     >
       <div className="min-h-[calc(100vh-200px)] themed-surface py-8 px-4">
         <div className="max-w-4xl mx-auto">

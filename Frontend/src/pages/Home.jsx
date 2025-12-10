@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import AnimatedFeatures from "../components/AnimatedFeatures";
 import campusClockImg from "../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
@@ -9,6 +10,15 @@ import Reveal from "../components/Reveal";
 
 const Home = () => {
   const { t } = useLanguage();
+  const [activeIndex, setActiveIndex] = useState(1); // Start with middle card active
+
+  // Auto-rotate cards every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % 3);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="w-full">
@@ -106,49 +116,54 @@ const Home = () => {
               { src: campusClockImg, alt: "Campus Clock", price: "1500$" },
               { src: nnuImg, alt: "Campus Housing", price: "1500$" },
               { src: heroImg, alt: "Student Life", price: "1500$" },
-            ].map((offer, i) => (
-              <Reveal
-                key={i}
-                className={`group relative rounded-2xl overflow-hidden shadow-xl transition-all duration-500 cursor-pointer
-                  ${
-                    i === 1
+            ].map((offer, i) => {
+              // Calculate relative position: -1 (left), 0 (center), 1 (right)
+              const relativePos = (i - activeIndex + 3) % 3;
+              const position = relativePos === 0 ? 0 : relativePos === 1 ? 1 : -1;
+              const isCenter = position === 0;
+
+              return (
+                <Reveal
+                  key={i}
+                  className={`group relative rounded-2xl overflow-hidden shadow-xl transition-all duration-700 cursor-pointer
+                  ${isCenter
                       ? "w-[45%] md:w-[420px] h-[380px] md:h-[450px] z-20"
                       : "w-[27%] md:w-[300px] h-[300px] md:h-[360px] z-10 opacity-80"
-                  }
+                    }
                   hover:scale-105 hover:opacity-100 hover:z-30 hover:shadow-2xl
                 `}
-                style={{
-                  transform:
-                    i === 0
-                      ? "perspective(1200px) rotateY(6deg)"
-                      : i === 2
-                      ? "perspective(1200px) rotateY(-6deg)"
-                      : "perspective(1200px) rotateY(0deg)",
-                }}
-              >
-                <div className="relative h-full flex flex-col">
-                  {/* Image */}
-                  <img
-                    src={offer.src}
-                    alt={offer.alt}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading={i === 1 ? "eager" : "lazy"}
-                  />
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-500"></div>
-                  {/* Price badge */}
-                  <div
-                    className={`absolute bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-[var(--color-surface)] px-8 py-3 rounded-full font-bold shadow-xl transition-all duration-300 group-hover:scale-110 ${
-                      i !== 1 ? "text-base px-5 py-2" : "text-xl"
-                    }`}
-                  >
-                    <span className="text-[var(--color-text)]">
-                      {offer.price}
-                    </span>
+                  style={{
+                    transform:
+                      position === -1
+                        ? "perspective(1200px) rotateY(6deg)"
+                        : position === 1
+                          ? "perspective(1200px) rotateY(-6deg)"
+                          : "perspective(1200px) rotateY(0deg)",
+                  }}
+                >
+                  <div className="relative h-full flex flex-col">
+                    {/* Image */}
+                    <img
+                      src={offer.src}
+                      alt={offer.alt}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading={isCenter ? "eager" : "lazy"}
+                    />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-500"></div>
+                    {/* Price badge */}
+                    <div
+                      className={`absolute bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-[var(--color-surface)] px-8 py-3 rounded-full font-bold shadow-xl transition-all duration-300 group-hover:scale-110 ${!isCenter ? "text-base px-5 py-2" : "text-xl"
+                        }`}
+                    >
+                      <span className="text-[var(--color-text)]">
+                        {offer.price}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>

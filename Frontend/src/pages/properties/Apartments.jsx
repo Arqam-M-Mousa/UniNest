@@ -216,7 +216,8 @@ const Apartments = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const clearFilters = () => {
+  const clearFilters = async () => {
+    setFilterApplyLoading(true);
     const emptyFilters = {
       propertyType: "",
       minPrice: "",
@@ -230,6 +231,9 @@ const Apartments = () => {
     setFilters(emptyFilters);
     setSearchQuery("");
     setActiveSearchQuery("");
+    // Brief delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 250));
+    setFilterApplyLoading(false);
   };
 
   const handlePostAdClick = () => {

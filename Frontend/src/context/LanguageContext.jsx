@@ -81,6 +81,7 @@ export const translations = {
     logInRequired: "Log In Required",
     pleaseSignInToMessage: "Please sign in to message the property owner.",
     pleaseSignInToAddFavorite: "Please sign in to add properties to your favorites list.",
+    pleaseSignInToViewFavorites: "Please sign in to view your favorites.",
     pleaseSignInToPostAd:
       "Please sign in to your account to post an ad and connect with students.",
     signingIn: "Signing In...",
@@ -293,6 +294,8 @@ export const translations = {
     "Size (m²)": "Size (m²)",
     imagesRequired: "At least one image is required",
     imageUploadFailed: "Failed to upload images",
+    viewAllImages: "View all images",
+    images: "images",
   },
   ar: {
     apartments: "الشقق",
@@ -372,6 +375,7 @@ export const translations = {
     logInRequired: "يتطلب تسجيل الدخول",
     pleaseSignInToMessage: "يرجى تسجيل الدخول لمراسلة مالك العقار.",
     pleaseSignInToAddFavorite: "يرجى تسجيل الدخول لإضافة العقارات إلى قائمة المفضلة.",
+    pleaseSignInToViewFavorites: "يرجى تسجيل الدخول لعرض المفضلة.",
     pleaseSignInToPostAd: "يرجى تسجيل الدخول لنشر إعلان والتواصل مع الطلاب.",
     signingIn: "جارٍ تسجيل الدخول...",
     creatingAccount: "جارٍ إنشاء الحساب...",
@@ -608,6 +612,8 @@ export const translations = {
     "Size (m²)": "المساحة (م²)",
     imagesRequired: "مطلوب صورة واحدة على الأقل",
     imageUploadFailed: "فشل في رفع الصور",
+    viewAllImages: "عرض جميع الصور",
+    images: "صور",
   },
 };
 

@@ -26,6 +26,7 @@ router.get("/", async (req, res) => {
       city,
       minSquareFeet,
       maxSquareFeet,
+      acceptsPartners,
       sortBy = "createdAt",
       sortOrder = "DESC",
       limit = 50,
@@ -67,6 +68,13 @@ router.get("/", async (req, res) => {
         propertyWhere.squareFeet[Op.gte] = parseInt(minSquareFeet, 10);
       if (maxSquareFeet)
         propertyWhere.squareFeet[Op.lte] = parseInt(maxSquareFeet, 10);
+    }
+
+    // Filter by accepts partners/roommates
+    if (acceptsPartners === 'true' || acceptsPartners === true) {
+      propertyWhere.amenitiesJson = {
+        partner: true
+      };
     }
 
     // Determine sort field - use PropertyListing fields for sorting to avoid subquery issues
@@ -268,7 +276,7 @@ router.get("/:id", async (req, res) => {
             {
               model: User,
               as: "owner",
-              attributes: ["id", "firstName", "lastName", "avatarUrl", "role", "phoneNumber"],
+              attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role", "phoneNumber"],
             },
           ],
         },

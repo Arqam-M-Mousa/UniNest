@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { conversationsAPI } from "../services/api";
-import { useAuth } from "../context/AuthContext";
+import { conversationsAPI } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import PageLoader from "../components/PageLoader";
 import { useRef } from "react";
 
@@ -9,11 +9,10 @@ const MessageBubble = ({ message, isMine }) => {
   return (
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm ${
-          isMine
+        className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm ${isMine
             ? "bg-[var(--color-accent)] text-white"
             : "bg-[var(--color-surface-alt)] text-[var(--color-text)]"
-        }`}
+          }`}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>
         <p className="text-[10px] mt-1 opacity-80">
@@ -92,9 +91,8 @@ const ConversationList = ({ items, activeId, onSelect }) => {
           <button
             key={c.id}
             onClick={() => onSelect(c.id)}
-            className={`w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors ${
-              c.id === activeId ? "bg-[var(--color-surface-alt)]" : ""
-            }`}
+            className={`w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors ${c.id === activeId ? "bg-[var(--color-surface-alt)]" : ""
+              }`}
           >
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-[var(--color-accent)] text-white text-xs font-semibold flex items-center justify-center">

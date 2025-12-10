@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext";
 import AnimatedFeatures from "../components/AnimatedFeatures";
 import campusClockImg from "../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";

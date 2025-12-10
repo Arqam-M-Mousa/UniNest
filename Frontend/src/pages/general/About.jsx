@@ -1,4 +1,4 @@
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext";
 import AnimatedFeatures from "../components/AnimatedFeatures";
 import Reveal from "../components/Reveal";
 import { Link } from "react-router-dom";

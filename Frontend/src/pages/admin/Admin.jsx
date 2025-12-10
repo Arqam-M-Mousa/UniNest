@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useLanguage } from "../context/LanguageContext";
-import { universitiesAPI } from "../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { universitiesAPI } from "../../services/api";
 import PageLoader from "../components/PageLoader";
 import Alert from "../components/Alert";
 import {

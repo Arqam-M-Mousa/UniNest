@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { UserCircleIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import PageLoader from "../components/PageLoader";
-import apiRequest from "../services/api";
+import apiRequest from "../../services/api";
 
 const ForgotPassword = () => {
   const { t } = useLanguage();
@@ -115,10 +115,10 @@ const ForgotPassword = () => {
               <div key={stepNum} className="flex items-center">
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm transition-all ${step === stepNum
-                      ? "bg-[var(--color-accent)] text-white scale-110 shadow-lg"
-                      : step > stepNum
-                        ? "bg-green-500 text-white"
-                        : "bg-[var(--color-surface)] text-[var(--color-text-soft)] border-2 border-[var(--color-border)]"
+                    ? "bg-[var(--color-accent)] text-white scale-110 shadow-lg"
+                    : step > stepNum
+                      ? "bg-green-500 text-white"
+                      : "bg-[var(--color-surface)] text-[var(--color-text-soft)] border-2 border-[var(--color-border)]"
                     }`}
                 >
                   {step > stepNum ? "✓" : stepNum}
@@ -126,8 +126,8 @@ const ForgotPassword = () => {
                 {stepNum < 3 && (
                   <div
                     className={`w-12 sm:w-16 h-1 mx-1 rounded-full transition-all ${step > stepNum
-                        ? "bg-green-500"
-                        : "bg-[var(--color-border)]"
+                      ? "bg-green-500"
+                      : "bg-[var(--color-border)]"
                       }`}
                   />
                 )}

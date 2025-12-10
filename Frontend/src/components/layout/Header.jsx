@@ -11,12 +11,12 @@ import {
   XMarkIcon,
   BuildingLibraryIcon,
 } from "@heroicons/react/24/outline";
-import { useLanguage } from "../context/LanguageContext";
-import { useTheme } from "../context/ThemeContext";
-import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState, useRef } from "react";
-import { notificationsAPI, conversationsAPI } from "../services/api";
-import CloudinaryImage from "./CloudinaryImage";
+import { notificationsAPI, conversationsAPI } from "../../services/api";
+import CloudinaryImage from "../media/CloudinaryImage";
 
 const navLinksConfig = (t) => [
   { to: "/", label: t("home"), match: (p) => p === "/" },

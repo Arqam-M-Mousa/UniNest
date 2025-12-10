@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useLanguage } from "../context/LanguageContext";
-import { useAuth } from "../context/AuthContext";
-import { properties } from "../data/properties";
+import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
+import { properties } from "../../data/properties";
 import StatsCard from "../components/StatsCard";
 import HeartButton from "../components/HeartButton";
 import Alert from "../components/Alert";

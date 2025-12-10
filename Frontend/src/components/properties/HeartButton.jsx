@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
-import { useAuth } from "../context/AuthContext";
-import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import Alert from "./Alert";
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useLanguage } from "../context/LanguageContext";
-import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import PageLoader from "../components/PageLoader";
 

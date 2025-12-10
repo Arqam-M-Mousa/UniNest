@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useLanguage } from "../context/LanguageContext";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 import {
   propertyListingsAPI,
   uploadsAPI,
   universitiesAPI,
-} from "../services/api";
-import { properties } from "../data/properties";
-import TabButton from "../components/TabButton";
-import HeartButton from "../components/HeartButton";
-import Reveal from "../components/Reveal";
-import Alert from "../components/Alert";
-import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
-import PageLoader from "../components/PageLoader";
+} from "../../services/api";
+import { properties } from "../../data/properties";
+import TabButton from "../../components/common/TabButton";
+import Alert from "../../components/common/Alert";
+import nnuImg from "../../assets/images/campus/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import PageLoader from "../../components/common/PageLoader";
+import PropertyCard from "../../components/properties/PropertyCard";
 
 const Apartments = () => {
   const { t, language } = useLanguage();
@@ -496,43 +495,11 @@ const Apartments = () => {
 
           <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
             {properties.map((property, idx) => (
-              <Reveal key={property.id} delay={idx * 70} className="w-full">
-                <Link
-                  to={`/apartments/${property.id}`}
-                  className="market-card themed-surface-alt rounded-xl overflow-hidden no-underline text-inherit shadow-card ring-0 hover:ring-2 hover:ring-[var(--color-accent)] transition-shadow"
-                >
-                  <div className="market-card-img-wrapper relative pt-[75%] bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)]">
-                    <img
-                      src={property.images[0]}
-                      alt={property.name}
-                      className="absolute top-0 left-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <span className="market-card-gradient" aria-hidden="true" />
-                    <div className="absolute top-4 right-4">
-                      <HeartButton size={40} />
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-xl mb-2 text-[var(--color-text)] font-semibold tracking-tight">
-                      {property.price}
-                    </h3>
-                    <p className="text-[var(--color-text-soft)] text-sm m-0 flex items-center gap-2">
-                      <span>
-                        {property.rooms.bedrooms}
-                        {t("beds")}
-                      </span>
-                      <span className="opacity-40">•</span>
-                      <span>
-                        {property.rooms.bathrooms}
-                        {t("baths")}
-                      </span>
-                      <span className="opacity-40">•</span>
-                      <span>{property.squareMeter}</span>
-                    </p>
-                  </div>
-                </Link>
-              </Reveal>
+              <PropertyCard
+                key={property.id}
+                property={property}
+                delay={idx * 70}
+              />
             ))}
           </div>
         </div>

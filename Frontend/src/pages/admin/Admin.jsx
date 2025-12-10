@@ -172,10 +172,10 @@ const Admin = () => {
             <div>
               <h1 className="text-4xl font-bold text-[var(--color-text)] flex items-center gap-3">
                 <AcademicCapIcon className="w-12 h-12 text-[var(--color-accent)]" />
-                Universities Management
+                {t("universitiesManagement")}
               </h1>
               <p className="text-[var(--color-text-soft)] mt-2 text-lg">
-                Manage university information and locations
+                {t("manageUniversityInfo")}
               </p>
             </div>
             <button
@@ -183,7 +183,7 @@ const Admin = () => {
               className="flex items-center gap-2 px-6 py-3 rounded-lg btn-primary text-sm hover:scale-105 transition-transform"
             >
               <PlusIcon className="w-5 h-5" />
-              {t("Add University") || "Add University"}
+              {t("addUniversity")}
             </button>
           </div>
 
@@ -204,16 +204,16 @@ const Admin = () => {
           {/* Universities List */}
           <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">
-              {t("Universities") || "Universities"} ({universities.length})
+              {t("universities")} ({universities.length})
             </h2>
             <div className="mb-4 text-sm text-[var(--color-text-soft)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-4 py-3">
-              Tip: click any university row to open edit/delete actions.
+              {t("clickRowToEdit")}
             </div>
 
             {universities.length === 0 ? (
               <div className="text-center py-12 text-[var(--color-text-soft)]">
                 <AcademicCapIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p>No universities found. Add one to get started.</p>
+                <p>{t("noUniversitiesFound")}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -221,19 +221,19 @@ const Admin = () => {
                   <thead>
                     <tr className="border-b border-[var(--color-border)]">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Name
+                        {t("universityName")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        City
+                        {t("universityCity")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Domain
+                        {t("universityDomain")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Latitude
+                        {t("universityLatitude")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Longitude
+                        {t("universityLongitude")}
                       </th>
                     </tr>
                   </thead>

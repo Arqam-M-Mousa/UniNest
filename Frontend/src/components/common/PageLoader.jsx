@@ -25,8 +25,9 @@ const PageLoader = ({
     }
   }, [sessionKey, hasVisited, duration]);
 
-  // Use internal loading if sessionKey is provided, otherwise use external
-  const loading = sessionKey ? internalLoading : externalLoading;
+  // Combine sessionKey loading with external loading
+  // Show loading if: first visit (sessionKey) OR external loading is true
+  const loading = sessionKey ? (internalLoading || externalLoading) : externalLoading;
 
   if (overlay) {
     return (

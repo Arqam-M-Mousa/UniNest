@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLanguage } from "../../context/LanguageContext";
+import { propertyListingsAPI } from "../../services/api";
 import AnimatedFeatures from "../../components/features/home/AnimatedFeatures";
 import campusClockImg from "../../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 import nnuImg from "../../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
@@ -10,13 +11,37 @@ import Reveal from "../../components/common/Reveal";
 
 const Home = () => {
   const { t } = useLanguage();
-  const [activeIndex, setActiveIndex] = useState(1); // Start with middle card active
+  const [activeIndex, setActiveIndex] = useState(1);
+  const [latestProperties, setLatestProperties] = useState([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
+
+  // Fetch latest 3 properties
+  useEffect(() => {
+    const fetchLatestProperties = async () => {
+      try {
+        setPropertiesLoading(true);
+        const response = await propertyListingsAPI.list({
+          sortBy: "createdAt",
+          sortOrder: "DESC",
+          limit: 3,
+        });
+        setLatestProperties(response.data.listings || []);
+      } catch (error) {
+        console.error("Failed to fetch latest properties:", error);
+        // Keep empty array on error
+      } finally {
+        setPropertiesLoading(false);
+      }
+    };
+
+    fetchLatestProperties();
+  }, []);
 
   // Auto-rotate cards every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % 3);
-    }, 3000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -111,59 +136,123 @@ const Home = () => {
             {t("ourOffers")}
           </Reveal>
           {/* Improved 3-card carousel layout */}
-          <div className="relative flex items-center justify-center gap-6 md:gap-10 max-w-6xl mx-auto px-4 min-h-[450px]">
-            {[
-              { src: campusClockImg, alt: "Campus Clock", price: "1500$" },
-              { src: nnuImg, alt: "Campus Housing", price: "1500$" },
-              { src: heroImg, alt: "Student Life", price: "1500$" },
-            ].map((offer, i) => {
-              // Calculate relative position: -1 (left), 0 (center), 1 (right)
-              const relativePos = (i - activeIndex + 3) % 3;
-              const position = relativePos === 0 ? 0 : relativePos === 1 ? 1 : -1;
-              const isCenter = position === 0;
+          {/* Improved 3-card carousel layout */}
+          <div className="relative h-[450px] md:h-[550px] max-w-6xl mx-auto px-4 w-full">
+            {propertiesLoading ? (
+              // Loading skeleton
+              <div className="text-center text-[var(--color-text-soft)]">
+                <div className="animate-pulse">Loading latest properties...</div>
+              </div>
+            ) : latestProperties.length > 0 ? (
+              latestProperties.map((property, i) => {
+                // Calculate relative position: -1 (left), 0 (center), 1 (right)
+                const relativePos = (i - activeIndex + 3) % 3;
+                const position = relativePos === 0 ? 0 : relativePos === 1 ? 1 : -1;
+                const isCenter = position === 0;
 
-              return (
-                <Reveal
-                  key={i}
-                  className={`group relative rounded-2xl overflow-hidden shadow-xl transition-all duration-700 cursor-pointer
-                  ${isCenter
-                      ? "w-[45%] md:w-[420px] h-[380px] md:h-[450px] z-20"
-                      : "w-[27%] md:w-[300px] h-[300px] md:h-[360px] z-10 opacity-80"
-                    }
-                  hover:scale-105 hover:opacity-100 hover:z-30 hover:shadow-2xl
-                `}
-                  style={{
-                    transform:
-                      position === -1
-                        ? "perspective(1200px) rotateY(6deg)"
-                        : position === 1
-                          ? "perspective(1200px) rotateY(-6deg)"
-                          : "perspective(1200px) rotateY(0deg)",
-                  }}
-                >
-                  <div className="relative h-full flex flex-col">
-                    {/* Image */}
-                    <img
-                      src={offer.src}
-                      alt={offer.alt}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading={isCenter ? "eager" : "lazy"}
-                    />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-500"></div>
-                    {/* Price badge */}
-                    <div
-                      className={`absolute bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-[var(--color-surface)] px-8 py-3 rounded-full font-bold shadow-xl transition-all duration-300 group-hover:scale-110 ${!isCenter ? "text-base px-5 py-2" : "text-xl"
-                        }`}
+                // Get primary image or fallback
+                const primaryImage = property.images?.find(img => img.isPrimary)?.url ||
+                  property.images?.[0]?.url ||
+                  heroImg;
+
+                return (
+                  <Link
+                    to={`/apartments/${property.id}`}
+                    key={property.id}
+                    className={`group absolute top-1/2 cursor-pointer rounded-2xl overflow-hidden bg-[var(--color-surface-alt)] no-underline
+                    ${isCenter
+                        ? "w-[85%] md:w-[450px] h-[380px] md:h-[450px] opacity-100 shadow-2xl ring-4 ring-[var(--color-accent)]/30"
+                        : "w-[70%] md:w-[320px] h-[300px] md:h-[360px] opacity-50 shadow-xl"
+                      }
+                    hover:opacity-100
+                  `}
+                    style={{
+                      left: position === 0 ? "50%" : position === -1 ? "15%" : "85%",
+                      transform: `translate(-50%, -50%) scale(${isCenter ? 1 : 0.85})`,
+                      zIndex: position === 0 ? 20 : 10,
+                      transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
                     >
-                      <span className="text-[var(--color-text)]">
-                        {offer.price}
-                      </span>
+                    <div className="relative h-full flex flex-col bg-[var(--color-surface-alt)]">
+                      {/* Image */}
+                      <img
+                        src={primaryImage}
+                        alt={property.title || "Property"}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading={isCenter ? "eager" : "lazy"}
+                      />
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-500"></div>
+                      {/* Property title */}
+                      {isCenter && (
+                        <div className="absolute top-6 left-6 right-6">
+                          <h3 className="text-white font-bold text-lg md:text-xl line-clamp-2" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+                            {property.title}
+                          </h3>
+                        </div>
+                      )}
+                      {/* Price badge */}
+                      <div
+                        className={`absolute bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-[var(--color-surface)] px-8 py-3 rounded-full font-bold shadow-xl transition-all duration-300 group-hover:scale-110 ${!isCenter ? "text-base px-5 py-2" : "text-xl"
+                          }`}
+                      >
+                        <span className="text-[var(--color-text)]">
+                          {property.pricePerMonth} {property.currency || "NIS"}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            ) : (
+              // Fallback to static images if no properties
+              [
+                { src: campusClockImg, alt: "Campus Clock", price: "1500$" },
+                { src: nnuImg, alt: "Campus Housing", price: "1500$" },
+                { src: heroImg, alt: "Student Life", price: "1500$" },
+              ].map((offer, i) => {
+                const relativePos = (i - activeIndex + 3) % 3;
+                const position = relativePos === 0 ? 0 : relativePos === 1 ? 1 : -1;
+                const isCenter = position === 0;
+
+                return (
+                  <div
+                    key={i}
+                    className={`group absolute top-1/2 cursor-pointer rounded-2xl overflow-hidden bg-[var(--color-surface-alt)]
+                    ${isCenter
+                        ? "w-[85%] md:w-[450px] h-[380px] md:h-[450px] opacity-100 shadow-2xl ring-4 ring-[var(--color-accent)]/30"
+                        : "w-[70%] md:w-[320px] h-[300px] md:h-[360px] opacity-50 shadow-xl"
+                      }
+                    hover:opacity-100
+                  `}
+                    style={{
+                      left: position === 0 ? "50%" : position === -1 ? "15%" : "85%",
+                      transform: `translate(-50%, -50%) scale(${isCenter ? 1 : 0.85})`,
+                      zIndex: position === 0 ? 20 : 10,
+                      transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    <div className="relative h-full flex flex-col bg-[var(--color-surface-alt)]">
+                      <img
+                        src={offer.src}
+                        alt={offer.alt}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading={isCenter ? "eager" : "lazy"}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-500"></div>
+                      <div
+                        className={`absolute bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-[var(--color-surface)] px-8 py-3 rounded-full font-bold shadow-xl transition-all duration-300 group-hover:scale-110 ${!isCenter ? "text-base px-5 py-2" : "text-xl"
+                          }`}
+                      >
+                        <span className="text-[var(--color-text)]">
+                          {offer.price}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </Reveal>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </section>

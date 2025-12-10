@@ -55,6 +55,7 @@ function ThemedLayout() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/apartments" element={<Apartments />} />
+          <Route path="/apartments/:id" element={<PropertyDetails />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Messages />} />

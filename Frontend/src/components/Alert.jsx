@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 const Alert = ({
   isOpen,
@@ -106,13 +107,17 @@ const Alert = ({
   const config = iconConfig[type];
   const iconNode = iconOverride || config.icon;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-      onClick={onClose}
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
     >
+      {/* Modal content */}
       <div
-        className="themed-surface-alt border border-[var(--color-accent)]/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200"
+        className="relative themed-surface-alt border border-[var(--color-accent)]/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center text-center gap-4">
@@ -137,7 +142,8 @@ const Alert = ({
           <div className="flex gap-3 w-full mt-4">
             {onConfirm && (
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onConfirm();
                   onClose();
                 }}
@@ -147,7 +153,10 @@ const Alert = ({
               </button>
             )}
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               className="flex-1 px-6 py-3 rounded-full border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white transition-colors font-medium"
             >
               {cancelText}
@@ -155,8 +164,10 @@ const Alert = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
 export default Alert;
+

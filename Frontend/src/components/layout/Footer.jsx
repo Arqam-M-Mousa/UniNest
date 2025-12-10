@@ -6,75 +6,50 @@ const Footer = () => {
 
   return (
     <footer className="themed-surface-alt border-t themed-border">
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="text-center text-2xl heading-font font-bold mb-8 text-[var(--color-text)]">
-          UniNest
-        </div>
-        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-5 text-sm">
-          <div className="space-y-3 text-center sm:text-left">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Logo and Navigation Row */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+          <Link to="/" className="text-xl heading-font font-bold text-[var(--color-text)] no-underline hover:text-[var(--color-accent)] transition-colors">
+            UniNest
+          </Link>
+          
+          {/* Navigation Links */}
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
             <Link
               to="/"
-              className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase no-underline hover:text-[var(--color-accent)] transition-colors inline-block"
+              className="text-[var(--color-text-soft)] no-underline hover:text-[var(--color-accent)] transition-colors"
             >
               {t("home")}
             </Link>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  to="/about"
-                  className="no-underline text-[var(--color-text-soft)] hover:text-[var(--color-accent)] transition-colors"
-                >
-                  {t("aboutUsLink")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/#offers"
-                  className="no-underline text-[var(--color-text-soft)] hover:text-[var(--color-accent)] transition-colors"
-                >
-                  {t("ourOffers")}
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="space-y-3 text-center sm:text-left">
             <Link
               to="/apartments"
-              className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase no-underline hover:text-[var(--color-accent)] transition-colors inline-block"
+              className="text-[var(--color-text-soft)] no-underline hover:text-[var(--color-accent)] transition-colors"
             >
               {t("apartments")}
             </Link>
-          </div>
-          <div className="space-y-3 text-center sm:text-left">
             <Link
               to="/marketplace"
-              className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase no-underline hover:text-[var(--color-accent)] transition-colors inline-block"
+              className="text-[var(--color-text-soft)] no-underline hover:text-[var(--color-accent)] transition-colors"
             >
               {t("marketplace")}
             </Link>
-          </div>
-          <div className="space-y-3 text-center sm:text-left">
             <Link
               to="/about"
-              className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase no-underline hover:text-[var(--color-accent)] transition-colors inline-block"
+              className="text-[var(--color-text-soft)] no-underline hover:text-[var(--color-accent)] transition-colors"
             >
               {t("about")}
             </Link>
-          </div>
-          <div className="space-y-3 text-center sm:text-left">
-            <h3 className="heading-font text-[var(--color-text)] text-xs tracking-wide uppercase">
-              {t("connect")}
-            </h3>
             <a
               href="mailto:arqam.mousa@gmail.com"
-              className="no-underline text-[var(--color-text-soft)] hover:text-[var(--color-accent)] transition-colors break-all"
-              aria-label="Email UniNest"
+              className="text-[var(--color-text-soft)] no-underline hover:text-[var(--color-accent)] transition-colors"
             >
-              arqam.mousa@gmail.com
+              {t("connect")}
             </a>
-          </div>
+          </nav>
         </div>
-        <div className="mt-10 pt-6 border-t themed-border text-center text-xs text-[var(--color-text-soft)]">
+        
+        {/* Copyright */}
+        <div className="pt-4 border-t themed-border text-center text-xs text-[var(--color-text-soft)]">
           {t("rightsReserved")}
         </div>
       </div>

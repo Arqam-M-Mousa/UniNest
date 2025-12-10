@@ -1,36 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import { favoritesAPI } from "../../services/api";
 import Alert from "../common/Alert";
 
 export default function HeartButton({
   size = 40,
+  propertyId,
+  listingId,
   initialActive = false,
   onToggle,
   className = "",
 }) {
   const [active, setActive] = useState(initialActive);
+  const [loading, setLoading] = useState(false);
   const [showAuthAlert, setShowAuthAlert] = useState(false);
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const toggle = (e) => {
-    e.preventDefault(); // prevent parent Link navigation when inside cards
-    e.stopPropagation(); // prevent event bubbling
+  // Check if this property is in favorites on mount
+  useEffect(() => {
+    const checkFavorite = async () => {
+      if (!isAuthenticated || !listingId) return;
+      try {
+        const response = await favoritesAPI.check(listingId);
+        setActive(response?.data?.isFavorite || false);
+      } catch (err) {
+        console.error("Failed to check favorite status:", err);
+      }
+    };
+    checkFavorite();
+  }, [isAuthenticated, listingId]);
 
-    // Check authentication
+  const toggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!isAuthenticated) {
       setShowAuthAlert(true);
       return;
     }
 
-    const next = !active;
-    setActive(next);
-    onToggle && onToggle(next);
+    if (!listingId || loading) return;
+
+    setLoading(true);
+    try {
+      if (active) {
+        await favoritesAPI.remove(listingId);
+        setActive(false);
+        onToggle && onToggle(false);
+      } else {
+        await favoritesAPI.add(listingId);
+        setActive(true);
+        onToggle && onToggle(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignIn = () => {
@@ -45,7 +77,8 @@ export default function HeartButton({
         aria-pressed={active}
         aria-label={active ? "Remove from favorites" : "Add to favorites"}
         onClick={toggle}
-        className={`group relative flex items-center justify-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] hover:scale-110 ${className}`}
+        disabled={loading}
+        className={`group relative flex items-center justify-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] hover:scale-110 ${loading ? "opacity-50 cursor-wait" : ""} ${className}`}
         style={{ width: size, height: size }}
       >
         {active ? (

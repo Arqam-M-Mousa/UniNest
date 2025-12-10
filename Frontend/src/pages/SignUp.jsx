@@ -10,14 +10,23 @@ import {
 } from "@heroicons/react/24/solid";
 import PageLoader from "../components/PageLoader";
 
+/**
+ * Check if email matches student pattern: s{5+ digits}@domain
+ */
+const isStudentEmail = (email) => {
+  if (!email?.includes("@")) return false;
+  return /^s\d{5,}@[\w.-]+$/i.test(email.trim());
+};
+
 const SignUp = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showEmailVerifiedBanner, setShowEmailVerifiedBanner] = useState(false);
-  const [step, setStep] = useState(1); // 1: email, 2: verify code, 3: complete signup
   const [verificationCode, setVerificationCode] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
@@ -25,11 +34,7 @@ const SignUp = () => {
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordAgain, setShowPasswordAgain] = useState(false);
-  const [emailDerivedMeta, setEmailDerivedMeta] = useState({
-    studentIdLocked: false,
-    universityLocked: false,
-    roleLocked: false,
-  });
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -37,40 +42,35 @@ const SignUp = () => {
     firstName: "",
     lastName: "",
     gender: "",
-    role: "Student",
     phoneNumber: "",
-    studentId: "",
-    universityId: "",
   });
 
-  const deriveStudentDetailsFromEmail = (emailValue) => {
-    if (!emailValue || !emailValue.includes("@")) return {};
+  // Derived role - locked based on email pattern from step 1
+  const isStudent = isStudentEmail(formData.email);
+  const role = isStudent ? "Student" : "Landlord";
 
-    const trimmed = emailValue.trim().toLowerCase();
-    const match = trimmed.match(/^s(\d{5,})@([\w.-]+)$/);
-    if (!match) {
-      return { studentId: "", universityId: "", domainRoot: "" };
-    }
-
+  // Extract student ID and university from email
+  const getStudentDetails = () => {
+    if (!isStudent) return { studentId: "", universityId: "" };
+    
+    const match = formData.email.trim().toLowerCase().match(/^s(\d{5,})@([\w.-]+)$/);
+    if (!match) return { studentId: "", universityId: "" };
+    
     const studentId = match[1];
-    const domainPartRaw = match[2];
-    const cleanDomain = domainPartRaw.replace(/^www\./, "");
-    const parts = cleanDomain.split(".");
-    const domainRoot = parts.slice(-2).join("."); // e.g., najah.edu
-
-    const matchedUniversity = universities.find((uni) => {
+    const domain = match[2].replace(/^www\./, "");
+    const domainRoot = domain.split(".").slice(-2).join(".");
+    
+    const matchedUni = universities.find((uni) => {
       if (!uni.domain) return false;
       const uniDomain = uni.domain.toLowerCase().replace(/^www\./, "");
       const uniRoot = uniDomain.split(".").slice(-2).join(".");
-      return domainRoot === uniRoot || cleanDomain.endsWith(uniDomain);
+      return domainRoot === uniRoot || domain.endsWith(uniDomain);
     });
-
-    return {
-      studentId,
-      universityId: matchedUniversity?.id || "",
-      domainRoot,
-    };
+    
+    return { studentId, universityId: matchedUni?.id || "" };
   };
+  
+  const { studentId, universityId } = getStudentDetails();
 
   const handleSendCode = async (e) => {
     e.preventDefault();
@@ -135,17 +135,6 @@ const SignUp = () => {
   const handleChangeEmail = () => {
     setStep(1);
     setVerificationCode("");
-    setEmailDerivedMeta({
-      studentIdLocked: false,
-      universityLocked: false,
-      roleLocked: false,
-    });
-    setFormData((prev) => ({
-      ...prev,
-      studentId: "",
-      universityId: "",
-      role: "Student",
-    }));
   };
 
   const handleSubmit = async (e) => {
@@ -162,36 +151,22 @@ const SignUp = () => {
       return;
     }
 
-    // Validate student-specific required fields and enforce email-derived data
-    if (formData.role === "Student") {
-      const derived = deriveStudentDetailsFromEmail(formData.email);
-      if (!derived.studentId) {
-        setError(
-          "Use your university student email (e.g., s123456@stu.najah.edu)."
-        );
+    // Validate student-specific required fields
+    if (role === "Student") {
+      if (!studentId) {
+        setError("Use your university student email (e.g., s123456@stu.najah.edu).");
         return;
       }
-      if (!derived.universityId) {
-        setError(
-          "We could not match your email domain to a university. Please use your official university email."
-        );
+      if (!universityId) {
+        setError("We could not match your email domain to a university. Please use your official university email.");
         return;
       }
-      // Ensure formData reflects derived values
-      setFormData((prev) => ({
-        ...prev,
-        studentId: derived.studentId,
-        universityId: derived.universityId,
-        role: "Student",
-      }));
     }
 
     // Validate landlord-specific required fields
-    if (formData.role === "Landlord") {
-      if (!formData.phoneNumber || !formData.phoneNumber.trim()) {
-        setError("Phone number is required for landlords");
-        return;
-      }
+    if (role === "Landlord" && !formData.phoneNumber?.trim()) {
+      setError("Phone number is required for landlords");
+      return;
     }
 
     if (!formData.gender) {
@@ -202,26 +177,17 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      // Prepare signup data
       const signupData = {
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
         gender: formData.gender,
-        role: formData.role,
+        role,
         phoneNumber: formData.phoneNumber,
-        verificationCode: verificationCode,
+        verificationCode,
+        ...(role === "Student" && { studentId, universityId }),
       };
-
-      // Add required fields for students
-      if (formData.role === "Student") {
-        const derived = deriveStudentDetailsFromEmail(formData.email);
-        signupData.studentId = derived.studentId;
-        signupData.universityId = derived.universityId;
-      }
-
-      console.log("Signing up with data:", signupData);
       const response = await authAPI.signup(signupData);
 
       if (response.success) {
@@ -240,13 +206,7 @@ const SignUp = () => {
   };
 
   const handleChange = (e) => {
-    if (emailDerivedMeta.roleLocked && e.target.name === "role") {
-      return;
-    }
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   useEffect(() => {
@@ -264,52 +224,6 @@ const SignUp = () => {
 
     fetchUniversities();
   }, []);
-
-  useEffect(() => {
-    if (step < 2) {
-      setEmailDerivedMeta((prev) =>
-        prev.studentIdLocked || prev.universityLocked || prev.roleLocked
-          ? {
-              studentIdLocked: false,
-              universityLocked: false,
-              roleLocked: false,
-            }
-          : prev
-      );
-      return;
-    }
-
-    const { studentId, universityId } = deriveStudentDetailsFromEmail(
-      formData.email
-    );
-
-    const nextStudentId = studentId || "";
-    const nextUniversityId = universityId || "";
-    const shouldLockRole = !!studentId;
-
-    setFormData((prev) => {
-      const role = shouldLockRole ? "Student" : prev.role;
-      if (
-        prev.studentId === nextStudentId &&
-        prev.universityId === nextUniversityId &&
-        prev.role === role
-      ) {
-        return prev;
-      }
-      return {
-        ...prev,
-        studentId: nextStudentId,
-        universityId: nextUniversityId,
-        role,
-      };
-    });
-
-    setEmailDerivedMeta({
-      studentIdLocked: !!studentId,
-      universityLocked: !!universityId,
-      roleLocked: shouldLockRole,
-    });
-  }, [step, formData.email, universities]);
 
   const pageLoading = loading || sendingCode || verifyingCode;
   const loaderMessage = sendingCode
@@ -499,10 +413,10 @@ const SignUp = () => {
               <div className="relative group">
                 <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
                   {t("phoneNumber")}{" "}
-                  {formData.role === "Landlord" ? (
+                  {role === "Landlord" ? (
                     <span className="text-red-500">*</span>
                   ) : (
-                    <span className="text-red-500/60">(Optional)</span>
+                    <span className="text-[var(--color-text-soft)]">(Optional)</span>
                   )}
                 </label>
                 <input
@@ -511,49 +425,36 @@ const SignUp = () => {
                   placeholder={t("phoneNumber")}
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  required={formData.role === "Landlord"}
+                  required={role === "Landlord"}
                   className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
                 />
               </div>
 
               <div className="relative group">
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                  disabled={emailDerivedMeta.roleLocked}
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <option value="Student">{t("student")}</option>
-                  <option value="Landlord">{t("landlord")}</option>
-                </select>
-                {emailDerivedMeta.roleLocked && (
-                  <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
-                    Role locked to Student based on your university email.
-                  </p>
-                )}
+                <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
+                  {t("role") || "Role"}
+                </label>
+                <div className="input-field text-base w-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed pointer-events-none">
+                  {role === "Student" ? t("student") : t("landlord")}
+                </div>
+                <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
+                  {role === "Student"
+                    ? "Role locked to Student based on your university email."
+                    : "Role set to Landlord based on your email type."}
+                </p>
               </div>
 
-              {formData.role === "Student" && (
+              {role === "Student" && (
                 <>
                   <div className="relative group">
                     <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
                       {t("studentId")} <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="studentId"
-                      placeholder={t("studentId")}
-                      value={formData.studentId}
-                      readOnly
-                      required
-                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-not-allowed opacity-90"
-                    />
+                    <div className="input-field text-base w-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed pointer-events-none">
+                      {studentId || "Loading..."}
+                    </div>
                     <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
-                      {emailDerivedMeta.studentIdLocked
-                        ? "Auto-filled from your verified student email."
-                        : "Verify your student email to auto-fill this ID."}
+                      Auto-filled from your verified student email.
                     </p>
                   </div>
 
@@ -562,33 +463,15 @@ const SignUp = () => {
                       {t("selectUniversity")}{" "}
                       <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      name="universityId"
-                      value={formData.universityId}
-                      onChange={handleChange}
-                      disabled={true}
-                      required
-                      className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <option value="">
-                        {universitiesLoading
-                          ? "Loading universities..."
-                          : t("selectUniversity")}
-                      </option>
-                      {universities.map((uni) => (
-                        <option key={uni.id} value={uni.id}>
-                          {uni.name}
-                          {uni.city ? ` — ${uni.city}` : ""}
-                        </option>
-                      ))}
-                    </select>
-                    {formData.role === "Student" && (
-                      <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
-                        {emailDerivedMeta.universityLocked
-                          ? "Auto-selected from your email domain."
-                          : "Your university is auto-selected from your student email domain."}
-                      </p>
-                    )}
+                    <div className="input-field text-base w-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed pointer-events-none">
+                      {universitiesLoading
+                        ? "Loading..."
+                        : universities.find((u) => u.id === universityId)?.name ||
+                          t("selectUniversity")}
+                    </div>
+                    <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
+                      Auto-selected from your email domain.
+                    </p>
                   </div>
                 </>
               )}

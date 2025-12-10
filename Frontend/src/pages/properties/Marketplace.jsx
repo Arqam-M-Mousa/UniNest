@@ -1,5 +1,5 @@
 import { useLanguage } from "../../context/LanguageContext";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../../components/common/PageLoader";
 
 const Marketplace = () => {
   const { t } = useLanguage();

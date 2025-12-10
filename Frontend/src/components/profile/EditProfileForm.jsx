@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { uploadsAPI } from "../../services/api";
-import Alert from "../Alert";
+import Alert from "../common/Alert";
 import {
   UserCircleIcon,
   PhotoIcon,
@@ -10,7 +10,7 @@ import {
   UserIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
-import CloudinaryImage from "../CloudinaryImage";
+import CloudinaryImage from "../media/CloudinaryImage";
 
 const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
   const { t } = useLanguage();

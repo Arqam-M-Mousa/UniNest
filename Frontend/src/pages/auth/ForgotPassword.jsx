@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { UserCircleIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../../components/common/PageLoader";
 import apiRequest from "../../services/api";
 
 const ForgotPassword = () => {

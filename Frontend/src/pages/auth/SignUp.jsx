@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { authAPI, universitiesAPI } from "../../services/api";
-import Alert from "../components/Alert";
+import Alert from "../../components/common/Alert";
 import {
   UserCircleIcon,
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/solid";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../../components/common/PageLoader";
 
 /**
  * Check if email matches student pattern: s{5+ digits}@domain

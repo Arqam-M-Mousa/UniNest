@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLanguage } from "../../context/LanguageContext";
-import AnimatedFeatures from "../components/AnimatedFeatures";
-import campusClockImg from "../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
-import nnuImg from "../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
-import heroImg from "../assets/image.jpg";
-import studentsImg from "../assets/lhrm_ljdyd_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
-import Reveal from "../components/Reveal";
+import AnimatedFeatures from "../../components/features/home/AnimatedFeatures";
+import campusClockImg from "../../assets/campus_clock.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import nnuImg from "../../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import heroImg from "../../assets/image.jpg";
+import studentsImg from "../../assets/lhrm_ljdyd_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import Reveal from "../../components/common/Reveal";
 
 const Home = () => {
   const { t } = useLanguage();

@@ -138,8 +138,6 @@ export const translations = {
     deleteProfilePictureTitle: "Delete profile picture",
     deleteProfilePictureMessage: "This will remove your current picture. The change only applies after you click Save Changes.",
     confirm: "Confirm",
-    delete: "Delete",
-    cancel: "Cancel",
     // Admin Page
     addUniversity: "Add University",
     editUniversity: "Edit University",
@@ -159,10 +157,6 @@ export const translations = {
     accountCreatedTitle: "Account Created!",
     accountCreatedMessage: "Your account has been created successfully. Please sign in to continue.",
     signInNow: "Sign In Now",
-    signInRequired: "Sign In Required",
-    signInRequiredMessage: "Please sign in to access this feature.",
-    pleaseSignInToMessage: "Please sign in to message the property owner.",
-    pleaseSignInToPostAd: "Please sign in to your account to post an ad and connect with students.",
     ctaBrowseSubtitle:
       "Browse hundreds of verified student-friendly apartments and find your perfect home today",
     // About Page
@@ -239,6 +233,8 @@ export const translations = {
     conversation: "Conversation",
     noMessagesYet: "No messages yet",
     loading: "Loading...",
+    loadingApartments: "Loading apartments...",
+    loadingProperty: "Loading property...",
     // Profile Page
     uploadPicture: "Upload Picture",
     dangerZone: "Danger Zone",
@@ -246,7 +242,6 @@ export const translations = {
     universities: "Universities",
     accountMenu: "Account menu",
     guestMenu: "Guest menu",
-    myProfile: "My Profile",
   },
   ar: {
     apartments: "الشقق",
@@ -332,6 +327,8 @@ export const translations = {
     createAdComingSoon: "ميزة إنشاء الإعلان ستتوفر قريبًا!",
     propertyNotFound: "العقار غير موجود",
     backToMarketplace: "العودة إلى السوق",
+    loadingApartments: "جارٍ تحميل الشقق...",
+    loadingProperty: "جارٍ تحميل العقار...",
     profile: "الملف الشخصي",
     loadingProfile: "جارٍ تحميل الملف الشخصي...",
     failedToLoadProfile: "فشل في تحميل الملف الشخصي",
@@ -382,8 +379,6 @@ export const translations = {
     deleteProfilePictureTitle: "حذف الصورة الشخصية",
     deleteProfilePictureMessage: "سيتم إزالة صورتك الحالية. لن يتم تطبيق التغيير إلا بعد النقر على حفظ التغييرات.",
     confirm: "تأكيد",
-    delete: "حذف",
-    cancel: "إلغاء",
     // Admin Page
     addUniversity: "إضافة جامعة",
     editUniversity: "تعديل جامعة",
@@ -403,10 +398,6 @@ export const translations = {
     accountCreatedTitle: "تم إنشاء الحساب!",
     accountCreatedMessage: "تم إنشاء حسابك بنجاح. يرجى تسجيل الدخول للمتابعة.",
     signInNow: "سجل الدخول الآن",
-    signInRequired: "يتطلب تسجيل الدخول",
-    signInRequiredMessage: "يرجى تسجيل الدخول للوصول إلى هذه الميزة.",
-    pleaseSignInToMessage: "يرجى تسجيل الدخول لمراسلة مالك العقار.",
-    pleaseSignInToPostAd: "يرجى تسجيل الدخول لنشر إعلان والتواصل مع الطلاب.",
     ctaBrowseSubtitle:
       "تصفح مئات الشقق الموثوقة والصديقة للطلاب وابحث عن منزلك المثالي اليوم",
     // About Page
@@ -487,7 +478,6 @@ export const translations = {
     universities: "الجامعات",
     accountMenu: "قائمة الحساب",
     guestMenu: "قائمة الضيف",
-    myProfile: "ملفي الشخصي",
   },
 };
 

@@ -15,7 +15,7 @@ import {
   TrashIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import CloudinaryImage from "../CloudinaryImage";
+import CloudinaryImage from "../media/CloudinaryImage";
 
 const ProfileView = ({ profile, onEdit, onDelete }) => {
   const { t, language } = useLanguage();

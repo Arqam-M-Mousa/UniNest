@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { conversationsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../../components/common/PageLoader";
 import { useRef } from "react";
 
 const MessageBubble = ({ message, isMine }) => {
@@ -10,8 +10,8 @@ const MessageBubble = ({ message, isMine }) => {
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm ${isMine
-            ? "bg-[var(--color-accent)] text-white"
-            : "bg-[var(--color-surface-alt)] text-[var(--color-text)]"
+          ? "bg-[var(--color-accent)] text-white"
+          : "bg-[var(--color-surface-alt)] text-[var(--color-text)]"
           }`}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>

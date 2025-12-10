@@ -10,7 +10,7 @@ import {
 import { properties } from "../../data/properties";
 import TabButton from "../../components/common/TabButton";
 import Alert from "../../components/common/Alert";
-import nnuImg from "../../assets/images/campus/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
+import nnuImg from "../../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 import PageLoader from "../../components/common/PageLoader";
 import PropertyCard from "../../components/properties/PropertyCard";
 
@@ -221,10 +221,14 @@ const Apartments = () => {
 
   return (
     <PageLoader
-      loading={postSubmitting}
-      overlay
-      message={t("Posting ad...") || "Posting ad..."}
+      sessionKey="apartments_visited"
+      message={t("loadingApartments")}
     >
+      <PageLoader
+        loading={postSubmitting}
+        overlay
+        message={t("Posting ad...") || "Posting ad..."}
+      >
       <div className="min-h-screen themed-surface">
         <section className="relative py-12 px-8 text-center overflow-hidden">
           {/* Background Image */}
@@ -849,6 +853,7 @@ const Apartments = () => {
           onConfirm={() => navigate("/signin")}
         />
       </div>
+      </PageLoader>
     </PageLoader>
   );
 };

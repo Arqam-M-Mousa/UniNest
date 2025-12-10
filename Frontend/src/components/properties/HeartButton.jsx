@@ -4,7 +4,7 @@ import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
-import Alert from "./Alert";
+import Alert from "../common/Alert";
 
 export default function HeartButton({
   size = 40,

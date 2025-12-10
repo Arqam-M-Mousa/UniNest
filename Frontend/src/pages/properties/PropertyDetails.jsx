@@ -2,11 +2,11 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { properties } from "../../data/properties";
-import StatsCard from "../components/StatsCard";
-import HeartButton from "../components/HeartButton";
-import Alert from "../components/Alert";
+import StatsCard from "../../components/features/home/StatsCard";
+import HeartButton from "../../components/properties/HeartButton";
+import Alert from "../../components/common/Alert";
 import { useState } from "react";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../../components/common/PageLoader";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -49,8 +49,8 @@ const PropertyDetails = () => {
 
   return (
     <PageLoader
-      loading={false}
-      message={t("loadingProperty") || "Loading property..."}
+      sessionKey={`property_visited_${id}`}
+      message={t("loadingProperty")}
     >
       <div className="min-h-screen themed-surface pb-12">
         <div className="themed-surface-alt py-4 border-b themed-border">

@@ -140,10 +140,10 @@ const Profile = () => {
       <Alert
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
-        title="Delete account"
-        message="This will permanently delete your account. This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t("deleteAccount")}
+        message={t("deleteAccountWarning")}
+        confirmText={t("delete")}
+        cancelText={t("cancel")}
         type="warning"
         onConfirm={handleDeleteAccount}
       />

@@ -103,11 +103,37 @@ const ForgotPassword = () => {
           <h1 className="heading-font text-4xl sm:text-5xl font-bold mb-4 text-[var(--color-text)] text-center bg-gradient-to-r from-[var(--color-text)] to-[var(--color-accent)] bg-clip-text text-transparent leading-tight pb-1">
             {t("forgotPassword")}
           </h1>
-          <p className="text-center text-[var(--color-text-soft)] mb-10 text-base leading-relaxed">
+          <p className="text-center text-[var(--color-text-soft)] mb-8 text-base leading-relaxed">
             {step === 1 && (t("forgotPasswordInstructions") || "Enter your email address and we'll send you a code to reset your password.")}
             {step === 2 && "Enter the 6-digit code we sent to your email."}
             {step === 3 && "Enter your new password."}
           </p>
+
+          {/* Step Progress Indicator */}
+          <div className="flex items-center justify-center mb-10">
+            {[1, 2, 3].map((stepNum) => (
+              <div key={stepNum} className="flex items-center">
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm transition-all ${step === stepNum
+                      ? "bg-[var(--color-accent)] text-white scale-110 shadow-lg"
+                      : step > stepNum
+                        ? "bg-green-500 text-white"
+                        : "bg-[var(--color-surface)] text-[var(--color-text-soft)] border-2 border-[var(--color-border)]"
+                    }`}
+                >
+                  {step > stepNum ? "✓" : stepNum}
+                </div>
+                {stepNum < 3 && (
+                  <div
+                    className={`w-12 sm:w-16 h-1 mx-1 rounded-full transition-all ${step > stepNum
+                        ? "bg-green-500"
+                        : "bg-[var(--color-border)]"
+                      }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
 
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 text-base animate-in fade-in slide-in-from-top-2 duration-200">
@@ -148,7 +174,7 @@ const ForgotPassword = () => {
                     {loading && (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     )}
-                    {loading ? "Sending..." : t("sendResetLink") || "Send Reset Code"}
+                    {loading ? "Sending..." : t("sendResetCode") || "Send Reset Code"}
                   </button>
                 </form>
               )}

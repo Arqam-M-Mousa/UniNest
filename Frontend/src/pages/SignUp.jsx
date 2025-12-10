@@ -613,10 +613,10 @@ const SignUp = () => {
             setShowSuccessAlert(false);
             navigate("/signin");
           }}
-          title="Account Created!"
-          message="Your account has been created successfully. Please sign in to continue."
+          title={t("accountCreatedTitle")}
+          message={t("accountCreatedMessage")}
           type="success"
-          confirmText="Sign In Now"
+          confirmText={t("signInNow")}
           onConfirm={() => navigate("/signin")}
         />
       </div>

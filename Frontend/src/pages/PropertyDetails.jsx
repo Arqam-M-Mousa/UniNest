@@ -111,11 +111,10 @@ const PropertyDetails = () => {
                       key={index}
                       type="button"
                       onClick={() => setActiveImage(image)}
-                      className={`relative pt-[75%] rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 transition-transform hover:scale-[1.02] border ${
-                        activeImage === image
+                      className={`relative pt-[75%] rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 transition-transform hover:scale-[1.02] border ${activeImage === image
                           ? "border-[var(--color-accent)] shadow-lg"
                           : "border-[var(--color-border)]"
-                      }`}
+                        }`}
                     >
                       <img
                         src={image}

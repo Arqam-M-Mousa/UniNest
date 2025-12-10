@@ -46,6 +46,8 @@ const PropertyDetails = () => {
           rooms: {
             bedrooms: data.bedrooms || 0,
             bathrooms: data.bathrooms || 0,
+            kitchen: data.amenitiesJson?.kitchen || 0,
+            livingRoom: data.amenitiesJson?.livingRoom || 0,
           },
           images: data.images?.map(img => img.url) || [],
           owner: {
@@ -196,7 +198,7 @@ const PropertyDetails = () => {
               )}
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <StatsCard
                 label={t("squareMeter")}
                 value={property.squareMeter}
@@ -205,30 +207,16 @@ const PropertyDetails = () => {
                 label={t("availableIn")}
                 value={property.availableIn}
               />
-              <StatsCard
-                label={t("garage")}
-                value={property.garage ? t("yes") : t("no")}
-              />
             </div>
 
             <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl p-6 shadow-sm space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="heading-font text-2xl text-[var(--color-text)] m-0">
-                    {t("overview") || "Overview"}
-                  </h2>
-                  <p className="text-[var(--color-text-soft)] text-sm m-0">
-                    {property.description}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-[var(--color-text-soft)] m-0">
-                    {t("startingFrom") || "Starting from"}
-                  </p>
-                  <p className="text-3xl font-bold text-[var(--color-accent)] m-0">
-                    {property.price}
-                  </p>
-                </div>
+              <div>
+                <h2 className="heading-font text-2xl text-[var(--color-text)] m-0">
+                  {t("overview") || "Overview"}
+                </h2>
+                <p className="text-[var(--color-text-soft)] text-sm m-0">
+                  {property.description}
+                </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -238,12 +226,16 @@ const PropertyDetails = () => {
                 <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
                   {property.rooms.bathrooms} {t("baths")}
                 </span>
-                <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                  {t("kitchen")}
-                </span>
-                <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                  {t("livingRoom")}
-                </span>
+                {property.rooms.kitchen > 0 && (
+                  <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                    {t("kitchen")}
+                  </span>
+                )}
+                {property.rooms.livingRoom > 0 && (
+                  <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                    {t("livingRoom")}
+                  </span>
+                )}
                 <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
                   {property.squareMeter} m²
                 </span>
@@ -256,9 +248,12 @@ const PropertyDetails = () => {
                   {t("rooms")}
                 </h3>
                 <p className="text-[var(--color-text-soft)] m-0">
-                  {t("kitchen")}, {property.rooms.bathrooms}
-                  {t("baths")}, {property.rooms.bedrooms}
-                  {t("beds")}, {t("livingRoom")}
+                  {[
+                    property.rooms.kitchen > 0 && t("kitchen"),
+                    property.rooms.bathrooms > 0 && `${property.rooms.bathrooms} ${t("baths")}`,
+                    property.rooms.bedrooms > 0 && `${property.rooms.bedrooms} ${t("beds")}`,
+                    property.rooms.livingRoom > 0 && t("livingRoom")
+                  ].filter(Boolean).join(", ")}
                 </p>
               </div>
 
@@ -322,9 +317,6 @@ const PropertyDetails = () => {
             <div className="mt-6 p-4 rounded-xl bg-[var(--color-bg)] dark:bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text-soft)]">
               <p className="m-0">
                 {t("availableIn")}: {property.availableIn}
-              </p>
-              <p className="m-0">
-                {t("garage")}: {property.garage ? t("yes") : t("no")}
               </p>
               <p className="m-0">
                 {t("partner")}: {property.partner ? t("yes") : t("no")}

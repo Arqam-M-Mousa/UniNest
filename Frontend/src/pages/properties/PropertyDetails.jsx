@@ -13,6 +13,15 @@ const PropertyDetails = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+
+  // Constants
+  const DEFAULT_CURRENCY = "NIS";
+  const DEFAULT_OWNER_NAME = "Property Owner";
+  const DEFAULT_CONTACT = "Contact via message";
+  const DEFAULT_SQUARE_METER = "N/A";
+  const DEFAULT_AVAILABLE = "Now";
+
+  // State
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,17 +48,7 @@ const PropertyDetails = () => {
         setLoading(true);
         setError(null);
         const response = await propertyListingsAPI.getById(id);
-        const data = response.data; // API returns data directly, not wrapped in a data field
-
-        // Debug: Log the actual data structure
-        console.log("API Response:", response);
-        console.log("Property images:", data.images);
-        console.log("Owner data:", data.owner);
-        console.log("Owner avatar fields:", {
-          avatarUrl: data.owner?.avatarUrl,
-          profilePictureUrl: data.owner?.profilePictureUrl,
-          avatar: data.owner?.avatar,
-        });
+        const data = response.data;
 
         // Transform API response to match expected format
         const transformedProperty = {
@@ -57,14 +56,14 @@ const PropertyDetails = () => {
           listingId: data.listingId,
           name: data.title,
           description: data.description,
-          price: `${data.pricePerMonth} ${data.currency || "NIS"}`,
+          price: `${data.pricePerMonth} ${data.currency || DEFAULT_CURRENCY}`,
           pricePerMonth: data.pricePerMonth,
           currency: data.currency,
           location: data.city,
-          squareMeter: data.squareFeet ? `${data.squareFeet} ` : "N/A",
+          squareMeter: data.squareFeet ? `${data.squareFeet} ` : DEFAULT_SQUARE_METER,
           availableIn: data.availableFrom
             ? new Date(data.availableFrom).toLocaleDateString()
-            : "Now",
+            : DEFAULT_AVAILABLE,
           garage: data.amenitiesJson?.garage || false,
           partner: data.amenitiesJson?.partner || false,
           rooms: {
@@ -77,9 +76,9 @@ const PropertyDetails = () => {
           owner: {
             name: data.owner
               ? `${data.owner.firstName || ""} ${data.owner.lastName || ""}`.trim()
-              : "Property Owner",
+              : DEFAULT_OWNER_NAME,
             avatar: data.owner?.avatarUrl || data.owner?.profilePictureUrl || data.owner?.avatar || null,
-            phone: data.owner?.phoneNumber || data.owner?.phone || "Contact via message",
+            phone: data.owner?.phoneNumber || data.owner?.phone || DEFAULT_CONTACT,
           },
         };
 

@@ -233,21 +233,21 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/20 to-transparent my-8" />
 
         {/* Danger Zone */}
-        <div className="rounded-2xl border border-red-300 dark:border-red-500/40 bg-white dark:bg-zinc-800 overflow-hidden shadow-sm transition">
+        <div className="rounded-xl border-2 border-red-300 dark:border-red-900/50 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
           <button
             type="button"
             onClick={() => setIsDangerOpen((prev) => !prev)}
-            className="w-full px-5 py-4 flex items-center justify-between gap-3 bg-red-50 dark:bg-zinc-800 border-b border-red-200 dark:border-red-500/30 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            className="w-full px-5 py-4 flex items-center justify-between gap-3 bg-red-50 dark:bg-red-950/30 text-left transition-colors hover:bg-red-100 dark:hover:bg-red-950/50"
             aria-expanded={isDangerOpen}
             aria-controls="danger-zone-panel"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-red-600 text-white flex items-center justify-center">
                 <TrashIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-red-600 dark:text-red-400 font-medium">
-                  {t("dangerZone") || "Danger zone"}
+                <p className="text-xs uppercase tracking-wider text-red-600 dark:text-red-400 font-bold">
+                  {t("dangerZone") || "DANGERZONE"}
                 </p>
                 <p className="text-base font-semibold text-gray-900 dark:text-white">
                   {t("deleteAccount") || "Delete account"}
@@ -255,7 +255,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
               </div>
             </div>
             <ChevronDownIcon
-              className={`w-5 h-5 text-red-500 dark:text-red-400 transition-transform ${
+              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                 isDangerOpen ? "rotate-180" : ""
               }`}
             />
@@ -264,22 +264,22 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
           {isDangerOpen && (
             <div
               id="danger-zone-panel"
-              className="p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-gray-50 dark:bg-zinc-900"
+              className="px-5 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-gray-50 dark:bg-zinc-800/50 border-t-2 border-red-300 dark:border-red-900/50"
             >
-              <div className="space-y-2 text-sm">
-                <p className="text-gray-700 dark:text-gray-200">
+              <div className="space-y-2 flex-1">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {t("deleteAccountWarning") ||
-                    "Permanently deletes your account and all data. This action cannot be undone."}
+                    "Permanently deletes your account and all associated data. This action cannot be undone."}
                 </p>
-                <ul className="text-xs text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
-                  <li>Removes conversations, favorites, and listings.</li>
-                  <li>You will be signed out immediately.</li>
+                <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>• Removes conversations, favorites, and listings.</li>
+                  <li>• You will be signed out immediately.</li>
                 </ul>
               </div>
 
               <button
                 onClick={onDelete}
-                className="px-5 py-2 text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 rounded-lg font-semibold shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 flex items-center gap-2 self-start sm:self-auto"
+                className="px-5 py-2.5 text-white bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors flex items-center gap-2 self-start sm:self-auto shadow-sm"
               >
                 <TrashIcon className="w-4 h-4" />
                 {t("delete") || "Delete"}

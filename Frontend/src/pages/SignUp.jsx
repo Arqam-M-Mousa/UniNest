@@ -21,7 +21,7 @@ const isStudentEmail = (email) => {
 const SignUp = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -34,7 +34,7 @@ const SignUp = () => {
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordAgain, setShowPasswordAgain] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -52,24 +52,24 @@ const SignUp = () => {
   // Extract student ID and university from email
   const getStudentDetails = () => {
     if (!isStudent) return { studentId: "", universityId: "" };
-    
+
     const match = formData.email.trim().toLowerCase().match(/^s(\d{5,})@([\w.-]+)$/);
     if (!match) return { studentId: "", universityId: "" };
-    
+
     const studentId = match[1];
     const domain = match[2].replace(/^www\./, "");
     const domainRoot = domain.split(".").slice(-2).join(".");
-    
+
     const matchedUni = universities.find((uni) => {
       if (!uni.domain) return false;
       const uniDomain = uni.domain.toLowerCase().replace(/^www\./, "");
       const uniRoot = uniDomain.split(".").slice(-2).join(".");
       return domainRoot === uniRoot || domain.endsWith(uniDomain);
     });
-    
+
     return { studentId, universityId: matchedUni?.id || "" };
   };
-  
+
   const { studentId, universityId } = getStudentDetails();
 
   const handleSendCode = async (e) => {
@@ -229,8 +229,8 @@ const SignUp = () => {
   const loaderMessage = sendingCode
     ? "Sending verification code..."
     : verifyingCode
-    ? "Verifying code..."
-    : t("creatingAccount") || "Creating Account...";
+      ? "Verifying code..."
+      : t("creatingAccount") || "Creating Account...";
 
   // Auto-dismiss success modal after 3 seconds and go to signin
   useEffect(() => {
@@ -256,24 +256,50 @@ const SignUp = () => {
       message={loaderMessage}
       minHeight="min-h-[calc(100vh-200px)]"
     >
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 themed-surface relative overflow-hidden">
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-16 px-4 themed-surface relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/5 via-transparent to-[var(--color-accent)]/10 pointer-events-none" />
 
-        <div className="themed-surface-alt border border-[var(--color-accent)]/20 rounded-3xl p-8 sm:p-10 max-w-[600px] w-full shadow-2xl shadow-black/5 dark:shadow-black/40 backdrop-blur-sm relative z-10">
-          <div className="flex justify-center mb-6">
+        <div className="themed-surface-alt border border-[var(--color-accent)]/20 rounded-3xl p-10 sm:p-12 max-w-[640px] w-full shadow-2xl shadow-black/5 dark:shadow-black/40 backdrop-blur-sm relative z-10">
+          <div className="flex justify-center mb-8">
             <div className="relative">
               <div className="absolute inset-0 bg-[var(--color-accent)] blur-2xl opacity-20 rounded-full" />
-              <UserCircleIcon className="w-20 h-20 text-[var(--color-accent)] drop-shadow-lg relative" />
+              <UserCircleIcon className="w-24 h-24 text-[var(--color-accent)] drop-shadow-lg relative" />
             </div>
           </div>
 
-          <h1 className="heading-font text-center text-3xl sm:text-4xl mb-3 font-bold bg-gradient-to-r from-[var(--color-text)] to-[var(--color-accent)] bg-clip-text text-transparent leading-tight pb-1">
+          <h1 className="heading-font text-center text-4xl sm:text-5xl mb-4 font-bold bg-gradient-to-r from-[var(--color-text)] to-[var(--color-accent)] bg-clip-text text-transparent leading-tight pb-1">
             {t("signUp")}
           </h1>
-          <p className="text-center text-[var(--color-text-soft)] mb-8 text-sm">
+          <p className="text-center text-[var(--color-text-soft)] mb-8 text-base">
             {t("createYourAccount") || "Create your account to get started"}
           </p>
+
+          {/* Step Progress Indicator */}
+          <div className="flex items-center justify-center gap-3 mb-10">
+            {[1, 2, 3].map((stepNum) => (
+              <div key={stepNum} className="flex items-center">
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm transition-all ${step === stepNum
+                    ? "bg-[var(--color-accent)] text-white scale-110 shadow-lg"
+                    : step > stepNum
+                      ? "bg-green-500 text-white"
+                      : "bg-[var(--color-surface)] text-[var(--color-text-soft)] border-2 border-[var(--color-border)]"
+                    }`}
+                >
+                  {step > stepNum ? "✓" : stepNum}
+                </div>
+                {stepNum < 3 && (
+                  <div
+                    className={`w-12 sm:w-16 h-1 mx-1 rounded-full transition-all ${step > stepNum
+                      ? "bg-green-500"
+                      : "bg-[var(--color-border)]"
+                      }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
 
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-600 dark:text-red-400 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
@@ -283,23 +309,31 @@ const SignUp = () => {
 
           {/* Step 1: Email Entry */}
           {step === 1 && (
-            <form onSubmit={handleSendCode} className="flex flex-col gap-5">
-              <div className="relative group">
-                <input
-                  type="email"
-                  name="email"
-                  placeholder={t("email") || "Email"}
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="input-field text-base w-full py-3.5 transition-all duration-300 focus:scale-[1.01]"
-                />
+            <form onSubmit={handleSendCode} className="flex flex-col gap-6">
+              <div>
+                <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <div className="relative group">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder={t("email") || "your.email@university.edu"}
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="input-field text-base w-full py-4 transition-all duration-300 focus:scale-[1.01]"
+                  />
+                </div>
+                <p className="text-xs text-[var(--color-text-soft)] mt-2">
+                  Use your university email (s123456@...) for student account
+                </p>
               </div>
 
               <button
                 type="submit"
                 disabled={sendingCode}
-                className="btn-primary mt-2 py-4 text-base font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="btn-primary mt-2 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 {sendingCode && (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -311,41 +345,48 @@ const SignUp = () => {
 
           {/* Step 2: Verify Code */}
           {step === 2 && (
-            <form onSubmit={handleVerifyCode} className="flex flex-col gap-5">
-              <p className="text-center text-[var(--color-text-soft)] text-sm">
-                We sent a 6-digit code to{" "}
-                <strong className="text-[var(--color-text)]">
+            <form onSubmit={handleVerifyCode} className="flex flex-col gap-6">
+              <div className="text-center bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
+                <p className="text-sm text-[var(--color-text-soft)] mb-1">
+                  We sent a 6-digit code to
+                </p>
+                <p className="font-semibold text-[var(--color-text)]">
                   {formData.email}
-                </strong>
-              </p>
+                </p>
+              </div>
 
-              <div className="relative group">
-                <input
-                  type="text"
-                  placeholder="000000"
-                  value={verificationCode}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-                    setVerificationCode(value);
-                  }}
-                  maxLength={6}
-                  required
-                  className="input-field text-base w-full py-3.5 text-center text-2xl font-mono tracking-[0.5em] transition-all duration-300 focus:scale-[1.01]"
-                />
+              <div>
+                <label className="text-sm font-medium text-[var(--color-text)] mb-2 block text-center">
+                  Verification Code
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    placeholder="000000"
+                    value={verificationCode}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                      setVerificationCode(value);
+                    }}
+                    maxLength={6}
+                    required
+                    className="input-field text-base w-full py-4 text-center text-3xl font-mono tracking-[0.5em] transition-all duration-300 focus:scale-[1.01] bg-[var(--color-surface)]"
+                  />
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={handleChangeEmail}
-                className="text-sm text-[var(--color-accent)] hover:underline font-medium self-start"
+                className="text-sm text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] hover:underline font-medium self-center"
               >
-                ← Change email
+                ← Change email address
               </button>
 
               <button
                 type="submit"
                 disabled={verifyingCode}
-                className="btn-primary mt-2 py-4 text-base font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="btn-primary mt-2 py-4 text-lg font-semibold shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 {verifyingCode && (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -357,77 +398,88 @@ const SignUp = () => {
 
           {/* Step 3: Complete Signup */}
           {step === 3 && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {showEmailVerifiedBanner && (
-                <div className="mb-2 p-3 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl border border-green-500/30 text-sm text-center font-medium animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="p-4 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl border border-green-500/30 text-base text-center font-medium animate-in fade-in slide-in-from-top-2 duration-200">
                   ✓ Email verified! Complete your profile below.
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="relative group">
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder={t("firstName")}
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                    className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-                  />
-                </div>
+              {/* Personal Information Section */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-[var(--color-text)] border-b border-[var(--color-border)] pb-2">
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="relative group">
+                    <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                      First Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      placeholder={t("firstName")}
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      className="input-field text-base w-full py-3 transition-all duration-300 focus:scale-[1.02]"
+                    />
+                  </div>
 
-                <div className="relative group">
-                  <input
-                    type="text"
-                    name="lastName"
-                    placeholder={t("lastName")}
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                    className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-                  />
-                </div>
+                  <div className="relative group">
+                    <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                      Last Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      placeholder={t("lastName")}
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      className="input-field text-base w-full py-3 transition-all duration-300 focus:scale-[1.02]"
+                    />
+                  </div>
 
-                <div className="relative group">
-                  <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
-                    {t("gender")}
-                    <span className="text-red-500"> *</span>
-                  </label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    required
-                    className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02] cursor-pointer"
-                  >
-                    <option value="">{t("selectGender") || "Select"}</option>
-                    <option value="Male">{t("genderMale") || "Male"}</option>
-                    <option value="Female">
-                      {t("genderFemale") || "Female"}
-                    </option>
-                  </select>
-                </div>
-              </div>
+                  <div className="relative group">
+                    <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                      {t("gender")} <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                      className="input-field text-base w-full py-3 transition-all duration-300 focus:scale-[1.02] cursor-pointer"
+                    >
+                      <option value="">{t("selectGender") || "Select"}</option>
+                      <option value="Male">{t("genderMale") || "Male"}</option>
+                      <option value="Female">
+                        {t("genderFemale") || "Female"}
+                      </option>
+                    </select>
+                  </div>
 
-              <div className="relative group">
-                <label className="text-xs text-[var(--color-text-soft)] ml-1 mb-1 block">
-                  {t("phoneNumber")}{" "}
-                  {role === "Landlord" ? (
-                    <span className="text-red-500">*</span>
-                  ) : (
-                    <span className="text-[var(--color-text-soft)]">(Optional)</span>
-                  )}
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  placeholder={t("phoneNumber")}
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  required={role === "Landlord"}
-                  className="input-field text-base w-full transition-all duration-300 focus:scale-[1.02]"
-                />
+                  <div className="relative group">
+                    <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                      {t("phoneNumber")}{" "}
+                      {role === "Landlord" ? (
+                        <span className="text-red-500">*</span>
+                      ) : (
+                        <span className="text-[var(--color-text-soft)]">(Optional)</span>
+                      )}
+                    </label>
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      placeholder={t("phoneNumber")}
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                      required={role === "Landlord"}
+                      className="input-field text-base w-full py-3 transition-all duration-300 focus:scale-[1.02]"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="relative group">
@@ -467,7 +519,7 @@ const SignUp = () => {
                       {universitiesLoading
                         ? "Loading..."
                         : universities.find((u) => u.id === universityId)?.name ||
-                          t("selectUniversity")}
+                        t("selectUniversity")}
                     </div>
                     <p className="text-[11px] text-[var(--color-text-soft)] mt-1">
                       Auto-selected from your email domain.

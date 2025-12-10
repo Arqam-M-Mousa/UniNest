@@ -13,36 +13,34 @@ const Home = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center text-center px-4 sm:px-6 py-20 md:py-32 overflow-hidden min-h-[420px] md:min-h-[520px]">
-        {/* Background Image with blur */}
+      <section className="relative flex items-center justify-center text-center px-4 sm:px-6 py-24 md:py-36 overflow-hidden min-h-[500px] md:min-h-[600px]">
+        {/* Background Image */}
         <img
           src={heroImg}
           alt="Campus Background"
-          className="absolute inset-0 w-full h-full object-cover object-center scale-108 blur-[2px]"
+          className="absolute inset-0 w-full h-full object-cover object-center"
           loading="eager"
         />
-        {/* Overlay with gradient */}
+        {/* Simplified overlay */}
         <div
-          className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40 dark:from-black/50 dark:via-black/40 dark:to-black/60"
+          className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50"
           aria-hidden="true"
         />
-        <div className="relative max-w-4xl z-10 px-2 sm:px-4">
+        <div className="relative max-w-5xl z-10 px-4 sm:px-6">
           <Reveal
             as="h1"
-            className="heading-font text-3xl sm:text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl tracking-tight"
+            className="heading-font text-4xl sm:text-5xl md:text-7xl font-extrabold mb-8 leading-tight text-white tracking-tight"
             style={{
-              textShadow:
-                "0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)",
+              textShadow: "0 4px 20px rgba(0,0,0,0.6)",
             }}
           >
             {t("heroTitle")}
           </Reveal>
           <Reveal
             as="p"
-            className="text-base sm:text-lg md:text-2xl mb-8 md:mb-10 text-white font-medium drop-shadow-lg max-w-2xl mx-auto leading-relaxed"
+            className="text-lg sm:text-xl md:text-2xl mb-10 md:mb-12 text-white/95 font-medium max-w-3xl mx-auto leading-relaxed"
             style={{
-              textShadow:
-                "0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4)",
+              textShadow: "0 2px 12px rgba(0,0,0,0.5)",
             }}
           >
             {t("heroSubtitle")}
@@ -50,7 +48,7 @@ const Home = () => {
           <Reveal>
             <Link
               to="/marketplace"
-              className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-md shadow-black/10 dark:shadow-black/40 transition-colors focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)] anim-btn-pulse"
+              className="inline-block px-12 py-4 rounded-full font-semibold text-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-black/30 transition-all hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/30"
             >
               {t("startSearching")}
             </Link>
@@ -59,30 +57,30 @@ const Home = () => {
       </section>
 
       {/* Features */}
-      <section className="py-14 sm:py-16 themed-surface features-bg relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-16 sm:py-20 themed-surface features-bg relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <AnimatedFeatures variant="home" />
         </div>
       </section>
 
       {/* About Us */}
-      <section className="py-14 sm:py-16 themed-bg-alt">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-            <div className="flex justify-center">
+      <section className="py-16 sm:py-20 themed-bg-alt">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+            <div className="flex justify-center order-2 md:order-1">
               <img
                 src={campusClockImg}
                 alt="Campus Clock"
-                className="w-full max-w-[569px] h-auto rounded-lg shadow-lg object-cover aspect-[16/10] md:aspect-auto"
+                className="w-full max-w-[600px] h-auto rounded-2xl shadow-xl object-cover"
                 loading="lazy"
                 sizes="(min-width: 1024px) 45vw, 90vw"
               />
             </div>
-            <div>
-              <h2 className="heading-font text-2xl sm:text-3xl font-bold mb-6 text-[var(--color-text)]">
+            <div className="order-1 md:order-2">
+              <h2 className="heading-font text-3xl sm:text-4xl font-bold mb-6 text-[var(--color-text)]">
                 {t("aboutUs")}
               </h2>
-              <p className="text-base leading-relaxed text-[var(--color-text-soft)]">
+              <p className="text-base sm:text-lg leading-relaxed text-[var(--color-text-soft)]">
                 {t("aboutUsText")}
               </p>
             </div>
@@ -92,18 +90,18 @@ const Home = () => {
 
       {/* Offers */}
       <section
-        className="py-14 sm:py-16 bg-[var(--color-surface)] dark:bg-[var(--color-surface-alt)]"
+        className="py-16 sm:py-20 bg-[var(--color-surface)] dark:bg-[var(--color-surface-alt)]"
         id="offers"
       >
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <Reveal
             as="h2"
-            className="heading-font text-center text-4xl font-bold mb-12 text-[var(--color-text)]"
+            className="heading-font text-center text-3xl sm:text-4xl md:text-5xl font-bold mb-16 text-[var(--color-text)]"
           >
             {t("ourOffers")}
           </Reveal>
-          {/* 3 rotating cards layout */}
-          <div className="relative flex items-center justify-center gap-4 md:gap-8 max-w-6xl mx-auto px-4 min-h-[400px]">
+          {/* Improved 3-card carousel layout */}
+          <div className="relative flex items-center justify-center gap-6 md:gap-10 max-w-6xl mx-auto px-4 min-h-[450px]">
             {[
               { src: campusClockImg, alt: "Campus Clock", price: "1500$" },
               { src: nnuImg, alt: "Campus Housing", price: "1500$" },
@@ -111,21 +109,21 @@ const Home = () => {
             ].map((offer, i) => (
               <Reveal
                 key={i}
-                className={`group relative rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer
+                className={`group relative rounded-2xl overflow-hidden shadow-xl transition-all duration-500 cursor-pointer
                   ${
                     i === 1
-                      ? "w-[45%] md:w-[400px] h-[350px] md:h-[400px] z-20 scale-100"
-                      : "w-[25%] md:w-[280px] h-[280px] md:h-[320px] z-10 opacity-70"
+                      ? "w-[45%] md:w-[420px] h-[380px] md:h-[450px] z-20"
+                      : "w-[27%] md:w-[300px] h-[300px] md:h-[360px] z-10 opacity-80"
                   }
-                  hover:scale-105 hover:opacity-100 hover:z-30 hover:shadow-3xl
+                  hover:scale-105 hover:opacity-100 hover:z-30 hover:shadow-2xl
                 `}
                 style={{
                   transform:
                     i === 0
-                      ? "perspective(1000px) rotateY(8deg)"
+                      ? "perspective(1200px) rotateY(6deg)"
                       : i === 2
-                      ? "perspective(1000px) rotateY(-8deg)"
-                      : "perspective(1000px) rotateY(0deg)",
+                      ? "perspective(1200px) rotateY(-6deg)"
+                      : "perspective(1200px) rotateY(0deg)",
                 }}
               >
                 <div className="relative h-full flex flex-col">
@@ -133,15 +131,15 @@ const Home = () => {
                   <img
                     src={offer.src}
                     alt={offer.alt}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     loading={i === 1 ? "eager" : "lazy"}
                   />
                   {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
-                  {/* Price pill */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-500"></div>
+                  {/* Price badge */}
                   <div
-                    className={`absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-[var(--color-surface)] px-6 py-2 rounded-full font-bold text-lg shadow-lg transition-all duration-300 group-hover:scale-110 animate-float-slow ${
-                      i !== 1 ? "text-sm px-4 py-1" : ""
+                    className={`absolute bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-[var(--color-surface)] px-8 py-3 rounded-full font-bold shadow-xl transition-all duration-300 group-hover:scale-110 ${
+                      i !== 1 ? "text-base px-5 py-2" : "text-xl"
                     }`}
                   >
                     <span className="text-[var(--color-text)]">
@@ -155,32 +153,29 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Ready CTA (Animated) */}
-      <section className="py-16 md:py-20 themed-surface">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="relative rounded-3xl md:rounded-[50px] p-10 md:p-16 themed-surface-alt border-4 themed-border shadow-2xl overflow-hidden">
-            {/* Decorative circles */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2 animate-float-slow"></div>
-            <div
-              className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--color-accent)]/15 dark:bg-[var(--color-accent)]/5 rounded-full translate-y-1/2 -translate-x-1/2 animate-float-slow"
-              style={{ animationDelay: "1.2s" }}
-            ></div>
+      {/* Ready CTA */}
+      <section className="py-20 md:py-24 themed-surface">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+          <div className="relative rounded-3xl p-12 md:p-20 themed-surface-alt border-2 themed-border shadow-xl overflow-hidden">
+            {/* Simplified decorative elements */}
+            <div className="absolute top-0 right-0 w-72 h-72 bg-[var(--color-accent)]/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-[var(--color-accent)]/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
 
             <div className="relative z-10">
               <Reveal delay={0}>
-                <h2 className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
+                <h2 className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-[var(--color-text)]">
                   {t("readyTitle")}
                 </h2>
               </Reveal>
               <Reveal delay={120}>
-                <p className="text-base sm:text-lg text-[var(--color-text-soft)] mb-8 md:mb-10 max-w-2xl mx-auto">
+                <p className="text-lg sm:text-xl text-[var(--color-text-soft)] mb-10 max-w-2xl mx-auto leading-relaxed">
                   {t("ctaBrowseSubtitle")}
                 </p>
               </Reveal>
               <Reveal delay={260}>
                 <Link
                   to="/marketplace"
-                  className="inline-block px-12 py-4 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-lg focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)] animate-glow-pulse"
+                  className="inline-block px-14 py-4 rounded-full font-semibold text-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
                 >
                   {t("startSearching")}
                 </Link>
@@ -191,23 +186,25 @@ const Home = () => {
       </section>
 
       {/* Final Banner */}
-      <section className="relative min-h-[300px] sm:min-h-[320px] flex items-center justify-center text-center px-4 sm:px-6 py-16 sm:py-20 overflow-hidden">
+      <section className="relative min-h-[350px] sm:min-h-[400px] flex items-center justify-center text-center px-4 sm:px-6 py-20 sm:py-24 overflow-hidden">
         <img
           src={studentsImg}
           alt="University Campus"
-          className="absolute inset-0 w-full h-full object-cover blur-[1px]"
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
-        <div className="relative max-w-3xl z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" aria-hidden="true" />
+        <div className="relative max-w-4xl z-10 px-4">
           <Reveal
             as="h2"
-            className="heading-font text-3xl sm:text-4xl font-bold mb-4 text-white drop-shadow-lg"
+            className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white"
+            style={{ textShadow: "0 4px 20px rgba(0,0,0,0.6)" }}
           >
             {t("builtForStudents")}
           </Reveal>
           <Reveal
             as="p"
-            className="text-lg sm:text-xl text-white drop-shadow-md max-w-2xl mx-auto"
+            className="text-lg sm:text-xl md:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}
           >
             {t("weUnderstand")}
           </Reveal>

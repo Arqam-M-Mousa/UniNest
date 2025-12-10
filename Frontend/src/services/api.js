@@ -131,6 +131,27 @@ export const userAPI = {
  * Property Listings API
  */
 export const propertyListingsAPI = {
+  list: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(
+      `/api/property-listings${queryString ? `?${queryString}` : ""}`
+    );
+  },
+
+  getById: async (id) => {
+    return apiRequest(`/api/property-listings/${id}`);
+  },
+
+  getFilterOptions: async () => {
+    return apiRequest("/api/property-listings/filters/options");
+  },
+
   create: async (payload) => {
     return apiRequest("/api/property-listings", {
       method: "POST",

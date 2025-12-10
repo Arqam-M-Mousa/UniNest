@@ -1,11 +1,11 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
-import { properties } from "../../data/properties";
+import { propertyListingsAPI } from "../../services/api";
 import StatsCard from "../../components/features/home/StatsCard";
 import HeartButton from "../../components/properties/HeartButton";
 import Alert from "../../components/common/Alert";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageLoader from "../../components/common/PageLoader";
 
 const PropertyDetails = () => {
@@ -13,18 +13,79 @@ const PropertyDetails = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const property = properties.find((p) => p.id === parseInt(id));
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [activeImage, setActiveImage] = useState(
-    property ? property.images?.[0] : null
-  );
+  const [activeImage, setActiveImage] = useState(null);
+
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await propertyListingsAPI.getById(id);
+        const data = response.data;
+        
+        // Transform API response to match expected format
+        const transformedProperty = {
+          id: data.id,
+          name: data.title,
+          description: data.description,
+          price: `${data.pricePerMonth} ${data.currency || "NIS"}`,
+          pricePerMonth: data.pricePerMonth,
+          currency: data.currency,
+          location: data.city,
+          squareMeter: data.squareFeet ? `${data.squareFeet} sqft` : "N/A",
+          availableIn: data.availableFrom 
+            ? new Date(data.availableFrom).toLocaleDateString() 
+            : "Now",
+          garage: data.amenitiesJson?.garage || false,
+          partner: data.amenitiesJson?.partner || false,
+          rooms: {
+            bedrooms: data.bedrooms || 0,
+            bathrooms: data.bathrooms || 0,
+          },
+          images: data.images?.map(img => img.url) || [],
+          owner: {
+            name: data.owner 
+              ? `${data.owner.firstName || ""} ${data.owner.lastName || ""}`.trim() 
+              : "Property Owner",
+            avatar: data.owner?.avatarUrl || null,
+            phone: data.owner?.phoneNumber || "Contact via message",
+          },
+        };
+        
+        setProperty(transformedProperty);
+        setActiveImage(transformedProperty.images[0] || null);
+      } catch (err) {
+        console.error("Failed to fetch property:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [id]);
 
   // Determine if we're on apartments or marketplace route
   const isApartmentsRoute = window.location.pathname.startsWith("/apartments");
   const parentRoute = isApartmentsRoute ? "/apartments" : "/marketplace";
   const parentLabel = isApartmentsRoute ? t("apartments") : t("marketplace");
 
-  if (!property) {
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent)]"></div>
+        <p className="text-[var(--color-text-soft)]">{t("loading") || "Loading..."}</p>
+      </div>
+    );
+  }
+
+  // Show error or not found state
+  if (error || !property) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4">
         <h2>{t("propertyNotFound")}</h2>
@@ -77,7 +138,7 @@ const PropertyDetails = () => {
             <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-lg">
               <div className="relative aspect-[4/3] bg-slate-200 dark:bg-slate-700">
                 <img
-                  src={activeImage || property.images[0]}
+                  src={activeImage || property.images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80"}
                   alt={property.name}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -109,7 +170,7 @@ const PropertyDetails = () => {
                 </div>
               </div>
 
-              {property.images.length > 1 && (
+              {property.images?.length > 1 && (
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3 p-4 bg-[var(--color-bg)] dark:bg-[var(--color-surface)]">
                   {property.images.slice(0, 8).map((image, index) => (
                     <button

@@ -6,7 +6,10 @@ import {
   propertyListingsAPI,
   uploadsAPI,
   universitiesAPI,
+  favoritesAPI,
 } from "../../services/api";
+import { QueueListIcon, HeartIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import TabButton from "../../components/common/TabButton";
 import Alert from "../../components/common/Alert";
 import nnuImg from "../../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
@@ -94,6 +97,14 @@ const Apartments = () => {
     setListingsError("");
 
     try {
+      // If favorites tab is active, fetch favorites instead
+      if (activeTab === "favorites") {
+        const response = await favoritesAPI.list();
+        setListings(response?.data?.listings || []);
+        setTotalListings(response?.data?.total || 0);
+        return;
+      }
+
       const queryFilters = {};
 
       if (filters.propertyType) queryFilters.propertyType = filters.propertyType;
@@ -209,6 +220,15 @@ const Apartments = () => {
     setPostSuccess("");
     setUniversitiesFetched(false);
     setPostModalOpen(true);
+  };
+
+  const handleFavoritesTabClick = () => {
+    if (!isAuthenticated) {
+      setAuthModalMessage("favorites");
+      setShowAuthModal(true);
+      return;
+    }
+    setActiveTab("favorites");
   };
 
   const updateForm = (field, value) => {
@@ -419,42 +439,19 @@ const Apartments = () => {
             <TabButton
               active={activeTab === "lastListings"}
               onClick={() => setActiveTab("lastListings")}
-              icon={
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <rect x="2" y="2" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
-                  <path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              }
+              icon={<QueueListIcon className="w-5 h-5" />}
             >
               {t("lastListings")}
             </TabButton>
             <TabButton
-              active={activeTab === "offers"}
-              onClick={() => setActiveTab("offers")}
-              icon={
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" />
-                  <path d="M7 13l6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="8" cy="8" r="1" fill="currentColor" />
-                  <circle cx="12" cy="12" r="1" fill="currentColor" />
-                </svg>
-              }
-            >
-              {t("offers")}
-            </TabButton>
-            <TabButton
               active={activeTab === "favorites"}
-              onClick={() => setActiveTab("favorites")}
+              onClick={() => handleFavoritesTabClick()}
               icon={
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <path
-                    d="M10 2.8l2.15 4.36 4.81.72-3.5 3.41.83 4.79-4.29-2.26-4.29 2.26.83-4.79-3.5-3.41 4.81-.72L10 2.8Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                activeTab === "favorites" ? (
+                  <HeartSolid className="w-5 h-5" />
+                ) : (
+                  <HeartIcon className="w-5 h-5" />
+                )
               }
             >
               {t("favorites")}
@@ -466,9 +463,7 @@ const Apartments = () => {
                 className={`${isRTL ? "mr-auto flex-row-reverse" : "ml-auto"} flex items-center gap-2 px-6 py-3 rounded-full btn-primary text-sm hover:scale-105 transition-transform`}
                 dir={isRTL ? "rtl" : "ltr"}
               >
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 5v10M5 10h10" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+                <PlusIcon className="w-5 h-5" />
                 {t("postAd")}
               </button>
             )}
@@ -1063,6 +1058,8 @@ const Apartments = () => {
             message={
               authModalMessage === "message"
                 ? t("pleaseSignInToMessage")
+                : authModalMessage === "favorites"
+                ? t("pleaseSignInToViewFavorites") || "Please sign in to view your favorites."
                 : t("pleaseSignInToPostAd")
             }
             type="warning"

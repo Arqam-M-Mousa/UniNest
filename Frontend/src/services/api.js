@@ -248,4 +248,17 @@ export const uploadsAPI = {
   },
 };
 
+/**
+ * Favorites API
+ */
+export const favoritesAPI = {
+  list: async () => apiRequest("/api/favorites"),
+  getIds: async () => apiRequest("/api/favorites/ids"),
+  add: async (listingId) =>
+    apiRequest(`/api/favorites/${listingId}`, { method: "POST" }),
+  remove: async (listingId) =>
+    apiRequest(`/api/favorites/${listingId}`, { method: "DELETE" }),
+  check: async (listingId) => apiRequest(`/api/favorites/check/${listingId}`),
+};
+
 export default apiRequest;

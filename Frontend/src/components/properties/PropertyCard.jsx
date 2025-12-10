@@ -82,7 +82,7 @@ const PropertyCard = ({ property, delay = 0, className = "" }) => {
 
           {/* Heart Button */}
           <div className="absolute top-4 right-4">
-            <HeartButton size={40} propertyId={property.id} />
+            <HeartButton size={40} propertyId={property.id} listingId={property.listingId} />
           </div>
 
           {/* Property Type Badge */}

@@ -30,13 +30,14 @@ const PropertyDetails = () => {
         // Transform API response to match expected format
         const transformedProperty = {
           id: data.id,
+          listingId: data.listingId,
           name: data.title,
           description: data.description,
           price: `${data.pricePerMonth} ${data.currency || "NIS"}`,
           pricePerMonth: data.pricePerMonth,
           currency: data.currency,
           location: data.city,
-          squareMeter: data.squareFeet ? `${data.squareFeet} sqft` : "N/A",
+          squareMeter: data.squareFeet ? `${data.squareFeet} ` : "N/A",
           availableIn: data.availableFrom 
             ? new Date(data.availableFrom).toLocaleDateString() 
             : "Now",
@@ -157,6 +158,8 @@ const PropertyDetails = () => {
                 <div className="absolute top-4 right-4">
                   <HeartButton
                     size={48}
+                    propertyId={property.id}
+                    listingId={property.listingId}
                     className="bg-white/90 backdrop-blur border-2 border-white/60"
                   />
                 </div>

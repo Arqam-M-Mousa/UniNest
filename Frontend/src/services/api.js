@@ -288,6 +288,18 @@ export const adminAPI = {
 };
 
 /**
+ * User Password Change API
+ */
+export const passwordChangeAPI = {
+  sendCode: async () => apiRequest("/api/users/change-password/send-code", { method: "POST" }),
+  changePassword: async (code, newPassword) =>
+    apiRequest("/api/users/change-password", {
+      method: "POST",
+      body: JSON.stringify({ code, newPassword }),
+    }),
+};
+
+/**
  * Favorites API
  */
 export const favoritesAPI = {

@@ -32,7 +32,7 @@ const MyListings = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState("");
 
-  const canAccess = user?.role && ["landlord", "admin"].includes(user.role.toLowerCase());
+  const canAccess = user?.role && ["landlord", "superadmin"].includes(user.role.toLowerCase());
 
   // Redirect if not authorized
   useEffect(() => {
@@ -47,7 +47,7 @@ const MyListings = () => {
 
   const fetchListings = useCallback(async () => {
     if (!canAccess) return;
-    
+
     setLoading(true);
     setError("");
     try {
@@ -233,9 +233,8 @@ const MyListings = () => {
             {listings.map((listing) => (
               <div
                 key={listing.id}
-                className={`themed-surface-alt rounded-xl overflow-hidden shadow-lg transition-all ${
-                  !listing.isPublished ? "opacity-70" : ""
-                }`}
+                className={`themed-surface-alt rounded-xl overflow-hidden shadow-lg transition-all ${!listing.isPublished ? "opacity-70" : ""
+                  }`}
               >
                 {/* Image */}
                 <div className="relative h-48">
@@ -249,11 +248,10 @@ const MyListings = () => {
                   />
                   {/* Status Badge */}
                   <div
-                    className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
-                      listing.isPublished
+                    className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${listing.isPublished
                         ? "bg-green-500/90 text-white"
                         : "bg-yellow-500/90 text-white"
-                    }`}
+                      }`}
                   >
                     {listing.isPublished ? (
                       <><CheckIcon className="w-3 h-3" /> {t("visible") || "Visible"}</>
@@ -306,11 +304,10 @@ const MyListings = () => {
                     <button
                       onClick={() => handleToggleVisibility(listing)}
                       disabled={actionLoading === listing.id}
-                      className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        listing.isPublished
+                      className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${listing.isPublished
                           ? "text-yellow-600 hover:bg-yellow-500/10"
                           : "text-green-600 hover:bg-green-500/10"
-                      }`}
+                        }`}
                     >
                       {actionLoading === listing.id ? (
                         <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

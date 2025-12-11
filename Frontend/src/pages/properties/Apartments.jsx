@@ -92,7 +92,7 @@ const Apartments = () => {
   const [universitiesFetched, setUniversitiesFetched] = useState(false);
 
   const canPostAd = Boolean(
-    user?.role && ["landlord", "admin"].includes(user.role.toLowerCase())
+    user?.role && ["landlord", "superadmin"].includes(user.role.toLowerCase())
   );
 
   // Fetch listings from backend

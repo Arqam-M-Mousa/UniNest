@@ -257,10 +257,118 @@ router.get("/filters/options", async (req, res) => {
   }
 });
 
+// GET /api/property-listings/my-listings - Get current user's listings
+// IMPORTANT: This route must come before /:id to avoid "my-listings" being treated as an ID
+router.get(
+  "/my-listings",
+  authenticate,
+  authorize(["Admin", "Landlord"]),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const isAdmin = req.user.role === "Admin";
+
+      // Build where clause for Listing
+      const listingWhere = { ownerId: userId };
+      
+      // Admins can see all listings
+      if (isAdmin) {
+        delete listingWhere.ownerId;
+      }
+
+      const properties = await PropertyListing.findAll({
+        include: [
+          {
+            model: Listing,
+            as: "listing",
+            where: listingWhere,
+            required: true,
+            include: [
+              {
+                model: ListingImage,
+                as: "images",
+                attributes: ["id", "url", "isPrimary", "displayOrder"],
+                required: false,
+                separate: true,
+              },
+              {
+                model: User,
+                as: "owner",
+                attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                required: false,
+              },
+            ],
+          },
+          {
+            model: University,
+            required: false,
+            attributes: ["id", "name", "city"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      const listings = properties.map((prop) => {
+        const listing = prop.listing || {};
+        return {
+          id: prop.id,
+          listingId: prop.listingId,
+          title: listing.title || "",
+          description: listing.description || "",
+          propertyType: prop.propertyType,
+          pricePerMonth: parseFloat(prop.pricePerMonth) || 0,
+          currency: prop.currency || "NIS",
+          city: prop.city || "",
+          bedrooms: prop.bedrooms,
+          bathrooms: prop.bathrooms,
+          squareFeet: prop.squareFeet,
+          distanceToUniversity: prop.distanceToUniversity,
+          leaseDuration: prop.leaseDuration,
+          availableFrom: prop.availableFrom,
+          availableUntil: prop.availableUntil,
+          images: listing.images || [],
+          owner: listing.owner || null,
+          university: prop.University || null,
+          isActive: listing.isActive,
+          isPublished: listing.isPublished,
+          viewCount: listing.viewCount || 0,
+          createdAt: listing.createdAt || prop.createdAt,
+          updatedAt: listing.updatedAt || prop.updatedAt,
+        };
+      });
+
+      return sendSuccess(res, { listings, total: listings.length });
+    } catch (error) {
+      console.error("Failed to fetch user listings", error);
+      return sendError(
+        res,
+        "Failed to fetch your listings",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
 // GET /api/property-listings/:id - Get single property listing
+// Optional authentication to check if viewer is the owner
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Try to get user from token if present (optional auth)
+    let currentUserId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const jwt = require("jsonwebtoken");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        currentUserId = decoded.id;
+      } catch (err) {
+        // Token invalid or expired - continue without user
+      }
+    }
 
     const property = await PropertyListing.findByPk(id, {
       include: [
@@ -291,10 +399,13 @@ router.get("/:id", async (req, res) => {
       return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
     }
 
-    // Increment view count
-    await Listing.increment("viewCount", {
-      where: { id: property.listingId },
-    });
+    // Only increment view count if viewer is NOT the owner
+    const isOwner = currentUserId && property.listing.ownerId === currentUserId;
+    if (!isOwner) {
+      await Listing.increment("viewCount", {
+        where: { id: property.listingId },
+      });
+    }
 
     const result = {
       id: property.id,
@@ -318,7 +429,7 @@ router.get("/:id", async (req, res) => {
       images: property.listing.images || [],
       owner: property.listing.owner,
       university: property.University,
-      viewCount: property.listing.viewCount + 1,
+      viewCount: property.listing.viewCount + (isOwner ? 0 : 1),
       createdAt: property.listing.createdAt,
       updatedAt: property.listing.updatedAt,
     };
@@ -334,6 +445,245 @@ router.get("/:id", async (req, res) => {
     );
   }
 });
+
+// PUT /api/property-listings/:id - Update a property listing
+router.put(
+  "/:id",
+  authenticate,
+  authorize(["Admin", "Landlord"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const isAdmin = req.user.role === "Admin";
+
+      const property = await PropertyListing.findByPk(id, {
+        include: [{ model: Listing, as: "listing" }],
+      });
+
+      if (!property) {
+        return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
+      }
+
+      // Check ownership (admins can edit any)
+      if (!isAdmin && property.listing.ownerId !== userId) {
+        return sendError(res, "Not authorized to edit this listing", HTTP_STATUS.FORBIDDEN);
+      }
+
+      const {
+        title,
+        description,
+        propertyType,
+        pricePerMonth,
+        currency,
+        bedrooms,
+        bathrooms,
+        squareFeet,
+        amenitiesJson,
+        distanceToUniversity,
+        availableFrom,
+        availableUntil,
+        leaseDuration,
+        images,
+      } = req.body;
+
+      const transaction = await Listing.sequelize.transaction();
+
+      try {
+        // Update Listing
+        if (title || description) {
+          await Listing.update(
+            {
+              ...(title && { title }),
+              ...(description && { description }),
+            },
+            { where: { id: property.listingId }, transaction }
+          );
+        }
+
+        // Update PropertyListing
+        const propertyUpdates = {};
+        if (propertyType) propertyUpdates.propertyType = propertyType;
+        if (pricePerMonth) propertyUpdates.pricePerMonth = pricePerMonth;
+        if (currency) propertyUpdates.currency = currency;
+        if (bedrooms) propertyUpdates.bedrooms = bedrooms;
+        if (bathrooms) propertyUpdates.bathrooms = bathrooms;
+        if (squareFeet) propertyUpdates.squareFeet = squareFeet;
+        if (amenitiesJson !== undefined) propertyUpdates.amenitiesJson = amenitiesJson;
+        if (distanceToUniversity) propertyUpdates.distanceToUniversity = distanceToUniversity;
+        if (availableFrom) propertyUpdates.availableFrom = availableFrom;
+        if (availableUntil !== undefined) propertyUpdates.availableUntil = availableUntil;
+        if (leaseDuration) propertyUpdates.leaseDuration = leaseDuration;
+
+        if (Object.keys(propertyUpdates).length > 0) {
+          await PropertyListing.update(propertyUpdates, {
+            where: { id },
+            transaction,
+          });
+        }
+
+        // Update images if provided
+        if (Array.isArray(images)) {
+          // Delete existing images
+          await ListingImage.destroy({
+            where: { listingId: property.listingId },
+            transaction,
+          });
+
+          // Create new images
+          if (images.length > 0) {
+            const filteredImages = images.filter(
+              (url) => typeof url === "string" && url.trim()
+            ).slice(0, 10);
+
+            const payload = filteredImages.map((url, index) => ({
+              url: url.trim(),
+              isPrimary: index === 0,
+              displayOrder: index,
+              listingId: property.listingId,
+            }));
+
+            if (payload.length) {
+              await ListingImage.bulkCreate(payload, { transaction });
+            }
+          }
+        }
+
+        await transaction.commit();
+
+        return sendSuccess(res, { message: "Listing updated successfully" });
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
+    } catch (error) {
+      console.error("Failed to update property listing", error);
+      return sendError(
+        res,
+        "Failed to update listing",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
+// PATCH /api/property-listings/:id/toggle-visibility - Toggle listing visibility
+router.patch(
+  "/:id/toggle-visibility",
+  authenticate,
+  authorize(["Admin", "Landlord"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const isAdmin = req.user.role === "Admin";
+
+      const property = await PropertyListing.findByPk(id, {
+        include: [{ model: Listing, as: "listing" }],
+      });
+
+      if (!property) {
+        return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
+      }
+
+      // Check ownership
+      if (!isAdmin && property.listing.ownerId !== userId) {
+        return sendError(res, "Not authorized", HTTP_STATUS.FORBIDDEN);
+      }
+
+      // Toggle isPublished
+      const newStatus = !property.listing.isPublished;
+      await Listing.update(
+        { isPublished: newStatus },
+        { where: { id: property.listingId } }
+      );
+
+      return sendSuccess(res, {
+        message: newStatus ? "Listing is now visible" : "Listing is now hidden",
+        isPublished: newStatus,
+      });
+    } catch (error) {
+      console.error("Failed to toggle listing visibility", error);
+      return sendError(
+        res,
+        "Failed to toggle visibility",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
+// DELETE /api/property-listings/:id - Delete a property listing
+router.delete(
+  "/:id",
+  authenticate,
+  authorize(["Admin", "Landlord"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const isAdmin = req.user.role === "Admin";
+
+      const property = await PropertyListing.findByPk(id, {
+        include: [{ model: Listing, as: "listing" }],
+      });
+
+      if (!property) {
+        return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
+      }
+
+      // Check ownership
+      if (!isAdmin && property.listing.ownerId !== userId) {
+        return sendError(res, "Not authorized to delete this listing", HTTP_STATUS.FORBIDDEN);
+      }
+
+      const transaction = await Listing.sequelize.transaction();
+
+      try {
+        // Delete images first
+        await ListingImage.destroy({
+          where: { listingId: property.listingId },
+          transaction,
+        });
+
+        // Delete favorites
+        await Favorite.destroy({
+          where: { listingId: property.listingId },
+          transaction,
+        });
+
+        // Delete property listing
+        await PropertyListing.destroy({
+          where: { id },
+          transaction,
+        });
+
+        // Delete base listing
+        await Listing.destroy({
+          where: { id: property.listingId },
+          transaction,
+        });
+
+        await transaction.commit();
+
+        return sendSuccess(res, { message: "Listing deleted successfully" });
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
+    } catch (error) {
+      console.error("Failed to delete property listing", error);
+      return sendError(
+        res,
+        "Failed to delete listing",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
 
 router.post(
   "/",

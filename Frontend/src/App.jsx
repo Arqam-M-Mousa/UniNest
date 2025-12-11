@@ -18,6 +18,7 @@ import PropertyDetails from "./pages/properties/PropertyDetails";
 import About from "./pages/general/About";
 import Contact from "./pages/general/Contact";
 import Apartments from "./pages/properties/Apartments";
+import MyListings from "./pages/properties/MyListings";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Profile from "./pages/profile/Profile";
 import Messages from "./pages/general/Messages";
@@ -56,6 +57,7 @@ function ThemedLayout() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/apartments" element={<Apartments />} />
           <Route path="/apartments/:id" element={<PropertyDetails />} />
+          <Route path="/my-listings" element={<MyListings />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Messages />} />

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { heroFeatureItems } from "./FeatureIcons";
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../../../context/LanguageContext";
 
 /**
  * AnimatedFeatures renders the core value / feature icons with:
@@ -49,11 +49,10 @@ export default function AnimatedFeatures({ variant = "home" }) {
             data-feature-item
             data-index={idx}
             style={{ animationDelay: `${idx * 120}ms` }}
-            className={`group flex flex-col items-center text-center transform-gpu transition-all duration-700 ease-[cubic-bezier(.16,.84,.44,1)] ${
-              isVisible
+            className={`group flex flex-col items-center text-center transform-gpu transition-all duration-700 ease-[cubic-bezier(.16,.84,.44,1)] ${isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-6"
-            } `}
+              } `}
           >
             <div className="feature-icon-wrapper w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] animate-float-slow">
               <Icon
@@ -62,9 +61,8 @@ export default function AnimatedFeatures({ variant = "home" }) {
               />
             </div>
             <h3
-              className={`font-semibold text-base text-[var(--color-text)] ${
-                variant === "about" ? "uppercase tracking-wide text-sm" : ""
-              }`}
+              className={`font-semibold text-base text-[var(--color-text)] ${variant === "about" ? "uppercase tracking-wide text-sm" : ""
+                }`}
             >
               {variant === "about" ? t(key) : t(key)}
             </h3>

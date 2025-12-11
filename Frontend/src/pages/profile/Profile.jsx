@@ -4,8 +4,10 @@ import { userAPI } from "../../services/api";
 import { useLanguage } from "../../context/LanguageContext";
 import ProfileView from "../../components/profile/ProfileView";
 import EditProfileForm from "../../components/profile/EditProfileForm";
-import PageLoader from "../../components/PageLoader";
-import Alert from "../../components/Alert";
+import ChangePasswordSection from "../../components/profile/ChangePasswordSection";
+import DangerZoneSection from "../../components/profile/DangerZoneSection";
+import PageLoader from "../../components/common/PageLoader";
+import Alert from "../../components/common/Alert";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -76,8 +78,9 @@ const Profile = () => {
 
   return (
     <PageLoader
+      sessionKey="profile_visited"
       loading={loading}
-      message={t("loadingProfile") || "Loading profile..."}
+      message={t("loadingProfile")}
     >
       <div className="min-h-[calc(100vh-200px)] themed-surface py-8 px-4">
         <div className="max-w-4xl mx-auto">
@@ -128,11 +131,16 @@ const Profile = () => {
               onProfileUpdate={fetchProfile}
             />
           ) : (
-            <ProfileView
-              profile={profile}
-              onEdit={() => setIsEditing(true)}
-              onDelete={() => setShowDeleteConfirm(true)}
-            />
+            <>
+              <ProfileView
+                profile={profile}
+                onEdit={() => setIsEditing(true)}
+              />
+              <div className="mt-6 space-y-6">
+                <ChangePasswordSection />
+                <DangerZoneSection onDelete={() => setShowDeleteConfirm(true)} />
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -140,10 +148,10 @@ const Profile = () => {
       <Alert
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
-        title="Delete account"
-        message="This will permanently delete your account. This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t("deleteAccount")}
+        message={t("deleteAccountWarning")}
+        confirmText={t("delete")}
+        cancelText={t("cancel")}
         type="warning"
         onConfirm={handleDeleteAccount}
       />

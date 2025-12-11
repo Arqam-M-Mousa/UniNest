@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", authenticate, authorize(["Admin"]), async (req, res) => {
+router.post("/", authenticate, authorize(["SuperAdmin"]), async (req, res) => {
   const { name, city, domain, latitude, longitude } = req.body;
 
   if (!name || !name.trim()) {
@@ -61,7 +61,7 @@ router.post("/", authenticate, authorize(["Admin"]), async (req, res) => {
 });
 
 // Update university
-router.put("/:id", authenticate, authorize(["Admin"]), async (req, res) => {
+router.put("/:id", authenticate, authorize(["SuperAdmin"]), async (req, res) => {
   const { id } = req.params;
   const { name, city, domain, latitude, longitude } = req.body;
 
@@ -100,7 +100,7 @@ router.put("/:id", authenticate, authorize(["Admin"]), async (req, res) => {
 });
 
 // Delete university
-router.delete("/:id", authenticate, authorize(["Admin"]), async (req, res) => {
+router.delete("/:id", authenticate, authorize(["SuperAdmin"]), async (req, res) => {
   const { id } = req.params;
 
   try {

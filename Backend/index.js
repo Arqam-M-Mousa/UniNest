@@ -60,9 +60,13 @@ app.use("/api/contact", require("./routes/contact"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/conversations", require("./routes/conversations"));
 app.use("/api/property-listings", require("./routes/propertyListings"));
+app.use("/api/favorites", require("./routes/favorites"));
 
 // Upload routes
 app.use("/api/uploads", require("./routes/uploads"));
+
+// Admin management routes
+app.use("/api/admin", require("./routes/admin"));
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

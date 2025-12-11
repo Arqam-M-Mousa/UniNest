@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useLanguage } from "../context/LanguageContext";
-import { universitiesAPI } from "../services/api";
-import PageLoader from "../components/PageLoader";
-import Alert from "../components/Alert";
+import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { universitiesAPI } from "../../services/api";
+import PageLoader from "../../components/common/PageLoader";
+import Alert from "../../components/common/Alert";
 import {
   AcademicCapIcon,
   PlusIcon,
@@ -33,8 +33,8 @@ const Admin = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Check if user is admin
-    if (!user || user.role?.toLowerCase() !== "admin") {
+    // Check if user is superadmin
+    if (!user || user.role?.toLowerCase() !== "superadmin") {
       navigate("/");
       return;
     }
@@ -94,9 +94,9 @@ const Admin = () => {
     } catch (err) {
       setError(
         err.message ||
-          (mode === "edit"
-            ? "Failed to update university"
-            : "Failed to add university")
+        (mode === "edit"
+          ? "Failed to update university"
+          : "Failed to add university")
       );
     } finally {
       setSubmitting(false);
@@ -135,6 +135,12 @@ const Admin = () => {
     setShowFormModal(true);
   };
 
+  const handleDeleteClick = (uni, e) => {
+    e.stopPropagation();
+    setActiveUniversity(uni);
+    setShowDeleteConfirm(true);
+  };
+
   const handleAddClick = () => {
     resetForm();
     setMode("create");
@@ -164,7 +170,7 @@ const Admin = () => {
   };
 
   return (
-    <PageLoader loading={loading} message="Loading universities...">
+    <PageLoader sessionKey="admin_visited" loading={loading} message={t("loadingUniversities")}>
       <div className="min-h-screen themed-surface py-12 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -172,10 +178,10 @@ const Admin = () => {
             <div>
               <h1 className="text-4xl font-bold text-[var(--color-text)] flex items-center gap-3">
                 <AcademicCapIcon className="w-12 h-12 text-[var(--color-accent)]" />
-                Universities Management
+                {t("universitiesManagement")}
               </h1>
               <p className="text-[var(--color-text-soft)] mt-2 text-lg">
-                Manage university information and locations
+                {t("manageUniversityInfo")}
               </p>
             </div>
             <button
@@ -183,7 +189,7 @@ const Admin = () => {
               className="flex items-center gap-2 px-6 py-3 rounded-lg btn-primary text-sm hover:scale-105 transition-transform"
             >
               <PlusIcon className="w-5 h-5" />
-              {t("Add University") || "Add University"}
+              {t("addUniversity")}
             </button>
           </div>
 
@@ -204,36 +210,39 @@ const Admin = () => {
           {/* Universities List */}
           <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">
-              {t("Universities") || "Universities"} ({universities.length})
+              {t("universities")} ({universities.length})
             </h2>
             <div className="mb-4 text-sm text-[var(--color-text-soft)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-4 py-3">
-              Tip: click any university row to open edit/delete actions.
+              {t("clickRowToEdit")}
             </div>
 
             {universities.length === 0 ? (
               <div className="text-center py-12 text-[var(--color-text-soft)]">
                 <AcademicCapIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p>No universities found. Add one to get started.</p>
+                <p>{t("noUniversitiesFound")}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full" dir="ltr">
                   <thead>
                     <tr className="border-b border-[var(--color-border)]">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Name
+                        {t("universityName")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        City
+                        {t("universityCity")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Domain
+                        {t("universityDomain")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Latitude
+                        {t("universityLatitude")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
-                        Longitude
+                        {t("universityLongitude")}
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
+                        {t("actions")}
                       </th>
                     </tr>
                   </thead>
@@ -258,6 +267,15 @@ const Admin = () => {
                         </td>
                         <td className="py-3 px-4 text-[var(--color-text-soft)]">
                           {uni.longitude || "—"}
+                        </td>
+                        <td className="py-3 px-4">
+                          <button
+                            onClick={(e) => handleDeleteClick(uni, e)}
+                            className="p-2 rounded-md text-red-600 hover:bg-red-500/10 transition"
+                            title={t("delete")}
+                          >
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -284,13 +302,13 @@ const Admin = () => {
                 <div>
                   <h3 className="text-xl font-semibold text-[var(--color-text)]">
                     {mode === "edit"
-                      ? t("Edit University") || "Edit University"
-                      : t("Add University") || "Add University"}
+                      ? t("editUniversity")
+                      : t("addUniversity")}
                   </h3>
                   <p className="text-xs text-[var(--color-text-soft)] mt-1">
                     {mode === "edit"
-                      ? "Update the details below"
-                      : "Fill in the details below"}
+                      ? t("updateDetails") || "Update the details below"
+                      : t("fillDetails") || "Fill in the details below"}
                   </p>
                 </div>
               </div>
@@ -304,7 +322,7 @@ const Admin = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                    {t("University name") || "University name"}{" "}
+                    {t("universityName")}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -321,7 +339,7 @@ const Admin = () => {
 
                 <div>
                   <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                    {t("City") || "City"}
+                    {t("city")}
                   </label>
                   <input
                     type="text"
@@ -336,7 +354,7 @@ const Admin = () => {
 
                 <div>
                   <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                    {t("Domain") || "Domain"}
+                    {t("domain")}
                   </label>
                   <input
                     type="text"
@@ -352,7 +370,7 @@ const Admin = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                      {t("Latitude") || "Latitude"}
+                      {t("latitude")}
                     </label>
                     <input
                       type="number"
@@ -368,7 +386,7 @@ const Admin = () => {
 
                   <div>
                     <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                      {t("Longitude") || "Longitude"}
+                      {t("longitude")}
                     </label>
                     <input
                       type="number"
@@ -383,43 +401,27 @@ const Admin = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-3 pt-6 items-center justify-between">
-                  {mode === "edit" && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      disabled={submitting}
-                      className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-500/10 transition disabled:opacity-60"
-                    >
-                      <div className="flex items-center gap-2 justify-center">
-                        <TrashIcon className="w-4 h-4" />
-                        <span>{t("Delete") || "Delete"}</span>
-                      </div>
-                    </button>
-                  )}
-
-                  <div className="flex gap-3 ml-auto">
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="px-4 py-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition"
-                    >
-                      {t("cancel") || "Cancel"}
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="px-5 py-2 rounded-md btn-primary disabled:opacity-60"
-                    >
-                      {submitting
-                        ? mode === "edit"
-                          ? t("Saving...") || "Saving..."
-                          : t("Adding...") || "Adding..."
-                        : mode === "edit"
-                        ? t("Save") || "Save"
-                        : t("Add") || "Add"}
-                    </button>
-                  </div>
+                <div className="flex gap-3 pt-6">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="flex-1 px-4 py-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition"
+                  >
+                    {t("cancel")}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 px-5 py-2 rounded-md btn-primary disabled:opacity-60"
+                  >
+                    {submitting
+                      ? mode === "edit"
+                        ? t("saving")
+                        : t("adding")
+                      : mode === "edit"
+                        ? t("save")
+                        : t("add")}
+                  </button>
                 </div>
               </form>
             </div>
@@ -429,10 +431,10 @@ const Admin = () => {
         <Alert
           isOpen={showDeleteConfirm}
           onClose={() => setShowDeleteConfirm(false)}
-          title="Delete university"
-          message="This action cannot be undone. Are you sure you want to delete this university?"
-          confirmText="Delete"
-          cancelText="Cancel"
+          title={t("deleteUniversity")}
+          message={t("deleteUniversityMessage")}
+          confirmText={t("delete")}
+          cancelText={t("cancel")}
           type="warning"
           iconOverride={
             <svg

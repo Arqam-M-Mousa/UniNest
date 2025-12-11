@@ -131,10 +131,54 @@ export const userAPI = {
  * Property Listings API
  */
 export const propertyListingsAPI = {
+  list: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(
+      `/api/property-listings${queryString ? `?${queryString}` : ""}`
+    );
+  },
+
+  getById: async (id) => {
+    return apiRequest(`/api/property-listings/${id}`);
+  },
+
+  getFilterOptions: async () => {
+    return apiRequest("/api/property-listings/filters/options");
+  },
+
   create: async (payload) => {
     return apiRequest("/api/property-listings", {
       method: "POST",
       body: JSON.stringify(payload),
+    });
+  },
+
+  getMyListings: async () => {
+    return apiRequest("/api/property-listings/my-listings");
+  },
+
+  update: async (id, payload) => {
+    return apiRequest(`/api/property-listings/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  toggleVisibility: async (id) => {
+    return apiRequest(`/api/property-listings/${id}/toggle-visibility`, {
+      method: "PATCH",
+    });
+  },
+
+  delete: async (id) => {
+    return apiRequest(`/api/property-listings/${id}`, {
+      method: "DELETE",
     });
   },
 };
@@ -225,6 +269,47 @@ export const uploadsAPI = {
       body: formData,
     });
   },
+};
+
+/**
+ * Admin Management API
+ */
+export const adminAPI = {
+  listAdmins: async () => apiRequest("/api/admin/users"),
+  createAdmin: async (data) =>
+    apiRequest("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  deleteAdmin: async (id) =>
+    apiRequest(`/api/admin/users/${id}`, {
+      method: "DELETE",
+    }),
+};
+
+/**
+ * User Password Change API
+ */
+export const passwordChangeAPI = {
+  sendCode: async () => apiRequest("/api/users/change-password/send-code", { method: "POST" }),
+  changePassword: async (code, newPassword) =>
+    apiRequest("/api/users/change-password", {
+      method: "POST",
+      body: JSON.stringify({ code, newPassword }),
+    }),
+};
+
+/**
+ * Favorites API
+ */
+export const favoritesAPI = {
+  list: async () => apiRequest("/api/favorites"),
+  getIds: async () => apiRequest("/api/favorites/ids"),
+  add: async (listingId) =>
+    apiRequest(`/api/favorites/${listingId}`, { method: "POST" }),
+  remove: async (listingId) =>
+    apiRequest(`/api/favorites/${listingId}`, { method: "DELETE" }),
+  check: async (listingId) => apiRequest(`/api/favorites/check/${listingId}`),
 };
 
 export default apiRequest;

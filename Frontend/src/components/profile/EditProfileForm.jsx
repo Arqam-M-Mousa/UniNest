@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { uploadsAPI } from "../../services/api";
-import Alert from "../Alert";
+import Alert from "../common/Alert";
 import {
   UserCircleIcon,
   PhotoIcon,
@@ -10,7 +10,7 @@ import {
   UserIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
-import CloudinaryImage from "../CloudinaryImage";
+import CloudinaryImage from "../media/CloudinaryImage";
 
 const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
   const { t } = useLanguage();
@@ -272,9 +272,8 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
               <div>
                 <label
                   htmlFor="profilePictureInput"
-                  className={`inline-block px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition font-medium cursor-pointer ${
-                    uploading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`inline-block px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition font-medium cursor-pointer ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   {uploading ? (
                     <span className="flex items-center gap-2">
@@ -286,7 +285,7 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                       <PhotoIcon className="w-5 h-5" />
                       {previewUrl || profilePictureUrl
                         ? "Change Picture"
-                        : "Upload Picture"}
+                        : t("uploadPicture")}
                     </span>
                   )}
                 </label>
@@ -356,9 +355,8 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                 type="text"
                 value={formData.firstName}
                 onChange={handleChange}
-                className={`w-full input-field ${
-                  errors.firstName ? "border-red-500/60" : ""
-                }`}
+                className={`w-full input-field ${errors.firstName ? "border-red-500/60" : ""
+                  }`}
                 placeholder={t("enterFirstName")}
               />
               {errors.firstName && (
@@ -380,9 +378,8 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
                 type="text"
                 value={formData.lastName}
                 onChange={handleChange}
-                className={`w-full input-field ${
-                  errors.lastName ? "border-red-500/60" : ""
-                }`}
+                className={`w-full input-field ${errors.lastName ? "border-red-500/60" : ""
+                  }`}
                 placeholder={t("enterLastName")}
               />
               {errors.lastName && (
@@ -455,9 +452,8 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
               type="tel"
               value={formData.phoneNumber}
               onChange={handleChange}
-              className={`w-full input-field ${
-                errors.phoneNumber ? "border-red-500/60" : ""
-              }`}
+              className={`w-full input-field ${errors.phoneNumber ? "border-red-500/60" : ""
+                }`}
               placeholder={t("phonePlaceholder")}
             />
             {errors.phoneNumber && (
@@ -528,10 +524,10 @@ const EditProfileForm = ({ profile, onSave, onCancel, onProfileUpdate }) => {
       <Alert
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
-        title="Delete profile picture"
-        message="This will remove your current picture. The change only applies after you click Save Changes."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t("deleteProfilePictureTitle")}
+        message={t("deleteProfilePictureMessage")}
+        confirmText={t("delete")}
+        cancelText={t("cancel")}
         type="warning"
         iconOverride={
           <svg

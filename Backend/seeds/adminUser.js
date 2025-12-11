@@ -23,9 +23,9 @@ const seedAdminUser = async () => {
     const adminUser = await User.create({
       email: "admin@uninest.com",
       passwordHash,
-      firstName: "Admin",
-      lastName: "User",
-      role: "Admin",
+      firstName: "Arqam",
+      lastName: "Mousa",
+      role: "SuperAdmin",
       gender: "Male",
       preferredLanguage: "en",
       isVerified: true,

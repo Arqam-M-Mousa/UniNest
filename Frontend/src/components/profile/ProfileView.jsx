@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { ar, enUS } from "date-fns/locale";
 import { useLanguage } from "../../context/LanguageContext";
 import {
-  UserCircleIcon,
   PhoneIcon,
   EnvelopeIcon,
   UserIcon,
@@ -11,14 +10,12 @@ import {
   BuildingLibraryIcon,
   StarIcon,
   IdentificationIcon,
-  TrashIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import CloudinaryImage from "../CloudinaryImage";
+import CloudinaryImage from "../media/CloudinaryImage";
 
-const ProfileView = ({ profile, onEdit, onDelete }) => {
-  const { t } = useLanguage();
-  const [isDangerOpen, setIsDangerOpen] = useState(false);
+const ProfileView = ({ profile, onEdit }) => {
+  const { t, language } = useLanguage();
+
   const getInitials = () => {
     return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
   };
@@ -26,18 +23,41 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
   const getRoleColor = (role) => {
     switch (role) {
       case "Student":
-        return "bg-blue-500/20 text-blue-600 border-blue-500/30";
-      case "Landlord":
         return "bg-green-500/20 text-green-600 border-green-500/30";
+      case "Landlord":
+        return "bg-blue-500/20 text-blue-600 border-blue-500/30";
       case "Admin":
         return "bg-purple-500/20 text-purple-600 border-purple-500/30";
+      case "SuperAdmin":
+        return "bg-red-500/20 text-red-600 border-red-500/30";
       default:
         return "bg-gray-500/20 text-gray-600 border-gray-500/30";
     }
   };
 
+  // Helper to translate role
+  const getTranslatedRole = (role) => {
+    const roles = {
+      Student: "student",
+      Landlord: "landlord",
+      Admin: "admin",
+      SuperAdmin: "superadmin",
+    };
+    return t(roles[role] || role.toLowerCase());
+  };
+
+  // Helper to translate gender
+  const getTranslatedGender = (gender) => {
+    if (!gender) return t("notSpecified");
+    if (gender === "Male") return t("genderMale");
+    if (gender === "Female") return t("genderFemale");
+    return gender;
+  };
+
   // Use profilePictureUrl first, then fall back to avatarUrl
   const displayImage = profile.profilePictureUrl || profile.avatarUrl;
+
+  const dateLocale = language === "ar" ? ar : enUS;
 
   return (
     <div className="space-y-6">
@@ -75,11 +95,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
                   profile.role
                 )}`}
               >
-                {profile.role === "Student"
-                  ? t("student")
-                  : profile.role === "Landlord"
-                  ? t("landlord")
-                  : t("admin")}
+                {getTranslatedRole(profile.role)}
               </span>
               {profile.isVerified && (
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 shadow-sm">
@@ -143,7 +159,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
                   {t("gender")}
                 </p>
                 <p className="text-[var(--color-text)] font-medium ml-6">
-                  {profile.gender || t("notSpecified")}
+                  {getTranslatedGender(profile.gender)}
                 </p>
               </div>
               <div>
@@ -229,77 +245,20 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
           )}
         </div>
 
-        {/* Divider */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/20 to-transparent my-8" />
-
-        {/* Danger Zone */}
-        <div className="rounded-2xl border border-red-300 dark:border-red-500/40 bg-white dark:bg-zinc-800 overflow-hidden shadow-sm transition">
-          <button
-            type="button"
-            onClick={() => setIsDangerOpen((prev) => !prev)}
-            className="w-full px-5 py-4 flex items-center justify-between gap-3 bg-red-50 dark:bg-zinc-800 border-b border-red-200 dark:border-red-500/30 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
-            aria-expanded={isDangerOpen}
-            aria-controls="danger-zone-panel"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
-                <TrashIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-red-600 dark:text-red-400 font-medium">
-                  {t("dangerZone") || "Danger zone"}
-                </p>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("deleteAccount") || "Delete account"}
-                </p>
-              </div>
-            </div>
-            <ChevronDownIcon
-              className={`w-5 h-5 text-red-500 dark:text-red-400 transition-transform ${
-                isDangerOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {isDangerOpen && (
-            <div
-              id="danger-zone-panel"
-              className="p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-gray-50 dark:bg-zinc-900"
-            >
-              <div className="space-y-2 text-sm">
-                <p className="text-gray-700 dark:text-gray-200">
-                  {t("deleteAccountWarning") ||
-                    "Permanently deletes your account and all data. This action cannot be undone."}
-                </p>
-                <ul className="text-xs text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
-                  <li>Removes conversations, favorites, and listings.</li>
-                  <li>You will be signed out immediately.</li>
-                </ul>
-              </div>
-
-              <button
-                onClick={onDelete}
-                className="px-5 py-2 text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 rounded-lg font-semibold shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 flex items-center gap-2 self-start sm:self-auto"
-              >
-                <TrashIcon className="w-4 h-4" />
-                {t("delete") || "Delete"}
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* Account Metadata */}
-        <div className="text-xs text-[var(--color-text)]/50">
+        <div className="mt-6 text-xs text-[var(--color-text)]/50 space-y-1">
           <p>
             {t("accountCreated")}{" "}
             {formatDistanceToNow(new Date(profile.createdAt), {
               addSuffix: true,
+              locale: dateLocale,
             })}
           </p>
           <p>
             {t("lastUpdated")}{" "}
             {formatDistanceToNow(new Date(profile.updatedAt), {
               addSuffix: true,
+              locale: dateLocale,
             })}
           </p>
         </div>

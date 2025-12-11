@@ -7,7 +7,7 @@ const {
   sendError,
   sendValidationError,
 } = require("../utils/responses");
-const { sendVerificationEmail } = require("./emailService");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("./emailService");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -337,9 +337,146 @@ const signin = async (req, res) => {
   }
 };
 
+/**
+ * Request password reset code
+ * POST /api/auth/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return sendValidationError(res, ["Email is required"]);
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return sendSuccess(
+        res,
+        { email },
+        "If this email is registered, you will receive a password reset code"
+      );
+    }
+
+    // Generate reset code
+    const code = generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Delete any existing unused codes for this email
+    await VerificationCode.destroy({
+      where: { email, isUsed: false },
+    });
+
+    // Create new reset code
+    await VerificationCode.create({
+      email,
+      code,
+      expiresAt,
+    });
+
+    // Send email
+    try {
+      await sendPasswordResetEmail(email, code);
+    } catch (emailError) {
+      console.error("Password reset email sending failed:", emailError);
+      // Continue anyway - code is saved in DB for development
+    }
+
+    return sendSuccess(
+      res,
+      { email },
+      "If this email is registered, you will receive a password reset code"
+    );
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return sendError(
+      res,
+      "Failed to process password reset request",
+      HTTP_STATUS.SERVER_ERROR,
+      error
+    );
+  }
+};
+
+/**
+ * Reset password with code
+ * POST /api/auth/reset-password
+ */
+const resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      return sendValidationError(res, [
+        "Email, code, and new password are required",
+      ]);
+    }
+
+    // Validate password length
+    if (newPassword.length < 6) {
+      return sendValidationError(res, [
+        "Password must be at least 6 characters long",
+      ]);
+    }
+
+    // Find the verification code
+    const verification = await VerificationCode.findOne({
+      where: {
+        email,
+        code,
+        isUsed: false,
+      },
+    });
+
+    if (!verification) {
+      return sendError(
+        res,
+        "Invalid or expired reset code",
+        HTTP_STATUS.BAD_REQUEST
+      );
+    }
+
+    // Check if expired
+    if (new Date() > verification.expiresAt) {
+      return sendError(
+        res,
+        "Reset code has expired",
+        HTTP_STATUS.BAD_REQUEST
+      );
+    }
+
+    // Find user
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return sendError(res, "User not found", HTTP_STATUS.NOT_FOUND);
+    }
+
+    // Update password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.update({ passwordHash });
+
+    // Mark code as used
+    await verification.update({ isUsed: true });
+
+    return sendSuccess(res, {}, "Password reset successfully");
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return sendError(
+      res,
+      "Failed to reset password",
+      HTTP_STATUS.SERVER_ERROR,
+      error
+    );
+  }
+};
+
 module.exports = {
   sendVerificationCode,
   verifyCode,
   signup,
   signin,
+  forgotPassword,
+  resetPassword,
 };

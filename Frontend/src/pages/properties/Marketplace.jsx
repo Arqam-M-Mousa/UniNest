@@ -1,13 +1,13 @@
-import { useLanguage } from "../context/LanguageContext";
-import PageLoader from "../components/PageLoader";
+import { useLanguage } from "../../context/LanguageContext";
+import PageLoader from "../../components/common/PageLoader";
 
 const Marketplace = () => {
   const { t } = useLanguage();
 
   return (
     <PageLoader
-      loading={false}
-      message={t("loadingMarketplace") || "Loading marketplace..."}
+      sessionKey="marketplace_visited"
+      message={t("loadingMarketplace")}
     >
       <div className="py-8 px-8 text-center min-h-[50vh] themed-surface">
         <h1 className="heading-font text-4xl font-bold mb-6 text-[var(--color-text)]">

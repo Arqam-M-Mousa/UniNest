@@ -1,6 +1,6 @@
-import { useLanguage } from "../context/LanguageContext";
-import AnimatedFeatures from "../components/AnimatedFeatures";
-import Reveal from "../components/Reveal";
+import { useLanguage } from "../../context/LanguageContext";
+import AnimatedFeatures from "../../components/features/home/AnimatedFeatures";
+import Reveal from "../../components/common/Reveal";
 import { Link } from "react-router-dom";
 
 const About = () => {
@@ -28,40 +28,40 @@ const About = () => {
   return (
     <div className="themed-surface">
       {/* Hero */}
-      <section className="px-8 pt-12 pb-10 text-center">
+      <section className="px-6 sm:px-8 pt-16 pb-12 text-center">
         <Reveal
           as="h1"
-          className="heading-font text-5xl font-bold mb-6 text-[var(--color-text)]"
+          className="heading-font text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-[var(--color-text)]"
         >
           {t("about")}
         </Reveal>
         <Reveal
           as="p"
-          className="text-lg max-w-4xl mx-auto leading-relaxed text-[var(--color-text-soft)]"
+          className="text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed text-[var(--color-text-soft)]"
         >
           {t("aboutUsText")}
         </Reveal>
       </section>
 
       {/* Mission & Illustration */}
-      <section className="px-8 py-12 themed-surface-alt">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <section className="px-6 sm:px-8 py-16 sm:py-20 themed-surface-alt">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div>
             <Reveal
               as="h2"
-              className="heading-font text-3xl font-bold mb-4 text-[var(--color-text)]"
+              className="heading-font text-3xl sm:text-4xl font-bold mb-6 text-[var(--color-text)]"
             >
               {t("ourMission")}
             </Reveal>
             <Reveal
               as="p"
-              className="text-base leading-relaxed text-[var(--color-text-soft)] mb-6"
+              className="text-base sm:text-lg leading-relaxed text-[var(--color-text-soft)] mb-8"
             >
               {t("missionParagraph")}
             </Reveal>
             <Reveal
               as="ul"
-              className="list-disc pl-5 space-y-2 text-[var(--color-text-soft)] text-sm"
+              className="list-disc pl-6 space-y-3 text-[var(--color-text-soft)] text-base"
             >
               <li>{t("missionPoint1")}</li>
               <li>{t("missionPoint2")}</li>
@@ -70,12 +70,13 @@ const About = () => {
             </Reveal>
           </div>
           <div className="flex justify-center">
-            <Reveal className="drop-shadow-md">
+            <Reveal className="drop-shadow-xl">
               <svg
-                width="320"
-                height="320"
+                width="360"
+                height="360"
                 viewBox="0 0 320 320"
                 aria-hidden="true"
+                className="w-full max-w-[360px] h-auto"
               >
                 <defs>
                   <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
@@ -140,48 +141,48 @@ const About = () => {
       </section>
 
       {/* Values */}
-      <section className="px-8 py-16">
-        <h2 className="heading-font text-3xl font-bold mb-10 text-center text-[var(--color-text)]">
+      <section className="px-6 sm:px-8 py-16 sm:py-20">
+        <h2 className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-12 text-center text-[var(--color-text)]">
           {t("coreValues")}
         </h2>
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <AnimatedFeatures variant="about" />
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="px-8 pb-20">
+      <section className="px-6 sm:px-8 py-16 sm:py-20 themed-bg-alt">
         <Reveal
           as="h2"
-          className="heading-font text-3xl font-bold mb-8 text-center text-[var(--color-text)]"
+          className="heading-font text-3xl sm:text-4xl md:text-5xl font-bold mb-12 text-center text-[var(--color-text)]"
         >
           {t("howItWorks")}
         </Reveal>
-        <div className="max-w-4xl mx-auto grid sm:grid-cols-2 gap-6">
+        <div className="max-w-5xl mx-auto grid sm:grid-cols-2 gap-6 md:gap-8 mb-12">
           {howItWorks.map((item, i) => (
             <Reveal
               key={item.step}
-              className="how-it-works-card themed-surface-alt rounded-xl p-5 shadow-card border border-[var(--color-border)]"
+              className="how-it-works-card themed-surface-alt rounded-2xl p-6 shadow-card border border-[var(--color-border)]"
             >
-              <div className="flex items-center gap-3 mb-2">
-                <span className="badge-animated inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-accent)] text-white font-bold">
+              <div className="flex items-center gap-4 mb-3">
+                <span className="badge-animated inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-accent)] text-white font-bold text-lg shadow-lg">
                   {i + 1}
                 </span>
-                <h3 className="m-0 font-semibold text-[var(--color-text)]">
+                <h3 className="m-0 font-semibold text-lg text-[var(--color-text)]">
                   {item.step}
                 </h3>
               </div>
-              <p className="m-0 text-sm leading-relaxed text-[var(--color-text-soft)]">
+              <p className="m-0 text-base leading-relaxed text-[var(--color-text-soft)] pl-16">
                 {item.desc}
               </p>
             </Reveal>
           ))}
         </div>
-        <div className="text-center mt-10">
+        <div className="text-center">
           <Reveal>
             <Link
               to="/marketplace"
-              className="inline-block px-10 py-3.5 rounded-full font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-colors shadow-md focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)] animate-glow-pulse"
+              className="inline-block px-12 py-4 rounded-full font-semibold text-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
             >
               {t("startExploring")}
             </Link>

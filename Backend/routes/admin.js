@@ -41,11 +41,11 @@ router.get("/users", authenticate, authorize("SuperAdmin"), async (req, res) => 
  */
 router.post("/users", authenticate, authorize("SuperAdmin"), async (req, res) => {
     try {
-        const { email, password, firstName, lastName, role } = req.body;
+        const { email, firstName, lastName, role } = req.body;
 
-        // Validate required fields
-        if (!email || !password || !firstName || !lastName) {
-            return sendError(res, "Email, password, first name, and last name are required", 400);
+        // Validate required fields (password is no longer required)
+        if (!email || !firstName || !lastName) {
+            return sendError(res, "Email, first name, and last name are required", 400);
         }
 
         // Validate role - only Admin or SuperAdmin can be created
@@ -59,8 +59,12 @@ router.post("/users", authenticate, authorize("SuperAdmin"), async (req, res) =>
             return sendError(res, "User with this email already exists", 409);
         }
 
+        // Auto-generate secure password
+        const { generateSecurePassword } = require("../utils/passwordUtils");
+        const generatedPassword = generateSecurePassword(12);
+
         // Hash password
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await bcrypt.hash(generatedPassword, 10);
 
         // Create admin user
         const newAdmin = await User.create({
@@ -73,6 +77,15 @@ router.post("/users", authenticate, authorize("SuperAdmin"), async (req, res) =>
             preferredLanguage: req.body.preferredLanguage || "en",
             isVerified: true, // Auto-verify admin users
         });
+
+        // Send email with generated password
+        const { sendAdminCreationEmail } = require("../services/emailService");
+        try {
+            await sendAdminCreationEmail(email, generatedPassword, firstName, role);
+        } catch (emailError) {
+            console.error("Failed to send admin creation email:", emailError);
+            // Don't fail the request if email fails, but log it
+        }
 
         // Return user without password hash
         const adminData = {

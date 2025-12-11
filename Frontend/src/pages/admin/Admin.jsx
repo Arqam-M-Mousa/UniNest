@@ -135,6 +135,12 @@ const Admin = () => {
     setShowFormModal(true);
   };
 
+  const handleDeleteClick = (uni, e) => {
+    e.stopPropagation();
+    setActiveUniversity(uni);
+    setShowDeleteConfirm(true);
+  };
+
   const handleAddClick = () => {
     resetForm();
     setMode("create");
@@ -217,7 +223,7 @@ const Admin = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full" dir="ltr">
                   <thead>
                     <tr className="border-b border-[var(--color-border)]">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
@@ -234,6 +240,9 @@ const Admin = () => {
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
                         {t("universityLongitude")}
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
+                        {t("actions")}
                       </th>
                     </tr>
                   </thead>
@@ -258,6 +267,15 @@ const Admin = () => {
                         </td>
                         <td className="py-3 px-4 text-[var(--color-text-soft)]">
                           {uni.longitude || "—"}
+                        </td>
+                        <td className="py-3 px-4">
+                          <button
+                            onClick={(e) => handleDeleteClick(uni, e)}
+                            className="p-2 rounded-md text-red-600 hover:bg-red-500/10 transition"
+                            title={t("delete")}
+                          >
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -383,43 +401,27 @@ const Admin = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-3 pt-6 items-center justify-between">
-                  {mode === "edit" && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      disabled={submitting}
-                      className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-500/10 transition disabled:opacity-60"
-                    >
-                      <div className="flex items-center gap-2 justify-center">
-                        <TrashIcon className="w-4 h-4" />
-                        <span>{t("delete")}</span>
-                      </div>
-                    </button>
-                  )}
-
-                  <div className="flex gap-3 ml-auto">
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="px-4 py-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition"
-                    >
-                      {t("cancel")}
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="px-5 py-2 rounded-md btn-primary disabled:opacity-60"
-                    >
-                      {submitting
-                        ? mode === "edit"
-                          ? t("saving")
-                          : t("adding")
-                        : mode === "edit"
-                          ? t("save")
-                          : t("add")}
-                    </button>
-                  </div>
+                <div className="flex gap-3 pt-6">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="flex-1 px-4 py-2 rounded-md border themed-border themed-text-soft hover:bg-[var(--color-surface-alt)] transition"
+                  >
+                    {t("cancel")}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 px-5 py-2 rounded-md btn-primary disabled:opacity-60"
+                  >
+                    {submitting
+                      ? mode === "edit"
+                        ? t("saving")
+                        : t("adding")
+                      : mode === "edit"
+                        ? t("save")
+                        : t("add")}
+                  </button>
                 </div>
               </form>
             </div>

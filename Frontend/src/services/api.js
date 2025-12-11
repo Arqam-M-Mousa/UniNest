@@ -158,6 +158,29 @@ export const propertyListingsAPI = {
       body: JSON.stringify(payload),
     });
   },
+
+  getMyListings: async () => {
+    return apiRequest("/api/property-listings/my-listings");
+  },
+
+  update: async (id, payload) => {
+    return apiRequest(`/api/property-listings/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  toggleVisibility: async (id) => {
+    return apiRequest(`/api/property-listings/${id}/toggle-visibility`, {
+      method: "PATCH",
+    });
+  },
+
+  delete: async (id) => {
+    return apiRequest(`/api/property-listings/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 /**

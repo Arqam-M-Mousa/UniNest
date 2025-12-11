@@ -4,6 +4,7 @@ import { userAPI } from "../../services/api";
 import { useLanguage } from "../../context/LanguageContext";
 import ProfileView from "../../components/profile/ProfileView";
 import EditProfileForm from "../../components/profile/EditProfileForm";
+import ChangePasswordSection from "../../components/profile/ChangePasswordSection";
 import PageLoader from "../../components/common/PageLoader";
 import Alert from "../../components/common/Alert";
 
@@ -129,11 +130,16 @@ const Profile = () => {
               onProfileUpdate={fetchProfile}
             />
           ) : (
-            <ProfileView
-              profile={profile}
-              onEdit={() => setIsEditing(true)}
-              onDelete={() => setShowDeleteConfirm(true)}
-            />
+            <>
+              <ProfileView
+                profile={profile}
+                onEdit={() => setIsEditing(true)}
+                onDelete={() => setShowDeleteConfirm(true)}
+              />
+              <div className="mt-6">
+                <ChangePasswordSection />
+              </div>
+            </>
           )}
         </div>
       </div>

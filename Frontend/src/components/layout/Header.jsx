@@ -413,7 +413,9 @@ const Header = () => {
                         ? t("student")
                         : user?.role === "Landlord"
                           ? t("landlord")
-                          : t("admin")}
+                          : user?.role === "SuperAdmin"
+                            ? t("superadmin")
+                            : t("admin")}
                     </span>
                   </div>
                   <div className="py-2">
@@ -427,7 +429,7 @@ const Header = () => {
                         {t("myProfile")}
                       </span>
                     </Link>
-                    {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "admin") && (
+                    {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "superadmin") && (
                       <Link
                         to="/my-listings"
                         onClick={() => setUserMenuOpen(false)}
@@ -439,7 +441,7 @@ const Header = () => {
                         </span>
                       </Link>
                     )}
-                    {user?.role?.toLowerCase() === "admin" && (
+                    {user?.role?.toLowerCase() === "superadmin" && (
                       <div className="border-t themed-border">
                         <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">
                           {t("administration")}
@@ -451,6 +453,14 @@ const Header = () => {
                         >
                           <BuildingLibraryIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                           <span className="font-medium">{t("universities")}</span>
+                        </Link>
+                        <Link
+                          to="/admin/manage-admins"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("adminManagement") || "Admin Management"}</span>
                         </Link>
                       </div>
                     )}

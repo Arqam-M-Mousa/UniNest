@@ -28,11 +28,13 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
   const getRoleColor = (role) => {
     switch (role) {
       case "Student":
-        return "bg-blue-500/20 text-blue-600 border-blue-500/30";
-      case "Landlord":
         return "bg-green-500/20 text-green-600 border-green-500/30";
+      case "Landlord":
+        return "bg-blue-500/20 text-blue-600 border-blue-500/30";
       case "Admin":
         return "bg-purple-500/20 text-purple-600 border-purple-500/30";
+      case "SuperAdmin":
+        return "bg-red-500/20 text-red-600 border-red-500/30";
       default:
         return "bg-gray-500/20 text-gray-600 border-gray-500/30";
     }
@@ -44,6 +46,7 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
       Student: "student",
       Landlord: "landlord",
       Admin: "admin",
+      SuperAdmin: "superadmin",
     };
     return t(roles[role] || role.toLowerCase());
   };

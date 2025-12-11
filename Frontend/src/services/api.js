@@ -272,6 +272,22 @@ export const uploadsAPI = {
 };
 
 /**
+ * Admin Management API
+ */
+export const adminAPI = {
+  listAdmins: async () => apiRequest("/api/admin/users"),
+  createAdmin: async (data) =>
+    apiRequest("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  deleteAdmin: async (id) =>
+    apiRequest(`/api/admin/users/${id}`, {
+      method: "DELETE",
+    }),
+};
+
+/**
  * Favorites API
  */
 export const favoritesAPI = {

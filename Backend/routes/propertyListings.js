@@ -262,17 +262,17 @@ router.get("/filters/options", async (req, res) => {
 router.get(
   "/my-listings",
   authenticate,
-  authorize(["Admin", "Landlord"]),
+  authorize(["SuperAdmin", "Landlord"]),
   async (req, res) => {
     try {
       const userId = req.user.id;
-      const isAdmin = req.user.role === "Admin";
+      const isSuperAdmin = req.user.role === "SuperAdmin";
 
       // Build where clause for Listing
       const listingWhere = { ownerId: userId };
-      
-      // Admins can see all listings
-      if (isAdmin) {
+
+      // SuperAdmins can see all listings
+      if (isSuperAdmin) {
         delete listingWhere.ownerId;
       }
 
@@ -450,12 +450,12 @@ router.get("/:id", async (req, res) => {
 router.put(
   "/:id",
   authenticate,
-  authorize(["Admin", "Landlord"]),
+  authorize(["SuperAdmin", "Landlord"]),
   async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      const isAdmin = req.user.role === "Admin";
+      const isSuperAdmin = req.user.role === "SuperAdmin";
 
       const property = await PropertyListing.findByPk(id, {
         include: [{ model: Listing, as: "listing" }],
@@ -465,8 +465,8 @@ router.put(
         return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
       }
 
-      // Check ownership (admins can edit any)
-      if (!isAdmin && property.listing.ownerId !== userId) {
+      // Check ownership (superadmins can edit any)
+      if (!isSuperAdmin && property.listing.ownerId !== userId) {
         return sendError(res, "Not authorized to edit this listing", HTTP_STATUS.FORBIDDEN);
       }
 
@@ -572,12 +572,12 @@ router.put(
 router.patch(
   "/:id/toggle-visibility",
   authenticate,
-  authorize(["Admin", "Landlord"]),
+  authorize(["SuperAdmin", "Landlord"]),
   async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      const isAdmin = req.user.role === "Admin";
+      const isSuperAdmin = req.user.role === "SuperAdmin";
 
       const property = await PropertyListing.findByPk(id, {
         include: [{ model: Listing, as: "listing" }],
@@ -588,7 +588,7 @@ router.patch(
       }
 
       // Check ownership
-      if (!isAdmin && property.listing.ownerId !== userId) {
+      if (!isSuperAdmin && property.listing.ownerId !== userId) {
         return sendError(res, "Not authorized", HTTP_STATUS.FORBIDDEN);
       }
 
@@ -619,12 +619,12 @@ router.patch(
 router.delete(
   "/:id",
   authenticate,
-  authorize(["Admin", "Landlord"]),
+  authorize(["SuperAdmin", "Landlord"]),
   async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      const isAdmin = req.user.role === "Admin";
+      const isSuperAdmin = req.user.role === "SuperAdmin";
 
       const property = await PropertyListing.findByPk(id, {
         include: [{ model: Listing, as: "listing" }],
@@ -635,7 +635,7 @@ router.delete(
       }
 
       // Check ownership
-      if (!isAdmin && property.listing.ownerId !== userId) {
+      if (!isSuperAdmin && property.listing.ownerId !== userId) {
         return sendError(res, "Not authorized to delete this listing", HTTP_STATUS.FORBIDDEN);
       }
 
@@ -688,7 +688,7 @@ router.delete(
 router.post(
   "/",
   authenticate,
-  authorize(["Admin", "Landlord"]),
+  authorize(["SuperAdmin", "Landlord"]),
   async (req, res) => {
     const {
       title,

@@ -5,6 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import ProfileView from "../../components/profile/ProfileView";
 import EditProfileForm from "../../components/profile/EditProfileForm";
 import ChangePasswordSection from "../../components/profile/ChangePasswordSection";
+import DangerZoneSection from "../../components/profile/DangerZoneSection";
 import PageLoader from "../../components/common/PageLoader";
 import Alert from "../../components/common/Alert";
 
@@ -134,10 +135,10 @@ const Profile = () => {
               <ProfileView
                 profile={profile}
                 onEdit={() => setIsEditing(true)}
-                onDelete={() => setShowDeleteConfirm(true)}
               />
-              <div className="mt-6">
+              <div className="mt-6 space-y-6">
                 <ChangePasswordSection />
+                <DangerZoneSection onDelete={() => setShowDeleteConfirm(true)} />
               </div>
             </>
           )}

@@ -75,20 +75,24 @@ const ChangePasswordSection = () => {
 
     return (
         <>
-            <div className="themed-surface-alt border themed-border rounded-2xl p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
-                            <KeyIcon className="w-5 h-5 text-[var(--color-accent)]" />
-                            {t("changePassword")}
-                        </h3>
-                        <p className="text-sm text-[var(--color-text-soft)] mt-1">
-                            {t("updateYourPassword")}
-                        </p>
+            <div className="themed-surface-alt border themed-border rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent)]/70 text-white flex items-center justify-center shadow-lg shadow-[var(--color-accent)]/20">
+                            <KeyIcon className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                                {t("changePassword")}
+                            </h3>
+                            <p className="text-sm text-[var(--color-text-soft)] mt-1">
+                                {t("updateYourPassword")}
+                            </p>
+                        </div>
                     </div>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="px-4 py-2 rounded-lg btn-primary text-sm"
+                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/80 text-white shadow-lg shadow-[var(--color-accent)]/20 hover:shadow-xl hover:shadow-[var(--color-accent)]/30 transition-all font-medium whitespace-nowrap"
                     >
                         {t("changePassword")}
                     </button>

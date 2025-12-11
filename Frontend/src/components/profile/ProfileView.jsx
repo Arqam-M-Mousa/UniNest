@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { useLanguage } from "../../context/LanguageContext";
 import {
-  UserCircleIcon,
   PhoneIcon,
   EnvelopeIcon,
   UserIcon,
@@ -12,14 +10,11 @@ import {
   BuildingLibraryIcon,
   StarIcon,
   IdentificationIcon,
-  TrashIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import CloudinaryImage from "../media/CloudinaryImage";
 
-const ProfileView = ({ profile, onEdit, onDelete }) => {
+const ProfileView = ({ profile, onEdit }) => {
   const { t, language } = useLanguage();
-  const [isDangerOpen, setIsDangerOpen] = useState(false);
 
   const getInitials = () => {
     return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
@@ -250,66 +245,8 @@ const ProfileView = ({ profile, onEdit, onDelete }) => {
           )}
         </div>
 
-        {/* Divider */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/20 to-transparent my-8" />
-
-        {/* Danger Zone */}
-        <div className="rounded-xl border-2 border-red-300 dark:border-red-900/50 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
-          <button
-            type="button"
-            onClick={() => setIsDangerOpen((prev) => !prev)}
-            className="w-full px-5 py-4 flex items-center justify-between gap-3 bg-red-50 dark:bg-red-950/30 text-left transition-colors hover:bg-red-100 dark:hover:bg-red-950/50"
-            aria-expanded={isDangerOpen}
-            aria-controls="danger-zone-panel"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-600 text-white flex items-center justify-center">
-                <TrashIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wider text-red-600 dark:text-red-400 font-bold">
-                  {t("dangerZone") || "DANGERZONE"}
-                </p>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("deleteAccount") || "Delete account"}
-                </p>
-              </div>
-            </div>
-            <ChevronDownIcon
-              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isDangerOpen ? "rotate-180" : ""
-                }`}
-            />
-          </button>
-
-          {isDangerOpen && (
-            <div
-              id="danger-zone-panel"
-              className="px-5 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-gray-50 dark:bg-zinc-800/50 border-t-2 border-red-300 dark:border-red-900/50"
-            >
-              <div className="space-y-2 flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {t("deleteAccountWarning") ||
-                    "Permanently deletes your account and all associated data. This action cannot be undone."}
-                </p>
-                <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• {t("deleteAccountBullet1")}</li>
-                  <li>• {t("deleteAccountBullet2")}</li>
-                </ul>
-              </div>
-
-              <button
-                onClick={onDelete}
-                className="px-5 py-2.5 text-white bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors flex items-center gap-2 self-start sm:self-auto shadow-sm"
-              >
-                <TrashIcon className="w-4 h-4" />
-                {t("delete") || "Delete"}
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* Account Metadata */}
-        <div className="text-xs text-[var(--color-text)]/50">
+        <div className="mt-6 text-xs text-[var(--color-text)]/50 space-y-1">
           <p>
             {t("accountCreated")}{" "}
             {formatDistanceToNow(new Date(profile.createdAt), {

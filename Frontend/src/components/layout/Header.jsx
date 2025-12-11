@@ -10,6 +10,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   BuildingLibraryIcon,
+  HomeModernIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -426,6 +427,18 @@ const Header = () => {
                         {t("myProfile")}
                       </span>
                     </Link>
+                    {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "admin") && (
+                      <Link
+                        to="/my-listings"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                      >
+                        <HomeModernIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">
+                          {t("myListings") || "My Listings"}
+                        </span>
+                      </Link>
+                    )}
                     {user?.role?.toLowerCase() === "admin" && (
                       <div className="border-t themed-border">
                         <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">

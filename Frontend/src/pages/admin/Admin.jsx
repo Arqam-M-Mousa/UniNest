@@ -33,8 +33,8 @@ const Admin = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Check if user is admin
-    if (!user || user.role?.toLowerCase() !== "admin") {
+    // Check if user is superadmin
+    if (!user || user.role?.toLowerCase() !== "superadmin") {
       navigate("/");
       return;
     }

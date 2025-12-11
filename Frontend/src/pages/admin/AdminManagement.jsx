@@ -23,7 +23,6 @@ const AdminManagement = () => {
     const [activeAdmin, setActiveAdmin] = useState(null);
     const [formData, setFormData] = useState({
         email: "",
-        password: "",
         firstName: "",
         lastName: "",
         role: "Admin",
@@ -59,7 +58,7 @@ const AdminManagement = () => {
         setError("");
         setSuccess("");
 
-        if (!formData.email.trim() || !formData.password.trim() || !formData.firstName.trim() || !formData.lastName.trim()) {
+        if (!formData.email.trim() || !formData.firstName.trim() || !formData.lastName.trim()) {
             setError("All fields are required");
             return;
         }
@@ -69,7 +68,6 @@ const AdminManagement = () => {
         try {
             const payload = {
                 email: formData.email.trim(),
-                password: formData.password.trim(),
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 role: formData.role,
@@ -94,7 +92,6 @@ const AdminManagement = () => {
     const resetForm = () => {
         setFormData({
             email: "",
-            password: "",
             firstName: "",
             lastName: "",
             role: "Admin",
@@ -198,7 +195,7 @@ const AdminManagement = () => {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full" dir="ltr">
                                     <thead>
                                         <tr className="border-b border-[var(--color-border)]">
                                             <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
@@ -337,21 +334,10 @@ const AdminManagement = () => {
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                                        {t("password")} <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="password"
-                                        className="w-full input-field"
-                                        value={formData.password}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, password: e.target.value })
-                                        }
-                                        placeholder="••••••••"
-                                        required
-                                        minLength={6}
-                                    />
+                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                                    <p className="text-sm text-[var(--color-text)]">
+                                        ℹ️ {t("passwordWillBeEmailed") || "A secure password will be generated and sent to the admin's email"}
+                                    </p>
                                 </div>
 
                                 <div>

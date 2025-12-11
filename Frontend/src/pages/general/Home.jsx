@@ -82,7 +82,7 @@ const Home = () => {
           </Reveal>
           <Reveal>
             <Link
-              to="/marketplace"
+              to="/apartments"
               className="inline-block px-12 py-4 rounded-full font-semibold text-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-black/30 transition-all hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/30"
             >
               {t("startSearching")}
@@ -172,7 +172,7 @@ const Home = () => {
                       zIndex: position === 0 ? 20 : 10,
                       transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
-                    >
+                  >
                     <div className="relative h-full flex flex-col bg-[var(--color-surface-alt)]">
                       {/* Image */}
                       <img
@@ -278,7 +278,7 @@ const Home = () => {
               </Reveal>
               <Reveal delay={260}>
                 <Link
-                  to="/marketplace"
+                  to="/apartments"
                   className="inline-block px-14 py-4 rounded-full font-semibold text-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white transition-all hover:scale-105 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[var(--color-ring)]"
                 >
                   {t("startSearching")}

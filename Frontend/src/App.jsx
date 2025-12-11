@@ -23,6 +23,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import Profile from "./pages/profile/Profile";
 import Messages from "./pages/general/Messages";
 import Admin from "./pages/admin/Admin";
+import AdminManagement from "./pages/admin/AdminManagement";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -62,6 +63,7 @@ function ThemedLayout() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Messages />} />
           <Route path="/admin/universities" element={<Admin />} />
+          <Route path="/admin/manage-admins" element={<AdminManagement />} />
         </Routes>
       </main>
       <Footer />

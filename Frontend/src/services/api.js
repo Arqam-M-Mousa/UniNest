@@ -14,7 +14,6 @@ async function apiRequest(endpoint, options = {}) {
 
   // Get token first
   const token = localStorage.getItem("token");
-  console.log("Token present:", !!token);
 
   const isFormData = options.body instanceof FormData;
 
@@ -29,18 +28,9 @@ async function apiRequest(endpoint, options = {}) {
   // Add auth token if available
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
-    console.log(
-      "Authorization header set:",
-      config.headers["Authorization"].substring(0, 20) + "..."
-    );
   }
 
   try {
-    console.log("API Request:", {
-      url,
-      method: config.method || "GET",
-      headers: config.headers,
-    });
     const response = await fetch(url, config);
 
     let data;
@@ -213,6 +203,10 @@ export const conversationsAPI = {
     apiRequest(`/api/conversations/${conversationId}/messages`, {
       method: "POST",
       body: JSON.stringify({ content, attachmentsJson }),
+    }),
+  deleteMessage: async (conversationId, messageId) =>
+    apiRequest(`/api/conversations/${conversationId}/messages/${messageId}`, {
+      method: "DELETE",
     }),
   markRead: async (conversationId) =>
     apiRequest(`/api/conversations/${conversationId}/read`, {

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { conversationsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { useSocket } from "../../context/SocketContext";
 import PageLoader from "../../components/common/PageLoader";
 
 const MessageBubble = ({ message, isMine }) => {
@@ -10,8 +11,8 @@ const MessageBubble = ({ message, isMine }) => {
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm ${isMine
-          ? "bg-[var(--color-accent)] text-white"
-          : "bg-[var(--color-surface-alt)] text-[var(--color-text)]"
+            ? "bg-[var(--color-accent)] text-white"
+            : "bg-[var(--color-surface-alt)] text-[var(--color-text)]"
           }`}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>
@@ -23,15 +24,70 @@ const MessageBubble = ({ message, isMine }) => {
   );
 };
 
-const ThreadView = ({ conversation, messages, onSend, sending }) => {
+const ThreadView = ({ conversation, messages, onSend, sending, isTyping }) => {
   const [draft, setDraft] = useState("");
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const { emitTypingStart, emitTypingStop } = useSocket();
+  const typingTimeoutRef = useRef(null);
+  const [userScrolled, setUserScrolled] = useState(false);
+
+  const scrollToBottom = (behavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
+
+  // Auto-scroll on new messages (only if user hasn't scrolled up)
+  useEffect(() => {
+    if (!userScrolled) {
+      scrollToBottom();
+    }
+  }, [messages, userScrolled]);
+
+  // Detect user scroll
+  const handleScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+    setUserScrolled(!isAtBottom);
+  };
 
   const handleSend = async (e) => {
     e.preventDefault();
     if (!draft.trim()) return;
     await onSend(draft.trim());
     setDraft("");
+    setUserScrolled(false); // Reset scroll state when sending
+    setTimeout(() => scrollToBottom("smooth"), 100);
   };
+
+  const handleTyping = (e) => {
+    setDraft(e.target.value);
+
+    if (!conversation?.id) return;
+
+    // Emit typing start
+    emitTypingStart(conversation.id);
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set timeout to emit typing stop
+    typingTimeoutRef.current = setTimeout(() => {
+      emitTypingStop(conversation.id);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full border rounded-2xl themed-border themed-surface shadow-card">
@@ -43,7 +99,11 @@ const ThreadView = ({ conversation, messages, onSend, sending }) => {
           {conversation?.landlord?.firstName} {conversation?.landlord?.lastName}
         </p>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--color-bg)]">
+      <div
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--color-bg)]"
+      >
         {messages.map((m) => (
           <MessageBubble
             key={m.id}
@@ -51,6 +111,14 @@ const ThreadView = ({ conversation, messages, onSend, sending }) => {
             isMine={m.senderId === conversation.viewerId}
           />
         ))}
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="max-w-[70%] rounded-2xl px-4 py-2 text-sm bg-[var(--color-surface-alt)] text-[var(--color-text-soft)] italic">
+              typing...
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
       <form
         onSubmit={handleSend}
@@ -58,7 +126,7 @@ const ThreadView = ({ conversation, messages, onSend, sending }) => {
       >
         <input
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={handleTyping}
           className="flex-1 rounded-xl px-3 py-2 bg-[var(--color-bg-alt)] border themed-border focus:outline-none"
           placeholder="Type a message"
         />
@@ -129,6 +197,7 @@ const Messages = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { socket, isConnected, joinConversation, leaveConversation } = useSocket();
   const viewerId = user?.id;
 
   const [conversations, setConversations] = useState([]);
@@ -136,12 +205,15 @@ const Messages = () => {
   const [activeId, setActiveId] = useState(id || null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [typingUsers, setTypingUsers] = useState(new Set());
   const messageCache = useRef({});
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeId) || null,
     [conversations, activeId]
   );
+
+  const isTyping = typingUsers.size > 0;
 
   const loadConversations = async () => {
     try {
@@ -183,16 +255,18 @@ const Messages = () => {
     setSending(true);
     try {
       await conversationsAPI.sendMessage(activeId, { content });
-      await loadMessages(activeId, { force: true });
+      // Message will be added via Socket.io event
     } finally {
       setSending(false);
     }
   };
 
+  // Initial load
   useEffect(() => {
     loadConversations();
   }, []);
 
+  // Load messages when activeId changes
   useEffect(() => {
     if (id) {
       setActiveId(id);
@@ -200,19 +274,87 @@ const Messages = () => {
     }
   }, [id]);
 
+  // Join/leave conversation rooms via Socket.io
+  useEffect(() => {
+    if (activeId && socket && isConnected) {
+      joinConversation(activeId);
+      return () => {
+        leaveConversation(activeId);
+      };
+    }
+  }, [activeId, socket, isConnected]);
+
+  // Listen for new messages
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (message) => {
+      // Update cache and state
+      setMessages((prev) => {
+        const updated = [...prev, message];
+        if (message.conversationId) {
+          messageCache.current[message.conversationId] = updated;
+        }
+        return updated;
+      });
+
+      // Update last message in conversation list
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === message.conversationId
+            ? { ...c, lastMessage: message, lastMessageAt: message.createdAt }
+            : c
+        )
+      );
+    };
+
+    const handleTypingStart = ({ userId, conversationId }) => {
+      if (conversationId === activeId && userId !== viewerId) {
+        setTypingUsers((prev) => new Set(prev).add(userId));
+      }
+    };
+
+    const handleTypingStop = ({ userId, conversationId }) => {
+      if (conversationId === activeId) {
+        setTypingUsers((prev) => {
+          const updated = new Set(prev);
+          updated.delete(userId);
+          return updated;
+        });
+      }
+    };
+
+    socket.on("message:new", handleNewMessage);
+    socket.on("typing:start", handleTypingStart);
+    socket.on("typing:stop", handleTypingStop);
+
+    return () => {
+      socket.off("message:new", handleNewMessage);
+      socket.off("typing:start", handleTypingStart);
+      socket.off("typing:stop", handleTypingStop);
+    };
+  }, [socket, activeId, viewerId]);
+
   const handleSelect = (conversationId) => {
     setActiveId(conversationId);
     navigate(`/messages/${conversationId}`);
     loadMessages(conversationId);
+    setTypingUsers(new Set()); // Clear typing indicators
   };
 
   return (
     <PageLoader
       sessionKey="messages_visited"
       loading={loading && conversations.length === 0}
-      message={t("loadingMessages")}
+      message={t("loadingMessages") || "Loading messages..."}
     >
       <div className="themed-surface min-h-[calc(100vh-140px)] px-6 py-8">
+        {/* Connection status indicator */}
+        {!isConnected && (
+          <div className="max-w-6xl mx-auto mb-4 px-4 py-2 bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 rounded-lg text-sm text-yellow-800 dark:text-yellow-200">
+            ⚠️ Disconnected - Messages may not update in real-time
+          </div>
+        )}
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[320px_1fr] gap-6">
           <div className="lg:h-[75vh]">
             <ConversationList
@@ -228,6 +370,7 @@ const Messages = () => {
                 messages={messages}
                 onSend={handleSend}
                 sending={sending}
+                isTyping={isTyping}
               />
             ) : loading ? (
               <div className="h-full rounded-2xl border themed-border themed-surface shadow-card flex items-center justify-center text-sm themed-text-soft">

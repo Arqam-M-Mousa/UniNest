@@ -8,6 +8,7 @@ import {
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/general/Home";
@@ -76,10 +77,12 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <Router>
-            <ScrollToTop />
-            <ThemedLayout />
-          </Router>
+          <SocketProvider>
+            <Router>
+              <ScrollToTop />
+              <ThemedLayout />
+            </Router>
+          </SocketProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

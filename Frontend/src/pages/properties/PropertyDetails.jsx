@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
-import { propertyListingsAPI } from "../../services/api";
+import { propertyListingsAPI, conversationsAPI } from "../../services/api";
 import StatsCard from "../../components/features/home/StatsCard";
 import HeartButton from "../../components/properties/HeartButton";
 import Alert from "../../components/common/Alert";
@@ -12,7 +12,7 @@ const PropertyDetails = () => {
   const { id } = useParams();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   // Constants
   const DEFAULT_CURRENCY = "NIS";

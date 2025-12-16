@@ -69,6 +69,7 @@ export const translations = {
     rooms: "Rooms",
     partner: "Partner",
     ownerOfBuilding: "Owner of the building",
+    ownerOfProperty: "Property Owner",
     messageNow: "Message Now",
     beds: "beds",
     baths: "bath",

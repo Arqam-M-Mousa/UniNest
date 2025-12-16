@@ -145,6 +145,8 @@ const PropertyDetails = () => {
       const studentId = user.id;
       const landlordId = property.owner?.id;
 
+      console.log('Creating conversation:', { studentId, landlordId, propertyId: property.id });
+
       if (!landlordId) {
         setError("Property owner information not available");
         return;
@@ -157,7 +159,10 @@ const PropertyDetails = () => {
         propertyId: property.id,
       });
 
+      console.log('Conversation created/fetched:', response);
+
       const conversationId = response.data.id;
+      console.log('Navigating to conversation:', conversationId);
 
       // Navigate to messages page with this conversation
       navigate(`/messages/${conversationId}`);

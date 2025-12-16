@@ -44,22 +44,19 @@ export const SocketProvider = ({ children }) => {
 
         // Connection event handlers
         newSocket.on("connect", () => {
-            console.log("✅ Socket connected:", newSocket.id);
             setIsConnected(true);
         });
 
-        newSocket.on("disconnect", (reason) => {
-            console.log("❌ Socket disconnected:", reason);
+        newSocket.on("disconnect", () => {
             setIsConnected(false);
         });
 
-        newSocket.on("connect_error", (error) => {
-            console.error("Socket connection error:", error.message);
+        newSocket.on("connect_error", () => {
             setIsConnected(false);
         });
 
-        newSocket.on("error", (error) => {
-            console.error("Socket error:", error);
+        newSocket.on("error", () => {
+            // Socket error - handled silently
         });
 
         socketRef.current = newSocket;

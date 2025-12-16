@@ -67,8 +67,6 @@ io.use(async (socket, next) => {
 
 // Socket.io connection handling
 io.on("connection", (socket) => {
-  console.log(`✅ User connected: ${socket.userId} (${socket.userEmail})`);
-
   // Join user to their personal room
   socket.join(`user:${socket.userId}`);
 
@@ -91,9 +89,7 @@ io.on("connection", (socket) => {
       }
 
       socket.join(`conversation:${conversationId}`);
-      console.log(`User ${socket.userId} joined conversation ${conversationId}`);
     } catch (error) {
-      console.error("Error joining conversation:", error);
       socket.emit("error", { message: "Failed to join conversation" });
     }
   });
@@ -101,7 +97,6 @@ io.on("connection", (socket) => {
   // Leave conversation room
   socket.on("conversation:leave", (conversationId) => {
     socket.leave(`conversation:${conversationId}`);
-    console.log(`User ${socket.userId} left conversation ${conversationId}`);
   });
 
   // Typing indicator
@@ -121,7 +116,7 @@ io.on("connection", (socket) => {
 
   // Disconnect handling
   socket.on("disconnect", () => {
-    console.log(`❌ User disconnected: ${socket.userId}`);
+    // User disconnected
   });
 });
 

@@ -74,6 +74,7 @@ const PropertyDetails = () => {
           },
           images: data.images?.map(img => img.url || img) || [],
           owner: {
+            id: data.owner?.id || data.ownerId,
             name: data.owner
               ? `${data.owner.firstName || ""} ${data.owner.lastName || ""}`.trim()
               : DEFAULT_OWNER_NAME,
@@ -125,12 +126,46 @@ const PropertyDetails = () => {
     );
   }
 
-  const handleMessageClick = () => {
+  const handleMessageClick = async () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
-    } else {
-      // Handle messaging logic here
-      console.log("Opening message conversation");
+      return;
+    }
+
+    // Prevent messaging own property
+    if (user?.id === property.owner?.id) {
+      setError("You cannot message your own property");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Determine student and landlord IDs
+      const studentId = user.id;
+      const landlordId = property.owner?.id;
+
+      if (!landlordId) {
+        setError("Property owner information not available");
+        return;
+      }
+
+      // Create or fetch conversation
+      const response = await conversationsAPI.create({
+        studentId,
+        landlordId,
+        propertyId: property.id,
+      });
+
+      const conversationId = response.data.id;
+
+      // Navigate to messages page with this conversation
+      navigate(`/messages/${conversationId}`);
+    } catch (err) {
+      console.error("Failed to create conversation:", err);
+      setError(err.message || "Failed to start conversation");
+    } finally {
+      setLoading(false);
     }
   };
 

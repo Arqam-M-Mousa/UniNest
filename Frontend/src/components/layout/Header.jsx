@@ -15,6 +15,7 @@ import {
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useSocket } from "../../context/SocketContext";
 import { useEffect, useState, useRef } from "react";
 import { notificationsAPI, conversationsAPI } from "../../services/api";
 import CloudinaryImage from "../media/CloudinaryImage";
@@ -150,6 +151,62 @@ const Header = () => {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen, userMenuOpen, notifOpen, msgOpen, guestMenuOpen]);
+
+  // Socket listener for real-time message notifications
+  const { socket, isConnected } = useSocket();
+
+  useEffect(() => {
+    if (!socket || !isAuthenticated || !user) return;
+
+    const handleNewMessage = (message) => {
+      // Only increment unread count if this message is NOT from the current user
+      if (message.senderId === user.id) {
+        return;
+      }
+
+      // Don't show notifications if user is on the messages page viewing that conversation
+      if (location.pathname.startsWith('/messages')) {
+        return;
+      }
+
+      // Update conversations state
+      setConversations((prev) => {
+        // If conversations haven't been loaded yet, load them
+        if (prev.length === 0) {
+          loadConversations();
+          return prev;
+        }
+
+        // Find and update the conversation
+        const conversationExists = prev.find(c => c.id === message.conversationId);
+
+        if (conversationExists) {
+          // Update existing conversation
+          return prev.map((c) =>
+            c.id === message.conversationId
+              ? {
+                ...c,
+                lastMessage: message,
+                lastMessageAt: message.createdAt,
+                unreadCount: (c.unreadCount || 0) + 1
+              }
+              : c
+          );
+        } else {
+          // Conversation not in list, reload all conversations
+          loadConversations();
+          return prev;
+        }
+      });
+    };
+
+    socket.on("message:new", handleNewMessage);
+
+    return () => {
+      socket.off("message:new", handleNewMessage);
+    };
+  }, [socket, isAuthenticated, user, location.pathname]);
+
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">

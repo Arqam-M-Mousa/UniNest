@@ -6,7 +6,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Dependency locks (if using a different manager, remove the others)
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

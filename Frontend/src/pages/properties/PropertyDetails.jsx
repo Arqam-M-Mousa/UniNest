@@ -324,7 +324,7 @@ const PropertyDetails = () => {
               {property.owner.name}
             </h3>
             <p className="text-[var(--color-text-soft)] text-sm mb-6 text-center">
-              {t("ownerOfBuilding")}
+              {t("ownerOfProperty")}
             </p>
             <div className="space-y-3">
               <button

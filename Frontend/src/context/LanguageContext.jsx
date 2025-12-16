@@ -424,7 +424,7 @@ export const translations = {
     no: "لا",
     rooms: "الغرف",
     partner: "شريك",
-    ownerOfBuilding: "مالك العقار",
+    ownerOfProperty: "مالك العقار",
     messageNow: "راسل الآن",
     beds: "سرير",
     baths: "حمام",

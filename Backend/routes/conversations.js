@@ -175,6 +175,20 @@ router.post("/:id/messages", authenticate, async (req, res) => {
     conversation.lastMessageAt = new Date();
     await conversation.save();
 
+    // Broadcast new message via Socket.io
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`conversation:${conversation.id}`).emit("message:new", {
+        ...message.toJSON(),
+        sender: {
+          id: req.user.id,
+          firstName: req.user.firstName,
+          lastName: req.user.lastName,
+          avatarUrl: req.user.avatarUrl,
+        },
+      });
+    }
+
     return sendSuccess(res, message, "Message sent", HTTP_STATUS.CREATED);
   } catch (error) {
     return sendError(

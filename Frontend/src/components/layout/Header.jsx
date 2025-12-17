@@ -20,12 +20,18 @@ import { useEffect, useState, useRef } from "react";
 import { notificationsAPI, conversationsAPI } from "../../services/api";
 import CloudinaryImage from "../media/CloudinaryImage";
 
-const navLinksConfig = (t) => [
+const navLinksConfig = (t, user) => [
   { to: "/", label: t("home"), match: (p) => p === "/" },
   {
     to: "/apartments",
     label: t("apartments"),
     match: (p) => p === "/apartments",
+  },
+  {
+    to: "/roommates",
+    label: t("roommates"),
+    match: (p) => p.startsWith("/roommates"),
+    studentOnly: true,
   },
   {
     to: "/marketplace",
@@ -239,20 +245,22 @@ const Header = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {navLinksConfig(t).map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={
-                (link.match(location.pathname)
-                  ? "text-[var(--color-accent)] font-semibold"
-                  : "themed-text-soft hover:text-[var(--color-accent)]") +
-                " transition-colors"
-              }
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinksConfig(t, user)
+            .filter(link => !link.studentOnly || (user?.role === "Student"))
+            .map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={
+                  (link.match(location.pathname)
+                    ? "text-[var(--color-accent)] font-semibold"
+                    : "themed-text-soft hover:text-[var(--color-accent)]") +
+                  " transition-colors"
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
         </nav>
 
         {/* Actions */}
@@ -486,6 +494,18 @@ const Header = () => {
                         {t("myProfile")}
                       </span>
                     </Link>
+                    {user?.role === "Student" && (
+                      <Link
+                        to="/roommates/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                      >
+                        <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">
+                          {t("roommateProfile")}
+                        </span>
+                      </Link>
+                    )}
                     {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "superadmin") && (
                       <Link
                         to="/my-listings"
@@ -646,20 +666,22 @@ const Header = () => {
             className="flex flex-col divide-y divide-[var(--color-border)]"
             role="navigation"
           >
-            {navLinksConfig(t).map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={
-                  "px-4 py-3 text-sm font-medium transition-colors " +
-                  (link.match(location.pathname)
-                    ? "bg-[var(--color-surface)] text-[var(--color-accent)]"
-                    : "themed-text-soft hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]")
-                }
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinksConfig(t, user)
+              .filter(link => !link.studentOnly || (user?.role === "Student"))
+              .map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={
+                    "px-4 py-3 text-sm font-medium transition-colors " +
+                    (link.match(location.pathname)
+                      ? "bg-[var(--color-surface)] text-[var(--color-accent)]"
+                      : "themed-text-soft hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]")
+                  }
+                >
+                  {link.label}
+                </Link>
+              ))}
           </nav>
         </div>
       </div>

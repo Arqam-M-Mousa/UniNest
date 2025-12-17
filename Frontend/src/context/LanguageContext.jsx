@@ -142,14 +142,10 @@ export const translations = {
     deleteProfilePictureMessage: "This will remove your current picture. The change only applies after you click Save Changes.",
     confirm: "Confirm",
     // Admin Page
-    addUniversity: "Add University",
-    editUniversity: "Edit University",
-    universityName: "University name",
     city: "City",
     domain: "Domain",
     latitude: "Latitude",
     longitude: "Longitude",
-    deleteUniversity: "Delete university",
     deleteUniversityMessage: "This action cannot be undone. Are you sure you want to delete this university?",
     saving: "Saving...",
     adding: "Adding...",
@@ -193,7 +189,6 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "Tell us how we can help...",
     sendMessage: "Send Message",
-    sending: "Sending",
     sent: "Sent!",
     privacyNotice:
       "We reply within 24h (weekdays). Your data is only used to respond to this inquiry.",
@@ -294,10 +289,6 @@ export const translations = {
     // Universities Management Page
     universitiesManagement: "Universities Management",
     manageUniversityInfo: "Manage university information and locations",
-    addUniversity: "Add University",
-    editUniversity: "Edit University",
-    deleteUniversity: "Delete University",
-    universityName: "Name",
     universityCity: "City",
     universityDomain: "Domain",
     universityLatitude: "Latitude",
@@ -316,6 +307,9 @@ export const translations = {
     imageUploadFailed: "Failed to upload images",
     viewAllImages: "View all images",
     images: "images",
+    image: "image",
+    mark360: "360°",
+    "360Image": "360° Panorama",
     // My Listings Page
     myListings: "My Listings",
     manageYourProperties: "Manage your property listings",
@@ -361,8 +355,6 @@ export const translations = {
     passwordTooShort: "Password must be at least 6 characters",
     updateYourPassword: "Update your account password",
     clickToSendCode: "Click the button below to receive a verification code via email",
-    sending: "Sending...",
-    changing: "Changing...",
   },
   ar: {
     apartments: "الشقق",
@@ -507,7 +499,7 @@ export const translations = {
     confirm: "تأكيد",
     // Admin Page
     addUniversity: "إضافة جامعة",
-    editUniversity: "تعديل جامعة",
+    editUniversity: "تعديل الجامعة",
     universityName: "اسم الجامعة",
     city: "المدينة",
     domain: "النطاق",
@@ -556,7 +548,6 @@ export const translations = {
     emailPlaceholder: "you@example.com",
     messagePlaceholder: "أخبرنا كيف يمكننا مساعدتك...",
     sendMessage: "إرسال الرسالة",
-    sending: "جارٍ الإرسال",
     sent: "تم الإرسال!",
     privacyNotice:
       "نرد خلال 24 ساعة (أيام الأسبوع). تُستخدم بياناتك فقط للرد على هذا الطلب.",
@@ -678,10 +669,6 @@ export const translations = {
     // Universities Management Page
     universitiesManagement: "إدارة الجامعات",
     manageUniversityInfo: "إدارة معلومات الجامعات والمواقع",
-    addUniversity: "إضافة جامعة",
-    editUniversity: "تعديل الجامعة",
-    deleteUniversity: "حذف الجامعة",
-    universityName: "الاسم",
     universityCity: "المدينة",
     universityDomain: "النطاق",
     universityLatitude: "خط العرض",
@@ -700,6 +687,9 @@ export const translations = {
     imageUploadFailed: "فشل في رفع الصور",
     viewAllImages: "عرض جميع الصور",
     images: "صور",
+    image: "صورة",
+    mark360: "360°",
+    "360Image": "بانوراما 360°",
     // My Listings Page
     myListings: "إعلاناتي",
     manageYourProperties: "إدارة إعلانات عقاراتك",

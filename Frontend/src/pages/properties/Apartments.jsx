@@ -70,6 +70,7 @@ const Apartments = () => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [postError, setPostError] = useState("");
   const [postSuccess, setPostSuccess] = useState("");
+  const [image360Flags, setImage360Flags] = useState({});
   const [universities, setUniversities] = useState([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [postForm, setPostForm] = useState({
@@ -302,11 +303,21 @@ const Apartments = () => {
 
       setUploadingImages(true);
       const uploadRes = await uploadsAPI.uploadListingImages(selectedFiles);
-      const uploadedUrls = uploadRes?.data?.map((i) => i.url) || [];
+      const uploadedImages = uploadRes?.data || [];
 
-      if (uploadedUrls.length === 0) {
+      if (uploadedImages.length === 0) {
         throw new Error(t("imageUploadFailed") || "Failed to upload images");
       }
+
+      // Build images array with 360 metadata and publicId
+      const imagesWithMetadata = uploadedImages.map((img, index) => {
+        const fileName = selectedFiles[index]?.name;
+        return {
+          url: img.url,
+          publicId: img.publicId,
+          is360: image360Flags[fileName] || false,
+        };
+      });
 
       const payload = {
         title: postForm.title.trim(),
@@ -322,7 +333,7 @@ const Apartments = () => {
         availableFrom: postForm.availableFrom,
         availableUntil: postForm.availableUntil || null,
         universityId: postForm.universityId || user?.universityId,
-        images: uploadedUrls,
+        images: imagesWithMetadata,
         amenitiesJson: {
           partner: postForm.acceptsPartners,
         },
@@ -332,6 +343,7 @@ const Apartments = () => {
       setPostSuccess(t("Ad created successfully"));
       resetForm();
       setSelectedFiles([]);
+      setImage360Flags({});
       setPostModalOpen(false);
       // Refresh listings
       fetchListings();
@@ -387,8 +399,20 @@ const Apartments = () => {
     setSelectedFiles((prev) => [...prev, ...fileArr].slice(0, 10));
   };
 
+  const toggle360Flag = (fileName) => {
+    setImage360Flags((prev) => ({
+      ...prev,
+      [fileName]: !prev[fileName],
+    }));
+  };
+
   const handleRemoveSelected = (name) => {
     setSelectedFiles((prev) => prev.filter((f) => f.name !== name));
+    setImage360Flags((prev) => {
+      const updated = { ...prev };
+      delete updated[name];
+      return updated;
+    });
   };
 
   return (
@@ -1081,12 +1105,30 @@ const Apartments = () => {
                                     alt={file.name}
                                     className="w-full h-20 object-cover rounded-lg border border-[var(--color-border)]"
                                   />
+                                  {image360Flags[file.name] && (
+                                    <span className="absolute top-1 left-1 bg-[var(--color-accent)] text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                                      360°
+                                    </span>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveSelected(file.name)}
                                     className="absolute top-1 right-1 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     {t("remove")}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggle360Flag(file.name)}
+                                    className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={image360Flags[file.name] || false}
+                                      onChange={() => { }}
+                                      className="w-3 h-3"
+                                    />
+                                    {t("mark360") || "360°"}
                                   </button>
                                 </div>
                               ))}

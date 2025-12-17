@@ -10,6 +10,7 @@ const {
 } = require("../models");
 const { authenticate, authorize } = require("../middleware/auth");
 const { sendSuccess, sendError, HTTP_STATUS } = require("../utils/responses");
+const { deleteFromCloudinary } = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -106,9 +107,8 @@ router.get("/", async (req, res) => {
             {
               model: ListingImage,
               as: "images",
-              attributes: ["id", "url", "isPrimary", "displayOrder"],
               required: false,
-              separate: true, // Use separate query to avoid join issues
+              separate: true,
             },
             {
               model: User,
@@ -287,7 +287,6 @@ router.get(
               {
                 model: ListingImage,
                 as: "images",
-                attributes: ["id", "url", "isPrimary", "displayOrder"],
                 required: false,
                 separate: true,
               },
@@ -379,7 +378,6 @@ router.get("/:id", async (req, res) => {
             {
               model: ListingImage,
               as: "images",
-              attributes: ["id", "url", "isPrimary", "displayOrder"],
             },
             {
               model: User,
@@ -642,7 +640,43 @@ router.delete(
       const transaction = await Listing.sequelize.transaction();
 
       try {
-        // Delete images first
+        // Get all images before deletion to delete from Cloudinary
+        const images = await ListingImage.findAll({
+          where: { listingId: property.listingId },
+          attributes: ['url', 'publicId'],
+        });
+
+        // Delete images from Cloudinary
+        for (const image of images) {
+          try {
+            let publicId = image.publicId;
+
+            if (!publicId && image.url) {
+              // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/v{version}/{folder}/{filename}.{ext}
+              const url = image.url;
+              const uploadIndex = url.indexOf('/upload/');
+              if (uploadIndex !== -1) {
+                let pathAfterUpload = url.substring(uploadIndex + 8);
+                pathAfterUpload = pathAfterUpload.replace(/^v\d+\//, '');
+                publicId = pathAfterUpload.substring(0, pathAfterUpload.lastIndexOf('.'));
+              }
+            }
+
+            if (!publicId) {
+              console.warn(`No publicId for image, skipping Cloudinary deletion: ${image.url}`);
+              continue;
+            }
+
+            console.log(`Attempting to delete from Cloudinary: ${publicId}`);
+            const result = await deleteFromCloudinary(publicId);
+            console.log(`✅ Deleted image from Cloudinary: ${publicId}`, result);
+          } catch (cloudinaryError) {
+            console.error('❌ Failed to delete image from Cloudinary:', cloudinaryError.message);
+            // Continue with deletion even if Cloudinary fails
+          }
+        }
+
+        // Delete image records from database
         await ListingImage.destroy({
           where: { listingId: property.listingId },
           transaction,
@@ -790,20 +824,31 @@ router.post(
 
       let createdImages = [];
       if (Array.isArray(images) && images.length > 0) {
-        const filteredRaw = images.filter(
-          (url) => typeof url === "string" && url.trim()
-        );
+        // Filter valid images - accept both strings and objects with url property
+        const filteredRaw = images.filter((img) => {
+          if (typeof img === "string") return img.trim();
+          if (typeof img === "object" && img.url) return img.url.trim();
+          return false;
+        });
 
         if (filteredRaw.length > 10) {
           throw new Error("Maximum 10 images per listing");
         }
 
-        const payload = filteredRaw.map((url, index) => ({
-          url: url.trim(),
-          isPrimary: index === 0,
-          displayOrder: index,
-          listingId: listing.id,
-        }));
+        const payload = filteredRaw.map((imgData, index) => {
+          const url = typeof imgData === 'string' ? imgData : imgData.url;
+          const is360 = typeof imgData === 'object' && imgData.is360 === true;
+          const publicId = typeof imgData === 'object' ? imgData.publicId : null;
+
+          return {
+            url: url.trim(),
+            is360: is360,
+            publicId: publicId,
+            isPrimary: index === 0,
+            displayOrder: index,
+            listingId: listing.id,
+          };
+        });
 
         if (payload.length) {
           createdImages = await ListingImage.bulkCreate(payload, {

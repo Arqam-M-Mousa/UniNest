@@ -17,6 +17,14 @@ const ListingImage = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    is360: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    publicId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     displayOrder: {
       type: DataTypes.INTEGER,
       defaultValue: 0,

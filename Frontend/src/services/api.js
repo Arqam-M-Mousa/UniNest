@@ -306,4 +306,41 @@ export const favoritesAPI = {
   check: async (listingId) => apiRequest(`/api/favorites/check/${listingId}`),
 };
 
+/**
+ * Roommates API
+ */
+export const roommatesAPI = {
+  getProfile: async () => apiRequest("/api/roommates/profile"),
+  saveProfile: async (data) =>
+    apiRequest("/api/roommates/profile", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  deleteProfile: async () =>
+    apiRequest("/api/roommates/profile", { method: "DELETE" }),
+  search: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(
+      `/api/roommates/search${queryString ? `?${queryString}` : ""}`
+    );
+  },
+  getMatches: async () => apiRequest("/api/roommates/matches"),
+  sendMatch: async (userId, message) =>
+    apiRequest(`/api/roommates/matches/${userId}`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    }),
+  respondMatch: async (matchId, status) =>
+    apiRequest(`/api/roommates/matches/${matchId}`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    }),
+};
+
 export default apiRequest;

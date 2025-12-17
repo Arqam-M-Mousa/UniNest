@@ -154,6 +154,9 @@ app.use("/api/uploads", require("./routes/uploads"));
 // Admin management routes
 app.use("/api/admin", require("./routes/admin"));
 
+// Roommates routes
+app.use("/api/roommates", require("./routes/roommates"));
+
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
@@ -166,7 +169,7 @@ app.use((err, req, res, next) => {
 });
 
 server.listen(PORT, async () => {
-  console.log("🚀 Server running on port " + PORT);
+  console.log("Server running on port " + PORT);
   console.log("🔌 WebSocket server ready");
   await DatabaseConnection.connect();
 });

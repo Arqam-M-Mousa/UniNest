@@ -573,7 +573,7 @@ router.post(
             });
 
             // Send notification to target user about the match request
-            await Notification.create({
+            const notification = await Notification.create({
                 userId: targetUserId,
                 title: "New Roommate Request",
                 message: `${currentUser.firstName} ${currentUser.lastName} wants to connect with you as a roommate${message ? `: "${message}"` : ""}`,
@@ -581,6 +581,12 @@ router.post(
                 relatedEntityId: match.id,
                 actionUrl: "/roommates",
             });
+
+            // Emit real-time notification via socket
+            const io = req.app.get("io");
+            if (io) {
+                io.to(`user:${targetUserId}`).emit("notification:new", notification);
+            }
 
             return sendSuccess(res, { match }, HTTP_STATUS.CREATED);
         } catch (error) {
@@ -638,7 +644,7 @@ router.put(
                 ? `${currentUser.firstName} ${currentUser.lastName} accepted your roommate request! You can now message each other.`
                 : `${currentUser.firstName} ${currentUser.lastName} declined your roommate request.`;
 
-            await Notification.create({
+            const notification = await Notification.create({
                 userId: match.requesterId,
                 title: notificationTitle,
                 message: notificationMessage,
@@ -646,6 +652,12 @@ router.put(
                 relatedEntityId: match.id,
                 actionUrl: "/roommates",
             });
+
+            // Emit real-time notification via socket
+            const io = req.app.get("io");
+            if (io) {
+                io.to(`user:${match.requesterId}`).emit("notification:new", notification);
+            }
 
             return sendSuccess(res, { match });
         } catch (error) {

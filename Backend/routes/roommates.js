@@ -376,6 +376,10 @@ router.get(
                 where.major = major;
             }
 
+            // Get current user's gender for filtering
+            const currentUser = await User.findByPk(req.user.id);
+            const currentUserGender = currentUser?.gender;
+
             const profiles = await RoommateProfile.findAll({
                 where,
                 include: [
@@ -383,6 +387,8 @@ router.get(
                         model: User,
                         as: "user",
                         attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
+                        // Filter by same gender if current user has gender set
+                        where: currentUserGender ? { gender: currentUserGender } : {},
                     },
                     {
                         model: University,
@@ -464,25 +470,50 @@ router.get(
                     {
                         model: User,
                         as: "requester",
-                        attributes: ["id", "firstName", "lastName", "profilePictureUrl"],
+                        attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
                     },
                     {
                         model: User,
                         as: "target",
-                        attributes: ["id", "firstName", "lastName", "profilePictureUrl"],
+                        attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
                     },
                 ],
                 order: [["createdAt", "DESC"]],
             });
 
-            // Transform to show the "other" user
-            const transformedMatches = matches.map((match) => {
+            // Fetch requester profiles for pending received matches
+            const transformedMatches = await Promise.all(matches.map(async (match) => {
                 const isSender = match.requesterId === userId;
                 const otherUser = isSender ? match.target : match.requester;
+
+                // For received pending requests, include the requester's profile
+                let requesterProfile = null;
+                if (!isSender && match.status === "pending") {
+                    const profile = await RoommateProfile.findOne({
+                        where: { userId: match.requesterId },
+                    });
+                    if (profile) {
+                        requesterProfile = {
+                            bio: profile.bio,
+                            major: profile.major,
+                            interests: profile.interests,
+                            minBudget: profile.minBudget,
+                            maxBudget: profile.maxBudget,
+                            cleanlinessLevel: profile.cleanlinessLevel,
+                            noiseLevel: profile.noiseLevel,
+                            sleepSchedule: profile.sleepSchedule,
+                            studyHabits: profile.studyHabits,
+                            smokingAllowed: profile.smokingAllowed,
+                            petsAllowed: profile.petsAllowed,
+                            guestsAllowed: profile.guestsAllowed,
+                        };
+                    }
+                }
 
                 return {
                     id: match.id,
                     otherUser,
+                    otherUserProfile: requesterProfile,
                     compatibilityScore: match.compatibilityScore,
                     status: match.status,
                     message: match.message,
@@ -490,7 +521,7 @@ router.get(
                     createdAt: match.createdAt,
                     respondedAt: match.respondedAt,
                 };
-            });
+            }));
 
             return sendSuccess(res, { matches: transformedMatches });
         } catch (error) {
@@ -520,6 +551,14 @@ router.post(
                 return sendError(res, "Cannot send match request to yourself", HTTP_STATUS.BAD_REQUEST);
             }
 
+            // Check if SENDER has a roommate profile (required to send match request)
+            const senderProfile = await RoommateProfile.findOne({
+                where: { userId: req.user.id, isActive: true },
+            });
+            if (!senderProfile) {
+                return sendError(res, "You must create a roommate profile before sending match requests", HTTP_STATUS.BAD_REQUEST);
+            }
+
             // Check if target user exists and is a student
             const targetUser = await User.findByPk(targetUserId);
             if (!targetUser) {
@@ -535,6 +574,12 @@ router.post(
             });
             if (!targetProfile) {
                 return sendError(res, "User does not have an active roommate profile", HTTP_STATUS.BAD_REQUEST);
+            }
+
+            // GENDER VALIDATION: Only same gender can match
+            const currentUser = await User.findByPk(req.user.id);
+            if (currentUser.gender && targetUser.gender && currentUser.gender !== targetUser.gender) {
+                return sendError(res, "You can only connect with roommates of the same gender", HTTP_STATUS.BAD_REQUEST);
             }
 
             // Check for existing match (in either direction)

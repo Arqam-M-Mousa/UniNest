@@ -195,6 +195,11 @@ export const conversationsAPI = {
       method: "POST",
       body: JSON.stringify({ studentId, landlordId, propertyId }),
     }),
+  startDirect: async (targetUserId) =>
+    apiRequest(`/api/conversations`, {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+    }),
   listMessages: async (conversationId, limit = 50, offset = 0) =>
     apiRequest(
       `/api/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`

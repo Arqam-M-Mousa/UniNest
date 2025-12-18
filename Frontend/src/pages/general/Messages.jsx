@@ -177,6 +177,20 @@ const ThreadView = ({ conversation, messages, onSend, sending, isTyping, viewerI
   const typingTimeoutRef = useRef(null);
   const [userScrolled, setUserScrolled] = useState(false);
 
+  // Helper to get the other user in a conversation
+  const otherUser = useMemo(() => {
+    if (!conversation) return null;
+    return conversation.studentId === viewerId ? conversation.landlord : conversation.student;
+  }, [conversation, viewerId]);
+
+  // Helper to get conversation title
+  const conversationTitle = useMemo(() => {
+    if (!conversation) return "";
+    if (conversation.property?.listing?.title) return conversation.property.listing.title;
+    if (conversation.property?.city) return conversation.property.city;
+    return otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : "Conversation";
+  }, [conversation, otherUser]);
+
   const scrollToBottom = (behavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({ behavior });
   };
@@ -257,23 +271,23 @@ const ThreadView = ({ conversation, messages, onSend, sending, isTyping, viewerI
     <div className="flex flex-col h-full overflow-hidden bg-[var(--color-surface)]">
       <div className="flex-shrink-0 px-5 py-4 border-b themed-border bg-[var(--color-surface)]">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold flex items-center justify-center flex-shrink-0">
-            {conversation?.landlord?.avatarUrl || conversation?.landlord?.profilePictureUrl ? (
+          <div className="w-11 h-11 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold flex items-center justify-center flex-shrink-0 shadow-sm">
+            {otherUser?.avatarUrl || otherUser?.profilePictureUrl ? (
               <img
-                src={conversation.landlord.avatarUrl || conversation.landlord.profilePictureUrl}
-                alt={conversation.landlord.firstName}
+                src={otherUser.avatarUrl || otherUser.profilePictureUrl}
+                alt={otherUser.firstName}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              <span>{(conversation?.landlord?.firstName || 'L')[0].toUpperCase()}</span>
+              <span>{(otherUser?.firstName || 'U')[0].toUpperCase()}</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold text-[var(--color-text)] truncate">
-              {conversation?.property?.listing?.title || conversation?.property?.city || "Conversation"}
+              {conversationTitle}
             </p>
             <p className="text-[11px] themed-text-soft">
-              {conversation?.landlord?.firstName} {conversation?.landlord?.lastName}
+              {otherUser?.firstName} {otherUser?.lastName}
               {conversation?.property?.city && ` • ${conversation.property.city}`}
             </p>
           </div>
@@ -300,7 +314,7 @@ const ThreadView = ({ conversation, messages, onSend, sending, isTyping, viewerI
                 key={m.id}
                 message={m}
                 isMine={m.senderId === viewerId}
-                sender={sender}
+                sender={sender || { firstName: "User" }}
                 showAvatar={m.showAvatar}
                 showName={m.showName}
                 conversation={conversation}
@@ -360,7 +374,7 @@ const ThreadView = ({ conversation, messages, onSend, sending, isTyping, viewerI
   );
 };
 
-const ConversationList = ({ items, activeId, onSelect }) => {
+const ConversationList = ({ items, activeId, onSelect, viewerId }) => {
   const formatTime = (date) => {
     const messageDate = new Date(date);
     const today = new Date();
@@ -373,6 +387,30 @@ const ConversationList = ({ items, activeId, onSelect }) => {
       return 'Yesterday';
     }
     return messageDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  };
+
+  // Helper to get the other user in a conversation
+  const getOtherUser = (c) => {
+    if (c.studentId === viewerId) {
+      return c.landlord;
+    }
+    return c.student;
+  };
+
+  // Helper to get conversation title
+  const getConversationTitle = (c) => {
+    if (c.property?.listing?.title) {
+      return c.property.listing.title;
+    }
+    if (c.property?.city) {
+      return c.property.city;
+    }
+    // Direct conversation - use other user's name
+    const otherUser = getOtherUser(c);
+    if (otherUser) {
+      return `${otherUser.firstName} ${otherUser.lastName}`;
+    }
+    return "Conversation";
   };
 
   return (
@@ -392,59 +430,62 @@ const ConversationList = ({ items, activeId, onSelect }) => {
               <ChatBubbleLeftRightIcon className="w-10 h-10 text-[var(--color-text-soft)]" />
             </div>
             <p className="text-base font-medium text-[var(--color-text)] mb-1">No messages yet</p>
-            <p className="text-xs themed-text-soft">Message a property owner to start chatting</p>
+            <p className="text-xs themed-text-soft">Start a conversation to begin chatting</p>
           </div>
         )}
-        {items.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => onSelect(c.id)}
-            className={`w-full text-left px-5 py-4 hover:bg-[var(--color-surface)] transition-all duration-200 cursor-pointer relative ${c.id === activeId ? "bg-[var(--color-surface)]" : ""
-              } ${c.unreadCount > 0 ? "border-l-[3px] border-[var(--color-accent)]" : "border-l-[3px] border-transparent"}`}
-          >
-            <div className="flex items-start gap-3">
-              <div className="relative flex-shrink-0">
-                <div className="w-11 h-11 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold flex items-center justify-center shadow-sm">
-                  {c.landlord?.avatarUrl || c.landlord?.profilePictureUrl ? (
-                    <img
-                      src={c.landlord.avatarUrl || c.landlord.profilePictureUrl}
-                      alt={c.landlord.firstName}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span>{(c.landlord?.firstName || 'L')[0].toUpperCase()}</span>
+        {items.map((c) => {
+          const otherUser = getOtherUser(c);
+          return (
+            <button
+              key={c.id}
+              onClick={() => onSelect(c.id)}
+              className={`w-full text-left px-5 py-4 hover:bg-[var(--color-surface)] transition-all duration-200 cursor-pointer relative ${c.id === activeId ? "bg-[var(--color-surface)]" : ""
+                } ${c.unreadCount > 0 ? "border-l-[3px] border-[var(--color-accent)]" : "border-l-[3px] border-transparent"}`}
+            >
+              <div className="flex items-start gap-3">
+                <div className="relative flex-shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold flex items-center justify-center shadow-sm">
+                    {otherUser?.avatarUrl || otherUser?.profilePictureUrl ? (
+                      <img
+                        src={otherUser.avatarUrl || otherUser.profilePictureUrl}
+                        alt={otherUser.firstName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span>{(otherUser?.firstName || 'U')[0].toUpperCase()}</span>
+                    )}
+                  </div>
+                  {c.unreadCount > 0 && (
+                    <>
+                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[var(--color-surface-alt)] shadow-sm">
+                        {c.unreadCount > 9 ? '9+' : c.unreadCount}
+                      </div>
+                      <div className="absolute -left-1 top-1 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] animate-pulse" />
+                    </>
                   )}
                 </div>
-                {c.unreadCount > 0 && (
-                  <>
-                    <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[var(--color-surface-alt)] shadow-sm">
-                      {c.unreadCount > 9 ? '9+' : c.unreadCount}
-                    </div>
-                    <div className="absolute -left-1 top-1 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] animate-pulse" />
-                  </>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <p className={`text-sm truncate ${c.unreadCount > 0 ? 'font-extrabold text-[var(--color-text)]' : 'font-bold text-[var(--color-text)]'
-                    }`}>
-                    {c.property?.listing?.title || c.property?.city || "Conversation"}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2 mb-1">
+                    <p className={`text-sm truncate ${c.unreadCount > 0 ? 'font-extrabold text-[var(--color-text)]' : 'font-bold text-[var(--color-text)]'
+                      }`}>
+                      {getConversationTitle(c)}
+                    </p>
+                    <span className="text-[11px] themed-text-soft flex-shrink-0">
+                      {formatTime(c.lastMessage?.createdAt || c.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-xs themed-text-soft mb-1.5 font-medium">
+                    {otherUser?.firstName} {otherUser?.lastName}
                   </p>
-                  <span className="text-[11px] themed-text-soft flex-shrink-0">
-                    {formatTime(c.lastMessage?.createdAt || c.createdAt)}
-                  </span>
+                  <p className={`text-xs line-clamp-1 ${c.unreadCount > 0 ? 'text-[var(--color-text)] font-semibold' : 'themed-text-soft font-normal'
+                    }`}>
+                    {c.lastMessage?.content || "No messages yet"}
+                  </p>
                 </div>
-                <p className="text-xs themed-text-soft mb-1.5 font-medium">
-                  {c.landlord?.firstName} {c.landlord?.lastName}
-                </p>
-                <p className={`text-xs line-clamp-1 ${c.unreadCount > 0 ? 'text-[var(--color-text)] font-semibold' : 'themed-text-soft font-normal'
-                  }`}>
-                  {c.lastMessage?.content || "No messages yet"}
-                </p>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -594,7 +635,7 @@ const Messages = () => {
         });
       }
     }
-  }, [activeId]);
+  }, [activeId, conversations.length]);
 
   // Join/leave conversation rooms via Socket.io
   useEffect(() => {
@@ -716,6 +757,7 @@ const Messages = () => {
                 items={conversations}
                 activeId={activeId}
                 onSelect={handleSelect}
+                viewerId={viewerId}
               />
             </div>
             <div className="h-[50vh] lg:h-full overflow-hidden">

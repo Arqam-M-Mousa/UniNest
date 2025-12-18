@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
-import { roommatesAPI } from "../../services/api";
+import { roommatesAPI, conversationsAPI } from "../../services/api";
 import PageLoader from "../../components/common/PageLoader";
 import RoommateCard from "../../components/roommates/RoommateCard";
 import {
@@ -30,6 +30,7 @@ function RoommateSearch() {
     const [selectedProfile, setSelectedProfile] = useState(null);
     const [matchMessage, setMatchMessage] = useState("");
     const [sendingMatch, setSendingMatch] = useState(false);
+    const [startingConversation, setStartingConversation] = useState(false);
     const [activeTab, setActiveTab] = useState("search"); // "search" | "matches"
 
     const [filters, setFilters] = useState({
@@ -129,6 +130,24 @@ function RoommateSearch() {
             }
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    const handleMessageClick = async (userId) => {
+        try {
+            setStartingConversation(true);
+            const res = await conversationsAPI.startDirect(userId);
+            if (res.data?.id) {
+                navigate(`/messages/${res.data.id}`);
+            } else {
+                navigate("/messages");
+            }
+        } catch (err) {
+            setError(err.message);
+            // Fallback to messages page
+            navigate("/messages");
+        } finally {
+            setStartingConversation(false);
         }
     };
 
@@ -405,11 +424,12 @@ function RoommateSearch() {
                                                     </p>
                                                 </div>
                                                 <button
-                                                    onClick={() => navigate("/messages")}
-                                                    className="px-4 py-2 rounded-xl bg-[var(--color-accent)] text-white font-medium hover:opacity-90 transition-all flex items-center gap-2"
+                                                    onClick={() => handleMessageClick(match.otherUser?.id)}
+                                                    disabled={startingConversation}
+                                                    className="px-4 py-2 rounded-xl bg-[var(--color-accent)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-2"
                                                 >
                                                     <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                                                    {t("message")}
+                                                    {startingConversation ? t("loading") : t("message")}
                                                 </button>
                                             </div>
                                         </div>
@@ -483,9 +503,7 @@ function RoommateSearch() {
                             {t("sendMatchRequest")}
                         </h3>
                         <p className="text-[var(--color-text-muted)] mb-4">
-                            {t("matchRequestHint", {
-                                name: selectedProfile.user?.firstName,
-                            })}
+                            {t("matchRequestHintPre")} <span className="font-semibold text-[var(--color-text)]">{selectedProfile.user?.firstName}</span>
                         </p>
                         <textarea
                             value={matchMessage}

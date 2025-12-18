@@ -1,7 +1,3 @@
-/**
- * Circular badge showing compatibility percentage with color coding
- * Green: 80%+, Yellow: 60-79%, Orange: 40-59%, Red: <40%
- */
 function CompatibilityBadge({ score, size = "md" }) {
     if (score === null || score === undefined) {
         return null;

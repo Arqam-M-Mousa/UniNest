@@ -5,34 +5,23 @@ const {
     University,
     RoommateProfile,
     RoommateMatch,
+    Notification,
 } = require("../models");
 const { authenticate, authorize } = require("../middleware/auth");
 const { sendSuccess, sendError, HTTP_STATUS } = require("../utils/responses");
 
 const router = express.Router();
 
-/**
- * Calculate compatibility score between two roommate profiles
- * Returns a score from 0-100
- */
 function calculateCompatibilityScore(profileA, profileB) {
     let score = 0;
     let totalWeight = 0;
 
-    // Budget overlap (25% weight) - reduced from 30% to make room for major/interests
     const budgetWeight = 25;
     totalWeight += budgetWeight;
     if (profileA.minBudget && profileA.maxBudget && profileB.minBudget && profileB.maxBudget) {
-        const overlapStart = Math.max(
-            parseFloat(profileA.minBudget),
-            parseFloat(profileB.minBudget)
-        );
-        const overlapEnd = Math.min(
-            parseFloat(profileA.maxBudget),
-            parseFloat(profileB.maxBudget)
-        );
+        const overlapStart = Math.max(parseFloat(profileA.minBudget), parseFloat(profileB.minBudget));
+        const overlapEnd = Math.min(parseFloat(profileA.maxBudget), parseFloat(profileB.maxBudget));
         if (overlapEnd >= overlapStart) {
-            // There is overlap
             const overlapRange = overlapEnd - overlapStart;
             const maxRange = Math.max(
                 parseFloat(profileA.maxBudget) - parseFloat(profileA.minBudget),
@@ -41,22 +30,17 @@ function calculateCompatibilityScore(profileA, profileB) {
             score += budgetWeight * Math.min(1, overlapRange / (maxRange || 1));
         }
     } else {
-        // If budget not specified, give partial score
         score += budgetWeight * 0.5;
     }
 
-    // Major match (10% weight) - NEW
     const majorWeight = 10;
     totalWeight += majorWeight;
     if (profileA.major && profileB.major) {
-        if (profileA.major === profileB.major) {
-            score += majorWeight; // Full score for exact match
-        }
+        if (profileA.major === profileB.major) score += majorWeight;
     } else {
         score += majorWeight * 0.5;
     }
 
-    // Interests overlap (10% weight) - NEW
     const interestsWeight = 10;
     totalWeight += interestsWeight;
     const interestsA = Array.isArray(profileA.interests) ? profileA.interests : [];
@@ -66,20 +50,18 @@ function calculateCompatibilityScore(profileA, profileB) {
         const maxPossible = Math.max(interestsA.length, interestsB.length);
         score += interestsWeight * (shared / maxPossible);
     } else {
-        score += interestsWeight * 0.3; // Low default if no interests specified
+        score += interestsWeight * 0.3;
     }
 
-    // Cleanliness difference (10% weight) - reduced from 15%
     const cleanlinessWeight = 10;
     totalWeight += cleanlinessWeight;
     if (profileA.cleanlinessLevel && profileB.cleanlinessLevel) {
         const diff = Math.abs(profileA.cleanlinessLevel - profileB.cleanlinessLevel);
-        score += cleanlinessWeight * (1 - diff / 4); // Max diff is 4 (5-1)
+        score += cleanlinessWeight * (1 - diff / 4);
     } else {
         score += cleanlinessWeight * 0.5;
     }
 
-    // Noise level difference (10% weight) - reduced from 15%
     const noiseWeight = 10;
     totalWeight += noiseWeight;
     if (profileA.noiseLevel && profileB.noiseLevel) {
@@ -89,61 +71,44 @@ function calculateCompatibilityScore(profileA, profileB) {
         score += noiseWeight * 0.5;
     }
 
-    // Sleep schedule match (10% weight) - reduced from 15%
     const sleepWeight = 10;
     totalWeight += sleepWeight;
     if (profileA.sleepSchedule && profileB.sleepSchedule) {
         if (profileA.sleepSchedule === profileB.sleepSchedule) {
             score += sleepWeight;
-        } else if (
-            (profileA.sleepSchedule === "normal" || profileB.sleepSchedule === "normal")
-        ) {
-            score += sleepWeight * 0.5; // Normal is compatible with both
+        } else if (profileA.sleepSchedule === "normal" || profileB.sleepSchedule === "normal") {
+            score += sleepWeight * 0.5;
         }
     } else {
         score += sleepWeight * 0.5;
     }
 
-    // Study habits match (10% weight)
     const studyWeight = 10;
     totalWeight += studyWeight;
     if (profileA.studyHabits && profileB.studyHabits) {
         if (profileA.studyHabits === profileB.studyHabits) {
             score += studyWeight;
-        } else if (
-            profileA.studyHabits === "mixed" || profileB.studyHabits === "mixed"
-        ) {
+        } else if (profileA.studyHabits === "mixed" || profileB.studyHabits === "mixed") {
             score += studyWeight * 0.7;
         }
     } else {
         score += studyWeight * 0.5;
     }
 
-    // Smoking preference (5% weight)
     const smokingWeight = 5;
     totalWeight += smokingWeight;
-    if (profileA.smokingAllowed === profileB.smokingAllowed) {
-        score += smokingWeight;
-    } else if (profileA.smokingAllowed === false && profileB.smokingAllowed === false) {
-        score += smokingWeight;
-    }
+    if (profileA.smokingAllowed === profileB.smokingAllowed) score += smokingWeight;
 
-    // Pets preference (5% weight)
     const petsWeight = 5;
     totalWeight += petsWeight;
-    if (profileA.petsAllowed === profileB.petsAllowed) {
-        score += petsWeight;
-    }
+    if (profileA.petsAllowed === profileB.petsAllowed) score += petsWeight;
 
-    // Guests preference (5% weight)
     const guestsWeight = 5;
     totalWeight += guestsWeight;
     if (profileA.guestsAllowed && profileB.guestsAllowed) {
         if (profileA.guestsAllowed === profileB.guestsAllowed) {
             score += guestsWeight;
-        } else if (
-            profileA.guestsAllowed === "sometimes" || profileB.guestsAllowed === "sometimes"
-        ) {
+        } else if (profileA.guestsAllowed === "sometimes" || profileB.guestsAllowed === "sometimes") {
             score += guestsWeight * 0.7;
         }
     } else {
@@ -154,7 +119,6 @@ function calculateCompatibilityScore(profileA, profileB) {
 }
 
 
-// GET /api/roommates/profile - Get current user's roommate profile
 router.get(
     "/profile",
     authenticate,
@@ -189,7 +153,6 @@ router.get(
     }
 );
 
-// POST /api/roommates/profile - Create or update roommate profile
 router.post(
     "/profile",
     authenticate,
@@ -287,7 +250,6 @@ router.post(
     }
 );
 
-// DELETE /api/roommates/profile - Deactivate roommate profile
 router.delete(
     "/profile",
     authenticate,
@@ -318,7 +280,6 @@ router.delete(
     }
 );
 
-// GET /api/roommates/search - Search for compatible roommates
 router.get(
     "/search",
     authenticate,
@@ -452,7 +413,6 @@ router.get(
     }
 );
 
-// GET /api/roommates/matches - Get all matches for current user
 router.get(
     "/matches",
     authenticate,
@@ -485,35 +445,34 @@ router.get(
             const transformedMatches = await Promise.all(matches.map(async (match) => {
                 const isSender = match.requesterId === userId;
                 const otherUser = isSender ? match.target : match.requester;
+                const otherUserId = isSender ? match.targetId : match.requesterId;
 
-                // For received pending requests, include the requester's profile
-                let requesterProfile = null;
-                if (!isSender && match.status === "pending") {
-                    const profile = await RoommateProfile.findOne({
-                        where: { userId: match.requesterId },
-                    });
-                    if (profile) {
-                        requesterProfile = {
-                            bio: profile.bio,
-                            major: profile.major,
-                            interests: profile.interests,
-                            minBudget: profile.minBudget,
-                            maxBudget: profile.maxBudget,
-                            cleanlinessLevel: profile.cleanlinessLevel,
-                            noiseLevel: profile.noiseLevel,
-                            sleepSchedule: profile.sleepSchedule,
-                            studyHabits: profile.studyHabits,
-                            smokingAllowed: profile.smokingAllowed,
-                            petsAllowed: profile.petsAllowed,
-                            guestsAllowed: profile.guestsAllowed,
-                        };
-                    }
+                // Include the other user's profile
+                let otherUserProfile = null;
+                const profile = await RoommateProfile.findOne({
+                    where: { userId: otherUserId },
+                });
+                if (profile) {
+                    otherUserProfile = {
+                        bio: profile.bio,
+                        major: profile.major,
+                        interests: profile.interests,
+                        minBudget: profile.minBudget,
+                        maxBudget: profile.maxBudget,
+                        cleanlinessLevel: profile.cleanlinessLevel,
+                        noiseLevel: profile.noiseLevel,
+                        sleepSchedule: profile.sleepSchedule,
+                        studyHabits: profile.studyHabits,
+                        smokingAllowed: profile.smokingAllowed,
+                        petsAllowed: profile.petsAllowed,
+                        guestsAllowed: profile.guestsAllowed,
+                    };
                 }
 
                 return {
                     id: match.id,
                     otherUser,
-                    otherUserProfile: requesterProfile,
+                    otherUserProfile,
                     compatibilityScore: match.compatibilityScore,
                     status: match.status,
                     message: match.message,
@@ -536,7 +495,6 @@ router.get(
     }
 );
 
-// POST /api/roommates/matches/:userId - Send match request
 router.post(
     "/matches/:userId",
     authenticate,
@@ -614,6 +572,16 @@ router.post(
                 message: message || null,
             });
 
+            // Send notification to target user about the match request
+            await Notification.create({
+                userId: targetUserId,
+                title: "New Roommate Request",
+                message: `${currentUser.firstName} ${currentUser.lastName} wants to connect with you as a roommate${message ? `: "${message}"` : ""}`,
+                relatedEntityType: "roommate_match",
+                relatedEntityId: match.id,
+                actionUrl: "/roommates",
+            });
+
             return sendSuccess(res, { match }, HTTP_STATUS.CREATED);
         } catch (error) {
             console.error("Failed to send match request:", error);
@@ -627,7 +595,6 @@ router.post(
     }
 );
 
-// PUT /api/roommates/matches/:matchId - Accept or reject match
 router.put(
     "/matches/:matchId",
     authenticate,
@@ -662,12 +629,65 @@ router.put(
                 respondedAt: new Date(),
             });
 
+            // Send notification to the requester about the response
+            const currentUser = await User.findByPk(req.user.id);
+            const notificationTitle = status === "accepted" 
+                ? "Roommate Request Accepted!" 
+                : "Roommate Request Declined";
+            const notificationMessage = status === "accepted"
+                ? `${currentUser.firstName} ${currentUser.lastName} accepted your roommate request! You can now message each other.`
+                : `${currentUser.firstName} ${currentUser.lastName} declined your roommate request.`;
+
+            await Notification.create({
+                userId: match.requesterId,
+                title: notificationTitle,
+                message: notificationMessage,
+                relatedEntityType: "roommate_match",
+                relatedEntityId: match.id,
+                actionUrl: "/roommates",
+            });
+
             return sendSuccess(res, { match });
         } catch (error) {
             console.error("Failed to update match:", error);
             return sendError(
                 res,
                 "Failed to update match",
+                HTTP_STATUS.SERVER_ERROR,
+                error
+            );
+        }
+    }
+);
+
+router.delete(
+    "/matches/:matchId",
+    authenticate,
+    authorize(["Student"]),
+    async (req, res) => {
+        try {
+            const { matchId } = req.params;
+            const userId = req.user.id;
+
+            const match = await RoommateMatch.findByPk(matchId);
+
+            if (!match) {
+                return sendError(res, "Match not found", HTTP_STATUS.NOT_FOUND);
+            }
+
+            // Only the requester or the target can delete the match
+            if (match.requesterId !== userId && match.targetId !== userId) {
+                return sendError(res, "You are not authorized to remove this match", HTTP_STATUS.FORBIDDEN);
+            }
+
+            await match.destroy();
+
+            return sendSuccess(res, null, HTTP_STATUS.NO_CONTENT);
+        } catch (error) {
+            console.error("Failed to delete match:", error);
+            return sendError(
+                res,
+                "Failed to remove match",
                 HTTP_STATUS.SERVER_ERROR,
                 error
             );

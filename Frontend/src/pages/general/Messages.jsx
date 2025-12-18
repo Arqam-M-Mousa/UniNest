@@ -4,6 +4,7 @@ import { conversationsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useSocket } from "../../context/SocketContext";
+import { useNotifications } from "../../context/NotificationContext";
 import PageLoader from "../../components/common/PageLoader";
 import Alert from "../../components/common/Alert";
 import { PaperAirplaneIcon, ChatBubbleLeftRightIcon, CheckIcon, EllipsisVerticalIcon, TrashIcon, ClockIcon } from "@heroicons/react/24/outline";
@@ -497,9 +498,15 @@ const Messages = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const { socket, isConnected, joinConversation, leaveConversation } = useSocket();
+  const { 
+    conversations: contextConversations, 
+    loadConversations: loadContextConversations,
+    markConversationRead,
+    setConversations: setContextConversations 
+  } = useNotifications();
   const viewerId = user?.id;
 
-  const [conversations, setConversations] = useState([]);
+  const [conversations, setConversations] = useState(contextConversations);
   const [messages, setMessages] = useState([]);
   const [activeId, setActiveId] = useState(id || null);
   const [loading, setLoading] = useState(false);
@@ -519,7 +526,9 @@ const Messages = () => {
       setLoading(true);
       const res = await conversationsAPI.list();
       const items = Array.isArray(res.data) ? res.data : [];
-      setConversations(items.map((c) => ({ ...c, viewerId })));
+      const mappedItems = items.map((c) => ({ ...c, viewerId }));
+      setConversations(mappedItems);
+      setContextConversations(mappedItems); // Keep context in sync
 
       // Only auto-navigate if there's no ID in the URL and no active conversation
       if (!id && !activeId && items.length > 0) {
@@ -567,6 +576,8 @@ const Messages = () => {
             : c
         )
       );
+      // Also update context to keep header in sync
+      markConversationRead(conversationId);
     } catch (error) {
       console.error('Failed to load messages:', error);
     }

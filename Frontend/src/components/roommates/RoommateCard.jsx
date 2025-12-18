@@ -8,10 +8,7 @@ import {
     SparklesIcon,
 } from "@heroicons/react/24/outline";
 
-/**
- * Card displaying a roommate profile with key info and connect button
- */
-function RoommateCard({ profile, onConnect, isConnecting }) {
+function RoommateCard({ profile, onConnect, isConnecting, onViewDetails }) {
     const { t } = useLanguage();
 
     const user = profile.user || {};
@@ -48,7 +45,10 @@ function RoommateCard({ profile, onConnect, isConnecting }) {
     };
 
     return (
-        <div className="bg-[var(--color-surface)] rounded-2xl p-5 shadow-lg border border-[var(--color-border)] hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+        <div
+            onClick={onViewDetails}
+            className="bg-[var(--color-surface)] rounded-2xl p-5 shadow-lg border border-[var(--color-border)] hover:shadow-xl hover:border-[var(--color-accent)]/30 transition-all duration-300 flex flex-col h-full cursor-pointer group"
+        >
             {/* Header with avatar and compatibility */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ function RoommateCard({ profile, onConnect, isConnecting }) {
                         </div>
                     )}
                     <div>
-                        <h3 className="font-semibold text-[var(--color-text)] text-lg">
+                        <h3 className="font-semibold text-[var(--color-text)] text-lg group-hover:text-[var(--color-accent)] transition-colors">
                             {user.firstName} {user.lastName?.[0]}.
                         </h3>
                         {university.name && (
@@ -75,7 +75,12 @@ function RoommateCard({ profile, onConnect, isConnecting }) {
                         )}
                     </div>
                 </div>
-                <CompatibilityBadge score={profile.compatibilityScore} size="md" />
+                <div className="flex flex-col items-end gap-2">
+                    <CompatibilityBadge score={profile.compatibilityScore} size="md" />
+                    <span className="text-[10px] font-bold text-[var(--color-accent)] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+                        {t("viewDetails")} →
+                    </span>
+                </div>
             </div>
 
             {/* Bio */}
@@ -149,7 +154,7 @@ function RoommateCard({ profile, onConnect, isConnecting }) {
             {/* Connect button */}
             <div className="mt-auto pt-3 border-t border-[var(--color-border)]">
                 <button
-                    onClick={() => onConnect(profile)}
+                    onClick={(e) => { e.stopPropagation(); onConnect(profile); }}
                     disabled={isConnecting}
                     className="w-full py-2.5 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-dark,var(--color-accent))] hover:opacity-90 disabled:opacity-50 transition-all duration-200 flex items-center justify-center gap-2"
                 >

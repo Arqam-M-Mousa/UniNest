@@ -88,10 +88,42 @@ router.get("/", authenticate, async (req, res) => {
 // POST /api/conversations - create or fetch a conversation
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { studentId, landlordId, propertyId } = req.body || {};
+    const { studentId, landlordId, propertyId, targetUserId } = req.body || {};
+
+    // For direct/roommate conversations (no property)
+    if (targetUserId && !propertyId) {
+      if (targetUserId === req.user.id) {
+        return sendError(res, "Cannot start conversation with yourself", HTTP_STATUS.BAD_REQUEST);
+      }
+
+      // For direct conversations, use a consistent ordering for participant lookup
+      const [user1Id, user2Id] = [req.user.id, targetUserId].sort();
+
+      // Look for existing direct conversation (no propertyId)
+      let convo = await Conversation.findOne({
+        where: {
+          [Op.or]: [
+            { studentId: user1Id, landlordId: user2Id, propertyId: { [Op.is]: null } },
+            { studentId: user2Id, landlordId: user1Id, propertyId: { [Op.is]: null } },
+          ],
+        },
+      });
+
+      if (!convo) {
+        convo = await Conversation.create({
+          studentId: req.user.id,
+          landlordId: targetUserId,
+          propertyId: null, // Direct conversation
+        });
+      }
+
+      return sendSuccess(res, convo, "Direct conversation ready");
+    }
+
+    // Original property-based conversation logic
     if (!studentId || !landlordId || !propertyId) {
       return sendValidationError(res, [
-        "studentId, landlordId, propertyId are required",
+        "studentId, landlordId, propertyId are required (or use targetUserId for direct conversations)",
       ]);
     }
 

@@ -47,7 +47,7 @@ const Conversation = sequelize.define(
     },
     propertyId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "property_listings",
         key: "id",

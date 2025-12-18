@@ -27,6 +27,7 @@ import Admin from "./pages/admin/Admin";
 import AdminManagement from "./pages/admin/AdminManagement";
 import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
+import RoommateView from "./pages/roommates/RoommateView";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -69,6 +70,7 @@ function ThemedLayout() {
           <Route path="/admin/manage-admins" element={<AdminManagement />} />
           <Route path="/roommates" element={<RoommateSearch />} />
           <Route path="/roommates/profile" element={<RoommateProfile />} />
+          <Route path="/roommates/view/:userId" element={<RoommateView />} />
         </Routes>
       </main>
       <Footer />

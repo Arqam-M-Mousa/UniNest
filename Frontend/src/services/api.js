@@ -346,6 +346,10 @@ export const roommatesAPI = {
       method: "PUT",
       body: JSON.stringify({ status }),
     }),
+  deleteMatch: async (matchId) =>
+    apiRequest(`/api/roommates/matches/${matchId}`, {
+      method: "DELETE",
+    }),
 };
 
 export default apiRequest;

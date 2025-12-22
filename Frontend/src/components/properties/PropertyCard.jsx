@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import HeartButton from "./HeartButton";
 import Reveal from "../common/Reveal";
+import VerifiedBadge from "../common/VerifiedBadge";
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80";
 
@@ -126,6 +127,26 @@ const PropertyCard = ({ property, delay = 0, className = "" }) => {
                 <circle cx="12" cy="10" r="3" />
               </svg>
               {property.city}
+            </p>
+          )}
+          {property.owner && (
+            <p className="text-[var(--color-text-soft)] text-xs mt-1 flex items-center gap-1">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              {property.owner.firstName} {property.owner.lastName}
+              {property.owner.isIdentityVerified && (
+                <span className="inline-flex">
+                  <VerifiedBadge size="sm" showText={false} />
+                </span>
+              )}
             </p>
           )}
         </div>

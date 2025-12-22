@@ -26,9 +26,12 @@ import Profile from "./pages/profile/Profile";
 import Messages from "./pages/general/Messages";
 import Admin from "./pages/admin/Admin";
 import AdminManagement from "./pages/admin/AdminManagement";
+import AdminVerification from "./pages/admin/AdminVerification";
+import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
 import RoommateView from "./pages/roommates/RoommateView";
+import VerificationPage from "./pages/profile/VerificationPage";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -57,6 +60,7 @@ function ThemedLayout() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/verification" element={<VerificationPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/:id" element={<PropertyDetails />} />
           <Route path="/about" element={<About />} />
@@ -69,6 +73,8 @@ function ThemedLayout() {
           <Route path="/messages/:id" element={<Messages />} />
           <Route path="/admin/universities" element={<Admin />} />
           <Route path="/admin/manage-admins" element={<AdminManagement />} />
+          <Route path="/admin/verification" element={<AdminVerification />} />
+          <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           <Route path="/roommates" element={<RoommateSearch />} />
           <Route path="/roommates/profile" element={<RoommateProfile />} />
           <Route path="/roommates/view/:userId" element={<RoommateView />} />

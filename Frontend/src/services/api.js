@@ -268,6 +268,16 @@ export const uploadsAPI = {
       body: formData,
     });
   },
+
+  uploadVerificationDocument: async (file) => {
+    const formData = new FormData();
+    formData.append("document", file);
+
+    return apiRequest("/api/uploads/verification-document", {
+      method: "POST",
+      body: formData,
+    });
+  },
 };
 
 /**
@@ -349,6 +359,36 @@ export const roommatesAPI = {
   deleteMatch: async (matchId) =>
     apiRequest(`/api/roommates/matches/${matchId}`, {
       method: "DELETE",
+    }),
+};
+
+/**
+ * Verification API
+ */
+export const verificationAPI = {
+  getStatus: async () => apiRequest("/api/verification/status"),
+  submit: async (data) =>
+    apiRequest("/api/verification/submit", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  listRequests: async (status) =>
+    apiRequest(`/api/verification/requests${status ? `?status=${status}` : ""}`),
+  reviewRequest: async (id, status, reviewNotes) =>
+    apiRequest(`/api/verification/requests/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ status, reviewNotes }),
+    }),
+};
+
+/**
+ * Announcements API
+ */
+export const announcementsAPI = {
+  send: async (data) =>
+    apiRequest("/api/announcements", {
+      method: "POST",
+      body: JSON.stringify(data),
     }),
 };
 

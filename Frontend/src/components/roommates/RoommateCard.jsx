@@ -9,6 +9,7 @@ import {
     FireIcon,
     HeartIcon,
     NoSymbolIcon,
+    CheckIcon,
 } from "@heroicons/react/24/outline";
 
 function RoommateCard({ profile, onConnect, isConnecting, onViewDetails }) {
@@ -117,6 +118,12 @@ function RoommateCard({ profile, onConnect, isConnecting, onViewDetails }) {
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-500">
                         <AcademicCapIcon className="w-3.5 h-3.5" />
                         {t(profile.major)}
+                    </span>
+                )}
+                {profile.sameMajor === 1 && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
+                        <CheckIcon className="w-3.5 h-3.5" />
+                        {t("sameMajor")}
                     </span>
                 )}
             </div>

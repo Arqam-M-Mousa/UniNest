@@ -4,13 +4,15 @@ import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import PageLoader from "../../components/common/PageLoader";
+import VerificationPrompt from "../../components/auth/VerificationPrompt";
 
 const SignIn = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { signin, error, loading, clearError } = useAuth();
+  const { signin, error, loading, clearError, user } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [localError, setLocalError] = useState("");
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +22,15 @@ const SignIn = () => {
     const result = await signin(formData.email, formData.password);
 
     if (result.success) {
-      navigate("/");
+      if (
+        result.user?.role === "Landlord" &&
+        !result.user?.isIdentityVerified &&
+        result.user?.verificationStatus !== "pending"
+      ) {
+        setShowVerificationPrompt(true);
+      } else {
+        navigate("/");
+      }
     } else {
       setLocalError(result.error || "Failed to sign in");
     }
@@ -124,6 +134,17 @@ const SignIn = () => {
             </p>
           </div>
         </div>
+
+        {/* Verification Prompt for Landlords */}
+        {showVerificationPrompt && (
+          <VerificationPrompt
+            user={user}
+            onDismiss={() => {
+              setShowVerificationPrompt(false);
+              navigate("/");
+            }}
+          />
+        )}
       </div>
     </PageLoader>
   );

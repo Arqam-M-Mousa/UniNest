@@ -152,6 +152,12 @@ export const translations = {
     save: "Save",
     add: "Add",
     verified: "Verified",
+    addUniversity: "Add University",
+    editUniversity: "Edit University",
+    universityName: "University Name",
+    deleteUniversity: "Delete University",
+    updateDetails: "Update the details below",
+    fillDetails: "Fill in the details below",
     // Auth Alerts
     accountCreatedTitle: "Account Created!",
     accountCreatedMessage: "Your account has been created successfully. Please sign in to continue.",
@@ -717,6 +723,8 @@ export const translations = {
     save: "حفظ",
     add: "إضافة",
     verified: "موثّق",
+    updateDetails: "يرجى تحديث البيانات أدناه",
+    fillDetails: "يرجى تعبئة البيانات أدناه",
     // Auth Alerts
     accountCreatedTitle: "تم إنشاء الحساب!",
     accountCreatedMessage: "تم إنشاء حسابك بنجاح. يرجى تسجيل الدخول للمتابعة.",

@@ -5,6 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { universitiesAPI } from "../../services/api";
 import PageLoader from "../../components/common/PageLoader";
 import Alert from "../../components/common/Alert";
+import LocationPicker from "../../components/properties/LocationPicker";
 import {
   AcademicCapIcon,
   PlusIcon,
@@ -295,7 +296,7 @@ const Admin = () => {
             onClick={handleCancel}
           >
             <div
-              className="w-full max-w-lg rounded-2xl themed-surface p-7 shadow-2xl border themed-border"
+              className="w-full max-w-3xl rounded-2xl themed-surface p-7 shadow-2xl border themed-border my-8 overflow-y-auto max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between mb-4">
@@ -367,38 +368,25 @@ const Admin = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                      {t("latitude")}
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      className="w-full input-field"
-                      value={formData.latitude}
-                      onChange={(e) =>
-                        setFormData({ ...formData, latitude: e.target.value })
-                      }
-                      placeholder="e.g. 42.3744"
-                    />
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                    {t("location") || "Location"} <span className="text-red-500">*</span>
+                  </label>
+                  <LocationPicker
+                    latitude={formData.latitude ? parseFloat(formData.latitude) : null}
+                    longitude={formData.longitude ? parseFloat(formData.longitude) : null}
+                    universities={universities}
+                    height="350px"
+                    onLocationChange={(lat, lng, city) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        latitude: lat,
+                        longitude: lng,
+                        city: city || prev.city
+                      }));
+                    }}
+                  />
 
-                  <div>
-                    <label className="text-sm font-medium text-[var(--color-text)] mb-1 block">
-                      {t("longitude")}
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      className="w-full input-field"
-                      value={formData.longitude}
-                      onChange={(e) =>
-                        setFormData({ ...formData, longitude: e.target.value })
-                      }
-                      placeholder="e.g. -71.1169"
-                    />
-                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-6">

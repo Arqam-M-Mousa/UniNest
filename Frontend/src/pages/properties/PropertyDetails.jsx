@@ -9,6 +9,8 @@ import { useState, useEffect } from "react";
 import PageLoader from "../../components/common/PageLoader";
 import Image360Viewer from "../../components/media/Image360Viewer";
 import MapView from "../../components/properties/MapView";
+import VerifiedBadge from "../../components/common/VerifiedBadge";
+import CostCalculator from "../../components/properties/CostCalculator";
 import { MapPinIcon, XMarkIcon, MapIcon } from "@heroicons/react/24/outline";
 
 const PropertyDetails = () => {
@@ -85,6 +87,7 @@ const PropertyDetails = () => {
               : DEFAULT_OWNER_NAME,
             avatar: data.owner?.avatarUrl || data.owner?.profilePictureUrl || data.owner?.avatar || null,
             phone: data.owner?.phoneNumber || data.owner?.phone || DEFAULT_CONTACT,
+            isVerified: data.owner?.isIdentityVerified || false,
           },
         };
 
@@ -380,42 +383,46 @@ const PropertyDetails = () => {
 
           </div>
 
-          <div className="themed-surface-alt p-8 rounded-2xl border border-[var(--color-border)] shadow-lg sticky top-24">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-[var(--color-border)]">
-              {property.owner.avatar ? (
-                <img
-                  src={property.owner.avatar}
-                  alt={property.owner.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] flex items-center justify-center">
-                  <span className="text-white text-3xl font-bold">
-                    {property.owner.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+          <div className="sticky top-24 space-y-6">
+            <div className="themed-surface-alt p-8 rounded-2xl border border-[var(--color-border)] shadow-lg">
+              <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-[var(--color-border)]">
+                {property.owner.avatar ? (
+                  <img
+                    src={property.owner.avatar}
+                    alt={property.owner.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] flex items-center justify-center">
+                    <span className="text-white text-3xl font-bold">
+                      {property.owner.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <h3 className="text-xl text-[var(--color-text)] mb-1 heading-font text-center flex items-center justify-center gap-2">
+                {property.owner.name}
+                {property.owner.isVerified && <VerifiedBadge size="md" />}
+              </h3>
+              <p className="text-[var(--color-text-soft)] text-sm mb-6 text-center">
+                {t("ownerOfProperty")}
+              </p>
+              <div className="space-y-3">
+                <button
+                  onClick={handleMessageClick}
+                  className="w-full btn-primary text-base py-3 rounded-xl shadow-md"
+                >
+                  {t("messageNow")}
+                </button>
+                <a
+                  href={`tel:${property.owner.phone}`}
+                  className="block w-full text-center font-semibold text-lg no-underline text-[var(--color-text)] hover:text-[var(--color-accent)]"
+                >
+                  {property.owner.phone}
+                </a>
+              </div>
             </div>
-            <h3 className="text-xl text-[var(--color-text)] mb-1 heading-font text-center">
-              {property.owner.name}
-            </h3>
-            <p className="text-[var(--color-text-soft)] text-sm mb-6 text-center">
-              {t("ownerOfProperty")}
-            </p>
-            <div className="space-y-3">
-              <button
-                onClick={handleMessageClick}
-                className="w-full btn-primary text-base py-3 rounded-xl shadow-md"
-              >
-                {t("messageNow")}
-              </button>
-              <a
-                href={`tel:${property.owner.phone}`}
-                className="block w-full text-center font-semibold text-lg no-underline text-[var(--color-text)] hover:text-[var(--color-accent)]"
-              >
-                {property.owner.phone}
-              </a>
-            </div>
+            <CostCalculator rent={property.pricePerMonth} currency={property.currency} />
           </div>
         </div>
 

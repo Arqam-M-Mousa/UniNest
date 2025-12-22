@@ -134,7 +134,7 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen, userMenuOpen, notifOpen, msgOpen, guestMenuOpen]);
 
-  
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 py-3">
@@ -455,6 +455,33 @@ const Header = () => {
                         >
                           <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                           <span className="font-medium">{t("adminManagement") || "Admin Management"}</span>
+                        </Link>
+                        <Link
+                          to="/admin/verification"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <svg className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                          </svg>
+                          <span className="font-medium">{t("verification") || "Verification"}</span>
+                        </Link>
+                      </div>
+                    )}
+                    {(user?.role === "Admin") && (
+                      <div className="border-t themed-border">
+                        <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">
+                          {t("administration")}
+                        </div>
+                        <Link
+                          to="/admin/verification"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <svg className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                          </svg>
+                          <span className="font-medium">{t("verification") || "Verification"}</span>
                         </Link>
                       </div>
                     )}

@@ -27,7 +27,6 @@ router.get("/", async (req, res) => {
       city,
       minSquareFeet,
       maxSquareFeet,
-      acceptsPartners,
       sortBy = "createdAt",
       sortOrder = "DESC",
       limit = 50,
@@ -35,7 +34,13 @@ router.get("/", async (req, res) => {
     } = req.query;
 
     // Build PropertyListing where clause
-    const propertyWhere = {};
+    const propertyWhere = {
+      isVisible: true,
+      [Op.or]: [
+        { expiresAt: null },
+        { expiresAt: { [Op.gt]: new Date() } }
+      ]
+    };
 
     if (propertyType) {
       propertyWhere.propertyType = propertyType;
@@ -71,17 +76,8 @@ router.get("/", async (req, res) => {
         propertyWhere.squareFeet[Op.lte] = parseInt(maxSquareFeet, 10);
     }
 
-    // Filter by accepts partners/roommates
-    if (acceptsPartners === 'true' || acceptsPartners === true) {
-      propertyWhere.amenitiesJson = {
-        partner: true
-      };
-    }
-
-    // Determine sort field - use PropertyListing fields for sorting to avoid subquery issues
     const order = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-    // First get the count
     const total = await PropertyListing.count({
       where: propertyWhere,
       include: [
@@ -94,7 +90,6 @@ router.get("/", async (req, res) => {
       ],
     });
 
-    // Then get the data with simpler query structure
     const properties = await PropertyListing.findAll({
       where: propertyWhere,
       include: [
@@ -147,8 +142,11 @@ router.get("/", async (req, res) => {
         squareFeet: prop.squareFeet,
         distanceToUniversity: prop.distanceToUniversity,
         leaseDuration: prop.leaseDuration,
-        availableFrom: prop.availableFrom,
-        availableUntil: prop.availableUntil,
+        listingDuration: prop.listingDuration,
+        expiresAt: prop.expiresAt,
+        isVisible: prop.isVisible,
+        latitude: prop.latitude,
+        longitude: prop.longitude,
         images: listing.images || [],
         owner: listing.owner || null,
         university: prop.University || null,
@@ -323,8 +321,12 @@ router.get(
           squareFeet: prop.squareFeet,
           distanceToUniversity: prop.distanceToUniversity,
           leaseDuration: prop.leaseDuration,
-          availableFrom: prop.availableFrom,
-          availableUntil: prop.availableUntil,
+          listingDuration: prop.listingDuration,
+          expiresAt: prop.expiresAt,
+          isVisible: prop.isVisible,
+          isExpired: prop.expiresAt ? new Date(prop.expiresAt) < new Date() : false,
+          latitude: prop.latitude,
+          longitude: prop.longitude,
           images: listing.images || [],
           owner: listing.owner || null,
           university: prop.University || null,
@@ -422,8 +424,9 @@ router.get("/:id", async (req, res) => {
       amenitiesJson: property.amenitiesJson,
       distanceToUniversity: property.distanceToUniversity,
       leaseDuration: property.leaseDuration,
-      availableFrom: property.availableFrom,
-      availableUntil: property.availableUntil,
+      listingDuration: property.listingDuration,
+      expiresAt: property.expiresAt,
+      isVisible: property.isVisible,
       images: property.listing.images || [],
       owner: property.listing.owner,
       university: property.University,
@@ -479,9 +482,10 @@ router.put(
         squareFeet,
         amenitiesJson,
         distanceToUniversity,
-        availableFrom,
-        availableUntil,
+        listingDuration,
         leaseDuration,
+        latitude,
+        longitude,
         images,
       } = req.body;
 
@@ -509,9 +513,15 @@ router.put(
         if (squareFeet) propertyUpdates.squareFeet = squareFeet;
         if (amenitiesJson !== undefined) propertyUpdates.amenitiesJson = amenitiesJson;
         if (distanceToUniversity) propertyUpdates.distanceToUniversity = distanceToUniversity;
-        if (availableFrom) propertyUpdates.availableFrom = availableFrom;
-        if (availableUntil !== undefined) propertyUpdates.availableUntil = availableUntil;
+        if (listingDuration) {
+          propertyUpdates.listingDuration = listingDuration;
+          // Recalculate expiresAt when duration changes
+          const durationDays = { '1week': 7, '2weeks': 14, '1month': 30, '2months': 60, '3months': 90 };
+          propertyUpdates.expiresAt = new Date(Date.now() + durationDays[listingDuration] * 24 * 60 * 60 * 1000);
+        }
         if (leaseDuration) propertyUpdates.leaseDuration = leaseDuration;
+        if (latitude !== undefined) propertyUpdates.latitude = latitude;
+        if (longitude !== undefined) propertyUpdates.longitude = longitude;
 
         if (Object.keys(propertyUpdates).length > 0) {
           await PropertyListing.update(propertyUpdates, {
@@ -606,6 +616,68 @@ router.patch(
       return sendError(
         res,
         "Failed to toggle visibility",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
+// PATCH /api/property-listings/:id/renew - Renew an expired listing
+router.patch(
+  "/:id/renew",
+  authenticate,
+  authorize(["SuperAdmin", "Landlord"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const isSuperAdmin = req.user.role === "SuperAdmin";
+      const { listingDuration = "1month" } = req.body;
+
+      const property = await PropertyListing.findByPk(id, {
+        include: [{ model: Listing, as: "listing" }],
+      });
+
+      if (!property) {
+        return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
+      }
+
+      // Check ownership
+      if (!isSuperAdmin && property.listing.ownerId !== userId) {
+        return sendError(res, "Not authorized", HTTP_STATUS.FORBIDDEN);
+      }
+
+      // Calculate new expiration date
+      const durationDays = { '1week': 7, '2weeks': 14, '1month': 30, '2months': 60, '3months': 90 };
+      const expiresAt = new Date(Date.now() + durationDays[listingDuration] * 24 * 60 * 60 * 1000);
+
+      // Update listing
+      await PropertyListing.update(
+        {
+          listingDuration,
+          expiresAt,
+          isVisible: true
+        },
+        { where: { id } }
+      );
+
+      // Also ensure the base listing is published
+      await Listing.update(
+        { isPublished: true },
+        { where: { id: property.listingId } }
+      );
+
+      return sendSuccess(res, {
+        message: "Listing renewed successfully",
+        expiresAt,
+        listingDuration,
+      });
+    } catch (error) {
+      console.error("Failed to renew listing", error);
+      return sendError(
+        res,
+        "Failed to renew listing",
         HTTP_STATUS.SERVER_ERROR,
         error
       );
@@ -737,8 +809,7 @@ router.post(
       squareFeet,
       amenitiesJson,
       distanceToUniversity,
-      availableFrom,
-      availableUntil,
+      listingDuration = "1month",
       leaseDuration,
       universityId,
       images,
@@ -800,6 +871,10 @@ router.post(
         { transaction }
       );
 
+      // Calculate expiration date based on listing duration
+      const durationDays = { '1week': 7, '2weeks': 14, '1month': 30, '2months': 60, '3months': 90 };
+      const expiresAt = new Date(Date.now() + durationDays[listingDuration] * 24 * 60 * 60 * 1000);
+
       const property = await PropertyListing.create(
         {
           listingId: listing.id,
@@ -814,8 +889,9 @@ router.post(
           squareFeet,
           amenitiesJson,
           distanceToUniversity,
-          availableFrom,
-          availableUntil,
+          listingDuration,
+          expiresAt,
+          isVisible: true,
           leaseDuration,
           universityId,
         },

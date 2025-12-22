@@ -108,7 +108,7 @@ router.get("/", async (req, res) => {
             {
               model: User,
               as: "owner",
-              attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+              attributes: ["id", "firstName", "lastName", "avatarUrl", "role", "isIdentityVerified"],
               required: false,
             },
           ],
@@ -291,7 +291,7 @@ router.get(
               {
                 model: User,
                 as: "owner",
-                attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                attributes: ["id", "firstName", "lastName", "avatarUrl", "role", "isIdentityVerified"],
                 required: false,
               },
             ],
@@ -384,7 +384,7 @@ router.get("/:id", async (req, res) => {
             {
               model: User,
               as: "owner",
-              attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role", "phoneNumber"],
+              attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role", "phoneNumber", "isIdentityVerified"],
             },
           ],
         },

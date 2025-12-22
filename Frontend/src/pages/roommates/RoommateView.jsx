@@ -150,6 +150,12 @@ function RoommateView() {
                                         {t(profile.major)}
                                     </span>
                                 )}
+                                {profile.sameMajor === 1 && (
+                                    <span className="px-3 py-1.5 rounded-full bg-green-500 text-white text-sm font-bold flex items-center gap-1">
+                                        <CheckIcon className="w-4 h-4" />
+                                        {t("sameMajor")}
+                                    </span>
+                                )}
                                 <span className="px-3 py-1.5 rounded-full bg-white/20 text-white text-sm font-medium flex items-center gap-1">
                                     <CurrencyDollarIcon className="w-4 h-4" />
                                     {formatBudget()}

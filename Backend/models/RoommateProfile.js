@@ -26,7 +26,6 @@ const RoommateProfile = sequelize.define(
                 key: "id",
             },
         },
-        // Budget preferences
         minBudget: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: true,
@@ -35,7 +34,6 @@ const RoommateProfile = sequelize.define(
             type: DataTypes.DECIMAL(10, 2),
             allowNull: true,
         },
-        // Living preferences (1-5 scale)
         cleanlinessLevel: {
             type: DataTypes.INTEGER,
             allowNull: true,
@@ -60,7 +58,6 @@ const RoommateProfile = sequelize.define(
             type: DataTypes.ENUM("home", "library", "mixed"),
             allowNull: true,
         },
-        // Lifestyle preferences
         smokingAllowed: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
@@ -73,17 +70,14 @@ const RoommateProfile = sequelize.define(
             type: DataTypes.ENUM("never", "sometimes", "often"),
             defaultValue: "sometimes",
         },
-        // Personal info
         bio: {
             type: DataTypes.TEXT,
             allowNull: true,
         },
-        // Major / Field of Study
         major: {
             type: DataTypes.STRING(100),
             allowNull: true,
         },
-        // Interests / Tags for better matching
         interests: {
             type: DataTypes.JSON,
             allowNull: true,
@@ -98,7 +92,12 @@ const RoommateProfile = sequelize.define(
             allowNull: true,
             defaultValue: [],
         },
-        // Profile status
+        matchingPriorities: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: null,
+            comment: "User preferences for matching importance: { budget: 1-5, cleanliness: 1-5, noise: 1-5, sleepSchedule: 1-5, studyHabits: 1-5, interests: 1-5, smoking: 1-5, pets: 1-5, guests: 1-5 }",
+        },
         isActive: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,

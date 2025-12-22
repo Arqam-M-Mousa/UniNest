@@ -13,6 +13,7 @@ const uploadRoutes = require("./uploads");
 const adminRoutes = require("./admin");
 const roommateRoutes = require("./roommates");
 const verificationRoutes = require("./verification");
+const announcementRoutes = require("./announcements");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -26,5 +27,6 @@ router.use("/uploads", uploadRoutes);
 router.use("/admin", adminRoutes);
 router.use("/roommates", roommateRoutes);
 router.use("/verification", verificationRoutes);
+router.use("/announcements", announcementRoutes);
 
 module.exports = router;

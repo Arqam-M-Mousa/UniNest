@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
-import { propertyListingsAPI } from "../../services/api";
+import { propertyListingsAPI, universitiesAPI } from "../../services/api";
+import LocationPicker from "../../components/properties/LocationPicker";
+import { calculateDistance } from "../../utils/mapUtils";
 import {
   PencilIcon,
   TrashIcon,
@@ -31,6 +33,38 @@ const MyListings = () => {
   const [editForm, setEditForm] = useState({});
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState("");
+  const [universities, setUniversities] = useState([]);
+
+  // Fetch universities
+  useEffect(() => {
+    const fetchUniversities = async () => {
+      try {
+        const response = await universitiesAPI.getAll();
+        setUniversities(response.data || []);
+      } catch (err) {
+        console.error("Failed to fetch universities:", err);
+      }
+    };
+    fetchUniversities();
+  }, []);
+
+  // Auto-calculate distance in edit form
+  useEffect(() => {
+    if (editForm.latitude && editForm.longitude && (editForm.universityId || user?.universityId)) {
+      const uniId = editForm.universityId || user?.universityId;
+      const uni = universities.find(u => u.id === uniId);
+
+      if (uni?.latitude && uni?.longitude) {
+        const dist = calculateDistance(
+          parseFloat(editForm.latitude),
+          parseFloat(editForm.longitude),
+          parseFloat(uni.latitude),
+          parseFloat(uni.longitude)
+        );
+        setEditForm(prev => ({ ...prev, distanceToUniversity: dist }));
+      }
+    }
+  }, [editForm.latitude, editForm.longitude, editForm.universityId, user?.universityId, universities]);
 
   const canAccess = user?.role && ["landlord", "superadmin"].includes(user.role.toLowerCase());
 
@@ -111,8 +145,11 @@ const MyListings = () => {
       squareFeet: listing.squareFeet || "",
       distanceToUniversity: listing.distanceToUniversity || "",
       leaseDuration: listing.leaseDuration || "",
-      availableFrom: listing.availableFrom ? listing.availableFrom.split("T")[0] : "",
-      availableUntil: listing.availableUntil ? listing.availableUntil.split("T")[0] : "",
+      listingDuration: listing.listingDuration || "1month",
+      latitude: listing.latitude,
+      longitude: listing.longitude,
+      universityId: listing.universityId,
+      maxOccupants: listing.maxOccupants || 1,
     });
     setEditError("");
     setEditModal(listing);
@@ -137,8 +174,11 @@ const MyListings = () => {
         squareFeet: Number(editForm.squareFeet),
         distanceToUniversity: Number(editForm.distanceToUniversity),
         leaseDuration: editForm.leaseDuration,
-        availableFrom: editForm.availableFrom,
-        availableUntil: editForm.availableUntil || null,
+        listingDuration: editForm.listingDuration,
+        latitude: editForm.latitude,
+        longitude: editForm.longitude,
+        universityId: editForm.universityId,
+        maxOccupants: Number(editForm.maxOccupants),
       });
 
       // Refresh listings
@@ -249,8 +289,8 @@ const MyListings = () => {
                   {/* Status Badge */}
                   <div
                     className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${listing.isPublished
-                        ? "bg-green-500/90 text-white"
-                        : "bg-yellow-500/90 text-white"
+                      ? "bg-green-500/90 text-white"
+                      : "bg-yellow-500/90 text-white"
                       }`}
                   >
                     {listing.isPublished ? (
@@ -305,8 +345,8 @@ const MyListings = () => {
                       onClick={() => handleToggleVisibility(listing)}
                       disabled={actionLoading === listing.id}
                       className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${listing.isPublished
-                          ? "text-yellow-600 hover:bg-yellow-500/10"
-                          : "text-green-600 hover:bg-green-500/10"
+                        ? "text-yellow-600 hover:bg-yellow-500/10"
+                        : "text-green-600 hover:bg-green-500/10"
                         }`}
                     >
                       {actionLoading === listing.id ? (
@@ -532,82 +572,95 @@ const MyListings = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-[var(--color-text)]">
-                          {t("Size (m²)")} *
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          className="w-full input-field mt-1"
-                          value={editForm.squareFeet}
-                          onChange={(e) =>
-                            setEditForm((prev) => ({ ...prev, squareFeet: e.target.value }))
-                          }
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-[var(--color-text)]">
-                          {t("Distance to university (km)")} *
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          className="w-full input-field mt-1"
-                          value={editForm.distanceToUniversity}
-                          onChange={(e) =>
-                            setEditForm((prev) => ({ ...prev, distanceToUniversity: e.target.value }))
-                          }
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-[var(--color-text)]">
-                          {t("Lease duration")} *
-                        </label>
-                        <input
-                          className="w-full input-field mt-1"
-                          value={editForm.leaseDuration}
-                          onChange={(e) =>
-                            setEditForm((prev) => ({ ...prev, leaseDuration: e.target.value }))
-                          }
-                          placeholder={t("e.g. 12 months")}
-                          required
-                        />
-                      </div>
+                    <div className="md:col-span-3">
+                      <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                        {t("propertyLocation") || "Property Location"}
+                      </label>
+                      <LocationPicker
+                        latitude={editForm.latitude}
+                        longitude={editForm.longitude}
+                        universities={universities}
+                        universityLatitude={universities.find(u => u.id === editForm.universityId)?.latitude}
+                        universityLongitude={universities.find(u => u.id === editForm.universityId)?.longitude}
+                        onLocationChange={(lat, lng, city) => {
+                          setEditForm(prev => ({
+                            ...prev,
+                            latitude: lat,
+                            longitude: lng,
+                          }));
+                        }}
+                        height="300px"
+                      />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-[var(--color-text)]">
-                          {t("availableFrom")} *
-                        </label>
-                        <input
-                          type="date"
-                          className="w-full input-field mt-1"
-                          value={editForm.availableFrom}
-                          onChange={(e) =>
-                            setEditForm((prev) => ({ ...prev, availableFrom: e.target.value }))
-                          }
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-[var(--color-text)]">
-                          {t("availableUntil")}
-                        </label>
-                        <input
-                          type="date"
-                          className="w-full input-field mt-1"
-                          value={editForm.availableUntil}
-                          onChange={(e) =>
-                            setEditForm((prev) => ({ ...prev, availableUntil: e.target.value }))
-                          }
-                        />
-                      </div>
+                    <div>
+                      <label className="text-sm font-medium text-[var(--color-text)]">
+                        {t("Size (m²)")} *
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full input-field mt-1"
+                        value={editForm.squareFeet}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, squareFeet: e.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-[var(--color-text)]">
+                        {t("Lease duration")} *
+                      </label>
+                      <input
+                        className="w-full input-field mt-1"
+                        value={editForm.leaseDuration}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, leaseDuration: e.target.value }))
+                        }
+                        placeholder={t("e.g. 12 months")}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-[var(--color-text)]">
+                        {t("maxOccupants") || "Max Occupants"} *
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        className="w-full input-field mt-1"
+                        value={editForm.maxOccupants}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, maxOccupants: e.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-[var(--color-text)]">
+                        {t("listingDuration") || "Listing Duration"} *
+                      </label>
+                      <select
+                        className="w-full input-field mt-1"
+                        value={editForm.listingDuration}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, listingDuration: e.target.value }))
+                        }
+                        required
+                      >
+                        <option value="1week">{t("1week") || "1 Week"}</option>
+                        <option value="2weeks">{t("2weeks") || "2 Weeks"}</option>
+                        <option value="1month">{t("1month") || "1 Month"}</option>
+                        <option value="2months">{t("2months") || "2 Months"}</option>
+                        <option value="3months">{t("3months") || "3 Months"}</option>
+                      </select>
                     </div>
                   </div>
 

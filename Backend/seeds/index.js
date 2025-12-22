@@ -1,5 +1,6 @@
 const sequelize = require("../config/database");
 const seedAdminUser = require("./adminUser");
+const seedStudentUsers = require("./studentUsers");
 
 /**
  * Run all seeds
@@ -12,6 +13,7 @@ const runSeeds = async () => {
 
     // Run seed files
     await seedAdminUser();
+    await seedStudentUsers();
 
     console.log("All seeds completed successfully");
     process.exit(0);

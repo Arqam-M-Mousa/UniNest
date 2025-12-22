@@ -10,6 +10,7 @@ const {
 } = require("../models");
 const { authenticate, authorize } = require("../middleware/auth");
 const { sendSuccess, sendError, HTTP_STATUS } = require("../utils/responses");
+const { deleteFromCloudinary } = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -26,7 +27,6 @@ router.get("/", async (req, res) => {
       city,
       minSquareFeet,
       maxSquareFeet,
-      acceptsPartners,
       sortBy = "createdAt",
       sortOrder = "DESC",
       limit = 50,
@@ -34,7 +34,13 @@ router.get("/", async (req, res) => {
     } = req.query;
 
     // Build PropertyListing where clause
-    const propertyWhere = {};
+    const propertyWhere = {
+      isVisible: true,
+      [Op.or]: [
+        { expiresAt: null },
+        { expiresAt: { [Op.gt]: new Date() } }
+      ]
+    };
 
     if (propertyType) {
       propertyWhere.propertyType = propertyType;
@@ -70,17 +76,8 @@ router.get("/", async (req, res) => {
         propertyWhere.squareFeet[Op.lte] = parseInt(maxSquareFeet, 10);
     }
 
-    // Filter by accepts partners/roommates
-    if (acceptsPartners === 'true' || acceptsPartners === true) {
-      propertyWhere.amenitiesJson = {
-        partner: true
-      };
-    }
-
-    // Determine sort field - use PropertyListing fields for sorting to avoid subquery issues
     const order = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-    // First get the count
     const total = await PropertyListing.count({
       where: propertyWhere,
       include: [
@@ -93,7 +90,6 @@ router.get("/", async (req, res) => {
       ],
     });
 
-    // Then get the data with simpler query structure
     const properties = await PropertyListing.findAll({
       where: propertyWhere,
       include: [
@@ -106,9 +102,8 @@ router.get("/", async (req, res) => {
             {
               model: ListingImage,
               as: "images",
-              attributes: ["id", "url", "isPrimary", "displayOrder"],
               required: false,
-              separate: true, // Use separate query to avoid join issues
+              separate: true,
             },
             {
               model: User,
@@ -147,8 +142,11 @@ router.get("/", async (req, res) => {
         squareFeet: prop.squareFeet,
         distanceToUniversity: prop.distanceToUniversity,
         leaseDuration: prop.leaseDuration,
-        availableFrom: prop.availableFrom,
-        availableUntil: prop.availableUntil,
+        listingDuration: prop.listingDuration,
+        expiresAt: prop.expiresAt,
+        isVisible: prop.isVisible,
+        latitude: prop.latitude,
+        longitude: prop.longitude,
         images: listing.images || [],
         owner: listing.owner || null,
         university: prop.University || null,
@@ -287,7 +285,6 @@ router.get(
               {
                 model: ListingImage,
                 as: "images",
-                attributes: ["id", "url", "isPrimary", "displayOrder"],
                 required: false,
                 separate: true,
               },
@@ -324,8 +321,12 @@ router.get(
           squareFeet: prop.squareFeet,
           distanceToUniversity: prop.distanceToUniversity,
           leaseDuration: prop.leaseDuration,
-          availableFrom: prop.availableFrom,
-          availableUntil: prop.availableUntil,
+          listingDuration: prop.listingDuration,
+          expiresAt: prop.expiresAt,
+          isVisible: prop.isVisible,
+          isExpired: prop.expiresAt ? new Date(prop.expiresAt) < new Date() : false,
+          latitude: prop.latitude,
+          longitude: prop.longitude,
           images: listing.images || [],
           owner: listing.owner || null,
           university: prop.University || null,
@@ -379,7 +380,6 @@ router.get("/:id", async (req, res) => {
             {
               model: ListingImage,
               as: "images",
-              attributes: ["id", "url", "isPrimary", "displayOrder"],
             },
             {
               model: User,
@@ -424,8 +424,9 @@ router.get("/:id", async (req, res) => {
       amenitiesJson: property.amenitiesJson,
       distanceToUniversity: property.distanceToUniversity,
       leaseDuration: property.leaseDuration,
-      availableFrom: property.availableFrom,
-      availableUntil: property.availableUntil,
+      listingDuration: property.listingDuration,
+      expiresAt: property.expiresAt,
+      isVisible: property.isVisible,
       images: property.listing.images || [],
       owner: property.listing.owner,
       university: property.University,
@@ -481,9 +482,10 @@ router.put(
         squareFeet,
         amenitiesJson,
         distanceToUniversity,
-        availableFrom,
-        availableUntil,
+        listingDuration,
         leaseDuration,
+        latitude,
+        longitude,
         images,
       } = req.body;
 
@@ -511,9 +513,15 @@ router.put(
         if (squareFeet) propertyUpdates.squareFeet = squareFeet;
         if (amenitiesJson !== undefined) propertyUpdates.amenitiesJson = amenitiesJson;
         if (distanceToUniversity) propertyUpdates.distanceToUniversity = distanceToUniversity;
-        if (availableFrom) propertyUpdates.availableFrom = availableFrom;
-        if (availableUntil !== undefined) propertyUpdates.availableUntil = availableUntil;
+        if (listingDuration) {
+          propertyUpdates.listingDuration = listingDuration;
+          // Recalculate expiresAt when duration changes
+          const durationDays = { '1week': 7, '2weeks': 14, '1month': 30, '2months': 60, '3months': 90 };
+          propertyUpdates.expiresAt = new Date(Date.now() + durationDays[listingDuration] * 24 * 60 * 60 * 1000);
+        }
         if (leaseDuration) propertyUpdates.leaseDuration = leaseDuration;
+        if (latitude !== undefined) propertyUpdates.latitude = latitude;
+        if (longitude !== undefined) propertyUpdates.longitude = longitude;
 
         if (Object.keys(propertyUpdates).length > 0) {
           await PropertyListing.update(propertyUpdates, {
@@ -615,6 +623,68 @@ router.patch(
   }
 );
 
+// PATCH /api/property-listings/:id/renew - Renew an expired listing
+router.patch(
+  "/:id/renew",
+  authenticate,
+  authorize(["SuperAdmin", "Landlord"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const isSuperAdmin = req.user.role === "SuperAdmin";
+      const { listingDuration = "1month" } = req.body;
+
+      const property = await PropertyListing.findByPk(id, {
+        include: [{ model: Listing, as: "listing" }],
+      });
+
+      if (!property) {
+        return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
+      }
+
+      // Check ownership
+      if (!isSuperAdmin && property.listing.ownerId !== userId) {
+        return sendError(res, "Not authorized", HTTP_STATUS.FORBIDDEN);
+      }
+
+      // Calculate new expiration date
+      const durationDays = { '1week': 7, '2weeks': 14, '1month': 30, '2months': 60, '3months': 90 };
+      const expiresAt = new Date(Date.now() + durationDays[listingDuration] * 24 * 60 * 60 * 1000);
+
+      // Update listing
+      await PropertyListing.update(
+        {
+          listingDuration,
+          expiresAt,
+          isVisible: true
+        },
+        { where: { id } }
+      );
+
+      // Also ensure the base listing is published
+      await Listing.update(
+        { isPublished: true },
+        { where: { id: property.listingId } }
+      );
+
+      return sendSuccess(res, {
+        message: "Listing renewed successfully",
+        expiresAt,
+        listingDuration,
+      });
+    } catch (error) {
+      console.error("Failed to renew listing", error);
+      return sendError(
+        res,
+        "Failed to renew listing",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
 // DELETE /api/property-listings/:id - Delete a property listing
 router.delete(
   "/:id",
@@ -642,7 +712,43 @@ router.delete(
       const transaction = await Listing.sequelize.transaction();
 
       try {
-        // Delete images first
+        // Get all images before deletion to delete from Cloudinary
+        const images = await ListingImage.findAll({
+          where: { listingId: property.listingId },
+          attributes: ['url', 'publicId'],
+        });
+
+        // Delete images from Cloudinary
+        for (const image of images) {
+          try {
+            let publicId = image.publicId;
+
+            if (!publicId && image.url) {
+              // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/v{version}/{folder}/{filename}.{ext}
+              const url = image.url;
+              const uploadIndex = url.indexOf('/upload/');
+              if (uploadIndex !== -1) {
+                let pathAfterUpload = url.substring(uploadIndex + 8);
+                pathAfterUpload = pathAfterUpload.replace(/^v\d+\//, '');
+                publicId = pathAfterUpload.substring(0, pathAfterUpload.lastIndexOf('.'));
+              }
+            }
+
+            if (!publicId) {
+              console.warn(`No publicId for image, skipping Cloudinary deletion: ${image.url}`);
+              continue;
+            }
+
+            console.log(`Attempting to delete from Cloudinary: ${publicId}`);
+            const result = await deleteFromCloudinary(publicId);
+            console.log(`✅ Deleted image from Cloudinary: ${publicId}`, result);
+          } catch (cloudinaryError) {
+            console.error('❌ Failed to delete image from Cloudinary:', cloudinaryError.message);
+            // Continue with deletion even if Cloudinary fails
+          }
+        }
+
+        // Delete image records from database
         await ListingImage.destroy({
           where: { listingId: property.listingId },
           transaction,
@@ -703,8 +809,7 @@ router.post(
       squareFeet,
       amenitiesJson,
       distanceToUniversity,
-      availableFrom,
-      availableUntil,
+      listingDuration = "1month",
       leaseDuration,
       universityId,
       images,
@@ -766,6 +871,10 @@ router.post(
         { transaction }
       );
 
+      // Calculate expiration date based on listing duration
+      const durationDays = { '1week': 7, '2weeks': 14, '1month': 30, '2months': 60, '3months': 90 };
+      const expiresAt = new Date(Date.now() + durationDays[listingDuration] * 24 * 60 * 60 * 1000);
+
       const property = await PropertyListing.create(
         {
           listingId: listing.id,
@@ -780,8 +889,9 @@ router.post(
           squareFeet,
           amenitiesJson,
           distanceToUniversity,
-          availableFrom,
-          availableUntil,
+          listingDuration,
+          expiresAt,
+          isVisible: true,
           leaseDuration,
           universityId,
         },
@@ -790,20 +900,31 @@ router.post(
 
       let createdImages = [];
       if (Array.isArray(images) && images.length > 0) {
-        const filteredRaw = images.filter(
-          (url) => typeof url === "string" && url.trim()
-        );
+        // Filter valid images - accept both strings and objects with url property
+        const filteredRaw = images.filter((img) => {
+          if (typeof img === "string") return img.trim();
+          if (typeof img === "object" && img.url) return img.url.trim();
+          return false;
+        });
 
         if (filteredRaw.length > 10) {
           throw new Error("Maximum 10 images per listing");
         }
 
-        const payload = filteredRaw.map((url, index) => ({
-          url: url.trim(),
-          isPrimary: index === 0,
-          displayOrder: index,
-          listingId: listing.id,
-        }));
+        const payload = filteredRaw.map((imgData, index) => {
+          const url = typeof imgData === 'string' ? imgData : imgData.url;
+          const is360 = typeof imgData === 'object' && imgData.is360 === true;
+          const publicId = typeof imgData === 'object' ? imgData.publicId : null;
+
+          return {
+            url: url.trim(),
+            is360: is360,
+            publicId: publicId,
+            isPrimary: index === 0,
+            displayOrder: index,
+            listingId: listing.id,
+          };
+        });
 
         if (payload.length) {
           createdImages = await ListingImage.bulkCreate(payload, {

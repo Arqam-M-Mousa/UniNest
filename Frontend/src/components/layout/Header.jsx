@@ -15,16 +15,22 @@ import {
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useNotifications } from "../../context/NotificationContext";
 import { useEffect, useState, useRef } from "react";
-import { notificationsAPI, conversationsAPI } from "../../services/api";
 import CloudinaryImage from "../media/CloudinaryImage";
 
-const navLinksConfig = (t) => [
+const navLinksConfig = (t, user) => [
   { to: "/", label: t("home"), match: (p) => p === "/" },
   {
     to: "/apartments",
     label: t("apartments"),
     match: (p) => p === "/apartments",
+  },
+  {
+    to: "/roommates",
+    label: t("roommates"),
+    match: (p) => p.startsWith("/roommates"),
+    studentOnly: true,
   },
   {
     to: "/marketplace",
@@ -39,58 +45,35 @@ const Header = () => {
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, signout } = useAuth();
+  const {
+    notifications,
+    notifUnread,
+    notifLoading,
+    loadNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    conversations,
+    msgLoading,
+    totalUnreadMessages,
+    loadConversations,
+  } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [notifUnread, setNotifUnread] = useState(0);
-  const [notifLoading, setNotifLoading] = useState(false);
   const [msgOpen, setMsgOpen] = useState(false);
-  const [conversations, setConversations] = useState([]);
-  const [msgLoading, setMsgLoading] = useState(false);
   const [guestMenuOpen, setGuestMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const userMenuRef = useRef(null);
   const notifRef = useRef(null);
   const msgRef = useRef(null);
   const guestMenuRef = useRef(null);
-  const totalUnreadMessages = conversations.reduce(
-    (sum, c) => sum + (c.unreadCount || 0),
-    0
-  );
 
   const handleSignOut = () => {
     signout();
     setUserMenuOpen(false);
     navigate("/");
-  };
-
-  const loadNotifications = async () => {
-    try {
-      setNotifLoading(true);
-      const res = await notificationsAPI.list();
-      setNotifications(res.data?.items || []);
-      setNotifUnread(res.data?.unreadCount || 0);
-    } catch (err) {
-      console.error("Failed to load notifications", err);
-    } finally {
-      setNotifLoading(false);
-    }
-  };
-
-  const loadConversations = async () => {
-    try {
-      setMsgLoading(true);
-      const res = await conversationsAPI.list();
-      const items = Array.isArray(res.data) ? res.data : [];
-      setConversations(items);
-    } catch (err) {
-      console.error("Failed to load conversations", err);
-    } finally {
-      setMsgLoading(false);
-    }
   };
 
   // Close on route change
@@ -151,6 +134,7 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen, userMenuOpen, notifOpen, msgOpen, guestMenuOpen]);
 
+  
   return (
     <header className="sticky top-0 z-50 backdrop-blur shadow-sm border-b themed-border bg-[var(--color-surface)]/90 dark:bg-[var(--color-surface)]/90 transition-colors">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 py-3">
@@ -182,20 +166,22 @@ const Header = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {navLinksConfig(t).map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={
-                (link.match(location.pathname)
-                  ? "text-[var(--color-accent)] font-semibold"
-                  : "themed-text-soft hover:text-[var(--color-accent)]") +
-                " transition-colors"
-              }
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinksConfig(t, user)
+            .filter(link => !link.studentOnly || (user?.role === "Student"))
+            .map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={
+                  (link.match(location.pathname)
+                    ? "text-[var(--color-accent)] font-semibold"
+                    : "themed-text-soft hover:text-[var(--color-accent)]") +
+                  " transition-colors"
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
         </nav>
 
         {/* Actions */}
@@ -229,9 +215,7 @@ const Header = () => {
                       </p>
                       <button
                         className="text-xs text-[var(--color-accent)] hover:underline"
-                        onClick={() =>
-                          notificationsAPI.markAllRead().then(loadNotifications)
-                        }
+                        onClick={() => markAllNotificationsRead()}
                       >
                         {t("markAllRead")}
                       </button>
@@ -252,11 +236,9 @@ const Header = () => {
                             className={`w-full text-left px-4 py-3 hover:bg-[var(--color-surface-alt)] transition-colors ${n.isRead ? "themed-text-soft" : ""
                               }`}
                             onClick={() => {
-                              notificationsAPI
-                                .markRead(n.id)
-                                .then(loadNotifications);
+                              markNotificationRead(n.id);
                               if (n.actionUrl)
-                                window.location.href = n.actionUrl;
+                                navigate(n.actionUrl);
                             }}
                           >
                             <p className="text-sm font-semibold text-[var(--color-text)] line-clamp-1">
@@ -429,6 +411,18 @@ const Header = () => {
                         {t("myProfile")}
                       </span>
                     </Link>
+                    {user?.role === "Student" && (
+                      <Link
+                        to="/roommates/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                      >
+                        <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">
+                          {t("roommateProfile")}
+                        </span>
+                      </Link>
+                    )}
                     {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "superadmin") && (
                       <Link
                         to="/my-listings"
@@ -589,20 +583,22 @@ const Header = () => {
             className="flex flex-col divide-y divide-[var(--color-border)]"
             role="navigation"
           >
-            {navLinksConfig(t).map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={
-                  "px-4 py-3 text-sm font-medium transition-colors " +
-                  (link.match(location.pathname)
-                    ? "bg-[var(--color-surface)] text-[var(--color-accent)]"
-                    : "themed-text-soft hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]")
-                }
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinksConfig(t, user)
+              .filter(link => !link.studentOnly || (user?.role === "Student"))
+              .map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={
+                    "px-4 py-3 text-sm font-medium transition-colors " +
+                    (link.match(location.pathname)
+                      ? "bg-[var(--color-surface)] text-[var(--color-accent)]"
+                      : "themed-text-soft hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]")
+                  }
+                >
+                  {link.label}
+                </Link>
+              ))}
           </nav>
         </div>
       </div>

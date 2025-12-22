@@ -63,13 +63,18 @@ const PropertyListing = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    availableFrom: {
+    listingDuration: {
+      type: DataTypes.ENUM("1week", "2weeks", "1month", "2months", "3months"),
+      allowNull: false,
+      defaultValue: "1month",
+    },
+    expiresAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },
-    availableUntil: {
-      type: DataTypes.DATE,
-      allowNull: true,
+    isVisible: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     leaseDuration: {
       type: DataTypes.STRING,
@@ -82,6 +87,11 @@ const PropertyListing = sequelize.define(
         model: "universities",
         key: "id",
       },
+    },
+    maxOccupants: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
     },
   },
   {

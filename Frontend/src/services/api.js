@@ -14,7 +14,6 @@ async function apiRequest(endpoint, options = {}) {
 
   // Get token first
   const token = localStorage.getItem("token");
-  console.log("Token present:", !!token);
 
   const isFormData = options.body instanceof FormData;
 
@@ -29,18 +28,9 @@ async function apiRequest(endpoint, options = {}) {
   // Add auth token if available
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
-    console.log(
-      "Authorization header set:",
-      config.headers["Authorization"].substring(0, 20) + "..."
-    );
   }
 
   try {
-    console.log("API Request:", {
-      url,
-      method: config.method || "GET",
-      headers: config.headers,
-    });
     const response = await fetch(url, config);
 
     let data;
@@ -205,6 +195,11 @@ export const conversationsAPI = {
       method: "POST",
       body: JSON.stringify({ studentId, landlordId, propertyId }),
     }),
+  startDirect: async (targetUserId) =>
+    apiRequest(`/api/conversations`, {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+    }),
   listMessages: async (conversationId, limit = 50, offset = 0) =>
     apiRequest(
       `/api/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`
@@ -213,6 +208,10 @@ export const conversationsAPI = {
     apiRequest(`/api/conversations/${conversationId}/messages`, {
       method: "POST",
       body: JSON.stringify({ content, attachmentsJson }),
+    }),
+  deleteMessage: async (conversationId, messageId) =>
+    apiRequest(`/api/conversations/${conversationId}/messages/${messageId}`, {
+      method: "DELETE",
     }),
   markRead: async (conversationId) =>
     apiRequest(`/api/conversations/${conversationId}/read`, {
@@ -310,6 +309,47 @@ export const favoritesAPI = {
   remove: async (listingId) =>
     apiRequest(`/api/favorites/${listingId}`, { method: "DELETE" }),
   check: async (listingId) => apiRequest(`/api/favorites/check/${listingId}`),
+};
+
+/**
+ * Roommates API
+ */
+export const roommatesAPI = {
+  getProfile: async () => apiRequest("/api/roommates/profile"),
+  saveProfile: async (data) =>
+    apiRequest("/api/roommates/profile", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  deleteProfile: async () =>
+    apiRequest("/api/roommates/profile", { method: "DELETE" }),
+  search: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(
+      `/api/roommates/search${queryString ? `?${queryString}` : ""}`
+    );
+  },
+  getMatches: async () => apiRequest("/api/roommates/matches"),
+  sendMatch: async (userId, message) =>
+    apiRequest(`/api/roommates/matches/${userId}`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    }),
+  respondMatch: async (matchId, status) =>
+    apiRequest(`/api/roommates/matches/${matchId}`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    }),
+  deleteMatch: async (matchId) =>
+    apiRequest(`/api/roommates/matches/${matchId}`, {
+      method: "DELETE",
+    }),
 };
 
 export default apiRequest;

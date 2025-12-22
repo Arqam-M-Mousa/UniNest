@@ -8,6 +8,8 @@ import {
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/general/Home";
@@ -24,6 +26,9 @@ import Profile from "./pages/profile/Profile";
 import Messages from "./pages/general/Messages";
 import Admin from "./pages/admin/Admin";
 import AdminManagement from "./pages/admin/AdminManagement";
+import RoommateProfile from "./pages/roommates/RoommateProfile";
+import RoommateSearch from "./pages/roommates/RoommateSearch";
+import RoommateView from "./pages/roommates/RoommateView";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -64,6 +69,9 @@ function ThemedLayout() {
           <Route path="/messages/:id" element={<Messages />} />
           <Route path="/admin/universities" element={<Admin />} />
           <Route path="/admin/manage-admins" element={<AdminManagement />} />
+          <Route path="/roommates" element={<RoommateSearch />} />
+          <Route path="/roommates/profile" element={<RoommateProfile />} />
+          <Route path="/roommates/view/:userId" element={<RoommateView />} />
         </Routes>
       </main>
       <Footer />
@@ -76,10 +84,14 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <Router>
-            <ScrollToTop />
-            <ThemedLayout />
-          </Router>
+          <SocketProvider>
+            <NotificationProvider>
+              <Router>
+                <ScrollToTop />
+                <ThemedLayout />
+              </Router>
+            </NotificationProvider>
+          </SocketProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

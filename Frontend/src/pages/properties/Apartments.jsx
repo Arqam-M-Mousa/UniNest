@@ -8,13 +8,16 @@ import {
   universitiesAPI,
   favoritesAPI,
 } from "../../services/api";
-import { QueueListIcon, HeartIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { QueueListIcon, HeartIcon, PlusIcon, MapIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import TabButton from "../../components/common/TabButton";
 import Alert from "../../components/common/Alert";
 import nnuImg from "../../assets/nnu.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 import PageLoader from "../../components/common/PageLoader";
 import PropertyCard from "../../components/properties/PropertyCard";
+import LocationPicker from "../../components/properties/LocationPicker";
+import MapView from "../../components/properties/MapView";
+import { calculateDistance } from "../../utils/mapUtils";
 
 const Apartments = () => {
   const { t, language } = useLanguage();
@@ -34,7 +37,6 @@ const Apartments = () => {
     bedrooms: "",
     bathrooms: "",
     city: "",
-    acceptsPartners: false,
   };
 
   // Listings state
@@ -70,6 +72,7 @@ const Apartments = () => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [postError, setPostError] = useState("");
   const [postSuccess, setPostSuccess] = useState("");
+  const [image360Flags, setImage360Flags] = useState({});
   const [universities, setUniversities] = useState([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [postForm, setPostForm] = useState({
@@ -83,10 +86,11 @@ const Apartments = () => {
     squareMeters: "",
     distanceToUniversity: "",
     leaseDuration: "",
-    availableFrom: "",
-    availableUntil: "",
+    listingDuration: "1month",
+    latitude: null,
+    longitude: null,
     universityId: user?.universityId || "",
-    acceptsPartners: false,
+    maxOccupants: "1",
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [universitiesFetched, setUniversitiesFetched] = useState(false);
@@ -117,7 +121,6 @@ const Apartments = () => {
       if (filters.bedrooms) queryFilters.bedrooms = filters.bedrooms;
       if (filters.bathrooms) queryFilters.bathrooms = filters.bathrooms;
       if (filters.city) queryFilters.city = filters.city;
-      if (filters.acceptsPartners) queryFilters.acceptsPartners = true;
 
       // Sort based on active tab
       if (activeTab === "lastListings") {
@@ -164,10 +167,23 @@ const Apartments = () => {
     }
   }, []);
 
+  // Fetch universities for map
+  const fetchUniversities = useCallback(async () => {
+    try {
+      const response = await universitiesAPI.list();
+      if (response?.data) {
+        setUniversities(response.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch universities:", err);
+    }
+  }, []);
+
   // Initial fetch
   useEffect(() => {
     fetchListings();
     fetchFilterOptions();
+    fetchUniversities();
   }, []);
 
   // Refetch when filters or tab change
@@ -250,6 +266,27 @@ const Apartments = () => {
     setPostForm((prev) => ({ ...prev, [field]: value }));
   };
 
+
+
+  // Auto-calculate distance when location or university changes
+  useEffect(() => {
+    if (postForm.latitude && postForm.longitude && (postForm.universityId || user?.universityId)) {
+      const uniId = postForm.universityId || user?.universityId;
+      const uni = universities.find(u => u.id === uniId);
+
+      if (uni?.latitude && uni?.longitude) {
+        const dist = calculateDistance(
+          parseFloat(postForm.latitude),
+          parseFloat(postForm.longitude),
+          parseFloat(uni.latitude),
+          parseFloat(uni.longitude)
+        );
+        updateForm("distanceToUniversity", dist);
+      }
+    }
+  }, [postForm.latitude, postForm.longitude, postForm.universityId, user?.universityId, universities]);
+
+  const [viewMode, setViewMode] = useState("grid");
   const resetForm = () => {
     setPostForm({
       title: "",
@@ -262,10 +299,11 @@ const Apartments = () => {
       squareMeters: "",
       distanceToUniversity: "",
       leaseDuration: "",
-      availableFrom: "",
-      availableUntil: "",
+      listingDuration: "1month",
+      latitude: null,
+      longitude: null,
       universityId: user?.universityId || "",
-      acceptsPartners: false,
+      maxOccupants: "1",
     });
   };
 
@@ -294,7 +332,6 @@ const Apartments = () => {
         !postForm.squareMeters ||
         !postForm.distanceToUniversity ||
         !postForm.leaseDuration.trim() ||
-        !postForm.availableFrom ||
         !(postForm.universityId || user?.universityId)
       ) {
         throw new Error(t("fillRequiredFields") || "Please fill in all required fields");
@@ -302,11 +339,21 @@ const Apartments = () => {
 
       setUploadingImages(true);
       const uploadRes = await uploadsAPI.uploadListingImages(selectedFiles);
-      const uploadedUrls = uploadRes?.data?.map((i) => i.url) || [];
+      const uploadedImages = uploadRes?.data || [];
 
-      if (uploadedUrls.length === 0) {
+      if (uploadedImages.length === 0) {
         throw new Error(t("imageUploadFailed") || "Failed to upload images");
       }
+
+      // Build images array with 360 metadata and publicId
+      const imagesWithMetadata = uploadedImages.map((img, index) => {
+        const fileName = selectedFiles[index]?.name;
+        return {
+          url: img.url,
+          publicId: img.publicId,
+          is360: image360Flags[fileName] || false,
+        };
+      });
 
       const payload = {
         title: postForm.title.trim(),
@@ -319,19 +366,19 @@ const Apartments = () => {
         squareFeet: Number(postForm.squareMeters),
         distanceToUniversity: Number(postForm.distanceToUniversity),
         leaseDuration: postForm.leaseDuration.trim(),
-        availableFrom: postForm.availableFrom,
-        availableUntil: postForm.availableUntil || null,
+        listingDuration: postForm.listingDuration,
+        latitude: postForm.latitude,
+        longitude: postForm.longitude,
         universityId: postForm.universityId || user?.universityId,
-        images: uploadedUrls,
-        amenitiesJson: {
-          partner: postForm.acceptsPartners,
-        },
+        images: imagesWithMetadata,
+        maxOccupants: Number(postForm.maxOccupants) || 1,
       };
 
       await propertyListingsAPI.create(payload);
       setPostSuccess(t("Ad created successfully"));
       resetForm();
       setSelectedFiles([]);
+      setImage360Flags({});
       setPostModalOpen(false);
       // Refresh listings
       fetchListings();
@@ -387,8 +434,20 @@ const Apartments = () => {
     setSelectedFiles((prev) => [...prev, ...fileArr].slice(0, 10));
   };
 
+  const toggle360Flag = (fileName) => {
+    setImage360Flags((prev) => ({
+      ...prev,
+      [fileName]: !prev[fileName],
+    }));
+  };
+
   const handleRemoveSelected = (name) => {
     setSelectedFiles((prev) => prev.filter((f) => f.name !== name));
+    setImage360Flags((prev) => {
+      const updated = { ...prev };
+      delete updated[name];
+      return updated;
+    });
   };
 
   return (
@@ -644,51 +703,6 @@ const Apartments = () => {
                     </div>
                   )}
 
-                  {/* Accepts Partners Filter */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-medium mb-3 text-[var(--color-text-soft)] flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      {t("partner")}
-                    </h4>
-                    <button
-                      type="button"
-                      className={`group w-full flex justify-between items-center px-4 py-3.5 rounded-xl border-2 transition-all duration-200 ${pendingFilters.acceptsPartners
-                        ? "bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/90 text-white border-[var(--color-accent)] shadow-lg shadow-[var(--color-accent)]/25"
-                        : "bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:shadow-md"
-                        }`}
-                      onClick={() =>
-                        handlePendingFilterChange(
-                          "acceptsPartners",
-                          !pendingFilters.acceptsPartners
-                        )
-                      }
-                    >
-                      <span className="font-medium text-sm flex items-center gap-2">
-                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <span className="truncate">{t("partner")}</span>
-                      </span>
-                      {/* Toggle Switch */}
-                      <div className={`relative w-11 h-6 rounded-full transition-all duration-300 flex-shrink-0 ml-2 ${pendingFilters.acceptsPartners
-                        ? "bg-white/30"
-                        : "bg-gray-300 dark:bg-gray-600"
-                        }`}>
-                        <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-all duration-300 transform ${pendingFilters.acceptsPartners
-                          ? "translate-x-5 bg-white shadow-md"
-                          : "translate-x-0 bg-white dark:bg-gray-300"
-                          }`}>
-                          {pendingFilters.acceptsPartners && (
-                            <svg className="w-5 h-5 text-[var(--color-accent)] p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  </div>
 
                   {/* Apply Filters Button */}
                   <button
@@ -710,8 +724,34 @@ const Apartments = () => {
                   </div>
                 </aside>
 
-                {/* Listings Grid */}
+                {/* Listings Grid or Map View */}
                 <div>
+                  {/* View Toggle */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setViewMode("grid")}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === "grid"
+                          ? "bg-[var(--color-accent)] text-white"
+                          : "bg-[var(--color-surface-alt)] text-[var(--color-text)] hover:bg-[var(--color-border)]"
+                          }`}
+                      >
+                        <Squares2X2Icon className="w-4 h-4" />
+                        {t("gridView") || "Grid"}
+                      </button>
+                      <button
+                        onClick={() => setViewMode("map")}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === "map"
+                          ? "bg-[var(--color-accent)] text-white"
+                          : "bg-[var(--color-surface-alt)] text-[var(--color-text)] hover:bg-[var(--color-border)]"
+                          }`}
+                      >
+                        <MapIcon className="w-4 h-4" />
+                        {t("mapView") || "Map"}
+                      </button>
+                    </div>
+                  </div>
+
                   {listingsError && (
                     <div className="mb-6 rounded-lg border border-red-500/60 bg-red-500/10 text-red-700 dark:text-red-300 px-4 py-3 text-sm">
                       {listingsError}
@@ -724,7 +764,13 @@ const Apartments = () => {
                     </div>
                   )}
 
-                  {listingsLoading ? (
+                  {viewMode === "map" ? (
+                    <MapView
+                      properties={filteredListings}
+                      universities={universities}
+                      height="600px"
+                    />
+                  ) : listingsLoading ? (
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
                       {[...Array(6)].map((_, idx) => (
                         <div
@@ -976,20 +1022,6 @@ const Apartments = () => {
                             </div>
                             <div>
                               <label className="text-sm font-medium text-[var(--color-text)]">
-                                {t("Distance to university (km)")} *
-                              </label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.1"
-                                className="w-full input-field mt-1"
-                                value={postForm.distanceToUniversity}
-                                onChange={(e) => updateForm("distanceToUniversity", e.target.value)}
-                                required
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-[var(--color-text)]">
                                 {t("Lease duration")} *
                               </label>
                               <input
@@ -1005,41 +1037,65 @@ const Apartments = () => {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <label className="text-sm font-medium text-[var(--color-text)]">
-                                {t("availableFrom") || "Available from"} *
+                                {t("listingDuration") || "Listing Duration"} *
                               </label>
-                              <input
-                                type="date"
+                              <select
                                 className="w-full input-field mt-1"
-                                value={postForm.availableFrom}
-                                onChange={(e) => updateForm("availableFrom", e.target.value)}
+                                value={postForm.listingDuration}
+                                onChange={(e) => updateForm("listingDuration", e.target.value)}
                                 required
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-[var(--color-text)]">
-                                {t("availableUntil") || "Available until"}
-                              </label>
-                              <input
-                                type="date"
-                                className="w-full input-field mt-1"
-                                value={postForm.availableUntil}
-                                onChange={(e) => updateForm("availableUntil", e.target.value)}
-                              />
+                              >
+                                <option value="1week">{t("1week") || "1 Week"}</option>
+                                <option value="2weeks">{t("2weeks") || "2 Weeks"}</option>
+                                <option value="1month">{t("1month") || "1 Month"}</option>
+                                <option value="2months">{t("2months") || "2 Months"}</option>
+                                <option value="3months">{t("3months") || "3 Months"}</option>
+                              </select>
+                              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                                {t("listingDurationHint") || "How long the listing will be visible"}
+                              </p>
                             </div>
                           </div>
 
-                          {/* Accept Partners Option */}
-                          <div className="flex items-center gap-3 pt-2">
-                            <input
-                              type="checkbox"
-                              id="acceptsPartners"
-                              checked={postForm.acceptsPartners}
-                              onChange={(e) => updateForm("acceptsPartners", e.target.checked)}
-                              className="w-5 h-5 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
-                            />
-                            <label htmlFor="acceptsPartners" className="text-sm font-medium text-[var(--color-text)] cursor-pointer">
-                              {t("acceptsPartners") || "Accepts partners/roommates"}
+                          {/* Location Picker */}
+                          <div className="mt-4">
+                            <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                              {t("propertyLocation") || "Property Location"}
                             </label>
+                            <LocationPicker
+                              latitude={postForm.latitude}
+                              longitude={postForm.longitude}
+                              universities={universities}
+                              universityLatitude={universities.find(u => u.id === postForm.universityId)?.latitude}
+                              universityLongitude={universities.find(u => u.id === postForm.universityId)?.longitude}
+                              onLocationChange={(lat, lng, city) => {
+                                setPostForm(prev => ({
+                                  ...prev,
+                                  latitude: lat,
+                                  longitude: lng,
+                                }));
+                              }}
+                              height="300px"
+                            />
+                          </div>
+
+                          {/* Max Occupants */}
+                          <div className="mt-4">
+                            <label className="text-sm font-medium text-[var(--color-text)]">
+                              {t("maxOccupants") || "Max Occupants"} *
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="20"
+                              className="w-full input-field mt-1"
+                              value={postForm.maxOccupants}
+                              onChange={(e) => updateForm("maxOccupants", e.target.value)}
+                              required
+                            />
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                              {t("maxOccupantsHint") || "Maximum number of people allowed"}
+                            </p>
                           </div>
                         </div>
 
@@ -1081,12 +1137,30 @@ const Apartments = () => {
                                     alt={file.name}
                                     className="w-full h-20 object-cover rounded-lg border border-[var(--color-border)]"
                                   />
+                                  {image360Flags[file.name] && (
+                                    <span className="absolute top-1 left-1 bg-[var(--color-accent)] text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                                      360°
+                                    </span>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveSelected(file.name)}
                                     className="absolute top-1 right-1 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     {t("remove")}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggle360Flag(file.name)}
+                                    className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={image360Flags[file.name] || false}
+                                      onChange={() => { }}
+                                      className="w-3 h-3"
+                                    />
+                                    {t("mark360") || "360°"}
                                   </button>
                                 </div>
                               ))}

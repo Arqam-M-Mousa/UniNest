@@ -27,6 +27,7 @@ import Messages from "./pages/general/Messages";
 import Admin from "./pages/admin/Admin";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminVerification from "./pages/admin/AdminVerification";
+import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
 import RoommateView from "./pages/roommates/RoommateView";
@@ -73,6 +74,7 @@ function ThemedLayout() {
           <Route path="/admin/universities" element={<Admin />} />
           <Route path="/admin/manage-admins" element={<AdminManagement />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
+          <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           <Route path="/roommates" element={<RoommateSearch />} />
           <Route path="/roommates/profile" element={<RoommateProfile />} />
           <Route path="/roommates/view/:userId" element={<RoommateView />} />

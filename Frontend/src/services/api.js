@@ -381,4 +381,15 @@ export const verificationAPI = {
     }),
 };
 
+/**
+ * Announcements API
+ */
+export const announcementsAPI = {
+  send: async (data) =>
+    apiRequest("/api/announcements", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
 export default apiRequest;

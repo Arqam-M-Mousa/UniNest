@@ -67,6 +67,22 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    isIdentityVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    identityVerifiedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    verificationDocumentUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    verificationStatus: {
+      type: DataTypes.ENUM("none", "pending", "approved", "rejected"),
+      defaultValue: "none",
+    },
     averageRating: {
       type: DataTypes.FLOAT,
       allowNull: true,

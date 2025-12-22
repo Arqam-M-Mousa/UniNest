@@ -29,6 +29,7 @@ import AdminManagement from "./pages/admin/AdminManagement";
 import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
 import RoommateView from "./pages/roommates/RoommateView";
+import VerificationPage from "./pages/profile/VerificationPage";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -57,6 +58,7 @@ function ThemedLayout() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/verification" element={<VerificationPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/:id" element={<PropertyDetails />} />
           <Route path="/about" element={<About />} />

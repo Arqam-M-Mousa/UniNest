@@ -352,4 +352,23 @@ export const roommatesAPI = {
     }),
 };
 
+/**
+ * Verification API
+ */
+export const verificationAPI = {
+  getStatus: async () => apiRequest("/api/verification/status"),
+  submit: async (data) =>
+    apiRequest("/api/verification/submit", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  listRequests: async (status) =>
+    apiRequest(`/api/verification/requests${status ? `?status=${status}` : ""}`),
+  reviewRequest: async (id, status, reviewNotes) =>
+    apiRequest(`/api/verification/requests/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ status, reviewNotes }),
+    }),
+};
+
 export default apiRequest;

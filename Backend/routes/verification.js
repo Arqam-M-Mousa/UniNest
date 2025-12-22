@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { VerificationRequest, User } = require("../models");
+const { VerificationRequest, User, Notification } = require("../models");
 const { authenticate, authorize } = require("../middleware/auth");
 
 // Submit a verification request
@@ -9,7 +9,6 @@ router.post("/submit", authenticate, async (req, res) => {
         const { documentType, documentUrl } = req.body;
         const userId = req.user.id;
 
-        // Check if there's already a pending request
         const pendingRequest = await VerificationRequest.findOne({
             where: { userId, status: "pending" },
         });
@@ -24,12 +23,35 @@ router.post("/submit", authenticate, async (req, res) => {
             documentUrl,
         });
 
-        // Update user status
         await User.update(
             { verificationStatus: "pending" },
             { where: { id: userId } }
         );
 
+        const admins = await User.findAll({
+            where: { role: ["Admin", "SuperAdmin"] },
+            attributes: ["id"]
+        });
+
+        const user = await User.findByPk(userId, {
+            attributes: ["firstName", "lastName"]
+        });
+        const adminNotifications = admins.map(admin => ({
+            userId: admin.id,
+            title: "New Verification Request",
+            message: `${user.firstName} ${user.lastName} has submitted a verification request`,
+            relatedEntityType: "verification_request",
+            relatedEntityId: request.id,
+            actionUrl: "/admin/verification",
+            isRead: false
+        }));
+
+        if (adminNotifications.length > 0) {
+            await Notification.bulkCreate(adminNotifications);
+            console.log(`Created ${adminNotifications.length} notifications for admins`);
+        }
+
+        console.log("Sending success response");
         res.status(201).json(request);
     } catch (error) {
         console.error("Error submitting verification request:", error);
@@ -69,6 +91,7 @@ router.get("/status", authenticate, async (req, res) => {
 router.get("/requests", authenticate, authorize(["Admin", "SuperAdmin"]), async (req, res) => {
     try {
         const { status } = req.query;
+
         const whereClause = status ? { status } : {};
 
         const requests = await VerificationRequest.findAll({
@@ -82,6 +105,20 @@ router.get("/requests", authenticate, authorize(["Admin", "SuperAdmin"]), async 
             ],
             order: [["createdAt", "DESC"]],
         });
+
+        if (requests.length > 0) {
+            console.log("Request IDs:", requests.map(r => r.id));
+            console.log("First request details:", {
+                id: requests[0].id,
+                userId: requests[0].userId,
+                status: requests[0].status,
+                documentType: requests[0].documentType,
+                user: requests[0].user ? {
+                    id: requests[0].user.id,
+                    name: `${requests[0].user.firstName} ${requests[0].user.lastName}`
+                } : null
+            });
+        }
 
         res.json(requests);
     } catch (error) {
@@ -130,6 +167,38 @@ router.put("/requests/:id", authenticate, authorize(["Admin", "SuperAdmin"]), as
                 },
                 { where: { id: request.userId } }
             );
+        }
+
+        const user = await User.findByPk(request.userId, {
+            attributes: ["firstName", "lastName"]
+        });
+
+        if (status === "approved") {
+            await Notification.create({
+                userId: request.userId,
+                title: "Verification Approved",
+                message: "Congratulations! Your identity verification has been approved. You now have the verified badge.",
+                relatedEntityType: "verification_request",
+                relatedEntityId: request.id,
+                actionUrl: "/profile",
+                isRead: false
+            });
+            console.log("Created approval notification for user");
+        } else {
+            const message = reviewNotes
+                ? `Your verification request has been rejected. Reason: ${reviewNotes}`
+                : "Your verification request has been rejected. Please review the requirements and try again.";
+
+            await Notification.create({
+                userId: request.userId,
+                title: "Verification Rejected",
+                message,
+                relatedEntityType: "verification_request",
+                relatedEntityId: request.id,
+                actionUrl: "/profile/verification",
+                isRead: false
+            });
+            console.log("Created rejection notification for user");
         }
 
         res.json({ message: `Verification request ${status}`, request });

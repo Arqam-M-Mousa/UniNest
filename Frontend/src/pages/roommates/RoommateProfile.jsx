@@ -19,6 +19,12 @@ import {
     ChatBubbleLeftRightIcon,
     UserGroupIcon,
     PencilSquareIcon,
+    AdjustmentsHorizontalIcon,
+    SpeakerWaveIcon,
+    StarIcon,
+    FireIcon,
+    HeartIcon,
+    UsersIcon,
 } from "@heroicons/react/24/outline";
 import Alert from "../../components/common/Alert";
 
@@ -91,6 +97,17 @@ function RoommateProfile() {
         major: "",
         interests: [],
         isActive: true,
+        matchingPriorities: {
+            budget: 3,
+            cleanliness: 3,
+            noise: 3,
+            sleepSchedule: 3,
+            studyHabits: 3,
+            interests: 3,
+            smoking: 3,
+            pets: 3,
+            guests: 3,
+        },
     });
 
     useEffect(() => {
@@ -127,6 +144,17 @@ function RoommateProfile() {
                     major: p.major || "",
                     interests: p.interests || [],
                     isActive: p.isActive ?? true,
+                    matchingPriorities: p.matchingPriorities || {
+                        budget: 3,
+                        cleanliness: 3,
+                        noise: 3,
+                        sleepSchedule: 3,
+                        studyHabits: 3,
+                        interests: 3,
+                        smoking: 3,
+                        pets: 3,
+                        guests: 3,
+                    },
                 });
             }
         } catch (err) {
@@ -381,6 +409,50 @@ function RoommateProfile() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Matching Priorities View */}
+                            <div className="themed-surface rounded-3xl p-6 border border-[var(--color-border)] shadow-sm">
+                                <h3 className="text-lg font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                                    <AdjustmentsHorizontalIcon className="w-5 h-5 text-[var(--color-accent)]" />
+                                    {t("matchingPriorities")}
+                                </h3>
+                                <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                                    {[
+                                        { key: "budget", label: "priorityBudget", Icon: CurrencyDollarIcon },
+                                        { key: "cleanliness", label: "priorityCleanliness", Icon: SparklesIcon },
+                                        { key: "noise", label: "priorityNoise", Icon: SpeakerWaveIcon },
+                                        { key: "sleepSchedule", label: "prioritySleepSchedule", Icon: MoonIcon },
+                                        { key: "studyHabits", label: "priorityStudyHabits", Icon: BookOpenIcon },
+                                        { key: "interests", label: "priorityInterests", Icon: StarIcon },
+                                        { key: "smoking", label: "prioritySmoking", Icon: FireIcon },
+                                        { key: "pets", label: "priorityPets", Icon: HeartIcon },
+                                        { key: "guests", label: "priorityGuests", Icon: UsersIcon },
+                                    ].map(({ key, label, Icon }) => {
+                                        const value = formData.matchingPriorities?.[key] || 3;
+                                        const colors = [
+                                            "bg-gray-400",
+                                            "bg-blue-400",
+                                            "bg-green-400",
+                                            "bg-yellow-400",
+                                            "bg-red-400"
+                                        ];
+                                        return (
+                                            <div key={key} className="text-center p-3 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+                                                <Icon className="w-5 h-5 mx-auto mb-1 text-[var(--color-accent)]" />
+                                                <p className="text-[9px] uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-1 truncate">{t(label)}</p>
+                                                <div className="flex justify-center gap-0.5">
+                                                    {[1, 2, 3, 4, 5].map((i) => (
+                                                        <div
+                                                            key={i}
+                                                            className={`w-2 h-2 rounded-full ${i <= value ? colors[value - 1] : "bg-gray-200 dark:bg-gray-700"}`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -499,6 +571,56 @@ function RoommateProfile() {
                                         ))}
                                     </div>
                                     <textarea value={formData.bio} onChange={(e) => handleChange("bio", e.target.value)} rows={5} className="w-full px-5 py-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]" placeholder={t("bioPlaceholder")} />
+                                </div>
+                            </div>
+
+                            {/* Matching Priorities Section */}
+                            <div className="themed-surface rounded-3xl p-6 border border-[var(--color-border)] shadow-sm">
+                                <h2 className="text-xl font-bold text-[var(--color-text)] mb-2 flex items-center gap-2">
+                                    <AdjustmentsHorizontalIcon className="w-6 h-6 text-[var(--color-accent)]" />
+                                    {t("matchingPriorities")}
+                                </h2>
+                                <p className="text-sm text-[var(--color-text-muted)] mb-6">{t("matchingPrioritiesSubtitle")}</p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {[
+                                        { key: "budget", label: "priorityBudget", Icon: CurrencyDollarIcon },
+                                        { key: "cleanliness", label: "priorityCleanliness", Icon: SparklesIcon },
+                                        { key: "noise", label: "priorityNoise", Icon: SpeakerWaveIcon },
+                                        { key: "sleepSchedule", label: "prioritySleepSchedule", Icon: MoonIcon },
+                                        { key: "studyHabits", label: "priorityStudyHabits", Icon: BookOpenIcon },
+                                        { key: "interests", label: "priorityInterests", Icon: StarIcon },
+                                        { key: "smoking", label: "prioritySmoking", Icon: FireIcon },
+                                        { key: "pets", label: "priorityPets", Icon: HeartIcon },
+                                        { key: "guests", label: "priorityGuests", Icon: UsersIcon },
+                                    ].map(({ key, label, Icon }) => (
+                                        <div key={key} className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-sm font-semibold text-[var(--color-text)] flex items-center gap-2">
+                                                    <Icon className="w-4 h-4 text-[var(--color-accent)]" />
+                                                    {t(label)}
+                                                </label>
+                                                <span className="text-xs font-bold text-[var(--color-accent)]">
+                                                    {formData.matchingPriorities[key]}/5
+                                                </span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="5"
+                                                value={formData.matchingPriorities[key]}
+                                                onChange={(e) => handleChange("matchingPriorities", {
+                                                    ...formData.matchingPriorities,
+                                                    [key]: parseInt(e.target.value)
+                                                })}
+                                                className="w-full"
+                                            />
+                                            <div className="flex justify-between text-[9px] text-[var(--color-text-muted)]">
+                                                <span>{t("priorityNotImportant")}</span>
+                                                <span>{t("priorityVeryImportant")}</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 

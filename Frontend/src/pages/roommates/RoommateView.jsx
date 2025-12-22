@@ -18,6 +18,7 @@ import {
     CheckIcon,
     FireIcon,
     UserGroupIcon,
+    HeartIcon,
 } from "@heroicons/react/24/outline";
 
 function RoommateView() {
@@ -25,7 +26,7 @@ function RoommateView() {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const profileData = location.state?.profile;
     const [loading, setLoading] = useState(!profileData);
     const [profile, setProfile] = useState(profileData || null);
@@ -110,7 +111,7 @@ function RoommateView() {
                         <ArrowLeftIcon className="w-5 h-5" />
                         {t("back")}
                     </button>
-                    
+
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                         {/* Profile Picture */}
                         <div className="flex-shrink-0">
@@ -272,7 +273,7 @@ function RoommateView() {
                                 </div>
                                 <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
                                     <span className="text-sm font-medium text-[var(--color-text)] flex items-center gap-2">
-                                        🐾
+                                        <HeartIcon className="w-5 h-5 text-pink-500" />
                                         {t("petsAllowed")}
                                     </span>
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${profile.petsAllowed ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500"}`}>
@@ -286,11 +287,11 @@ function RoommateView() {
             </div>
             {/* Match Request Modal */}
             {showMatchForm && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
                     onClick={() => setShowMatchForm(false)}
                 >
-                    <div 
+                    <div
                         className="bg-[var(--color-surface)] rounded-2xl p-6 max-w-md w-full shadow-xl border border-[var(--color-border)]"
                         onClick={(e) => e.stopPropagation()}
                     >

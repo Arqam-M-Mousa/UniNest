@@ -6,6 +6,9 @@ import {
     CurrencyDollarIcon,
     MoonIcon,
     SparklesIcon,
+    FireIcon,
+    HeartIcon,
+    NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 
 function RoommateCard({ profile, onConnect, isConnecting, onViewDetails }) {
@@ -140,13 +143,21 @@ function RoommateCard({ profile, onConnect, isConnecting, onViewDetails }) {
             {/* Additional info row */}
             <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)] mb-4">
                 {profile.smokingAllowed !== undefined && (
-                    <span>
-                        {profile.smokingAllowed ? "🚬 " + t("smokingOk") : "🚭 " + t("noSmoking")}
+                    <span className="inline-flex items-center gap-1">
+                        {profile.smokingAllowed ? (
+                            <><FireIcon className="w-4 h-4 text-orange-500" /> {t("smokingOk")}</>
+                        ) : (
+                            <><NoSymbolIcon className="w-4 h-4 text-gray-500" /> {t("noSmoking")}</>
+                        )}
                     </span>
                 )}
                 {profile.petsAllowed !== undefined && (
-                    <span>
-                        {profile.petsAllowed ? "🐾 " + t("petsOk") : t("noPets")}
+                    <span className="inline-flex items-center gap-1">
+                        {profile.petsAllowed ? (
+                            <><HeartIcon className="w-4 h-4 text-pink-500" /> {t("petsOk")}</>
+                        ) : (
+                            <>{t("noPets")}</>
+                        )}
                     </span>
                 )}
             </div>

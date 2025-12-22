@@ -190,4 +190,46 @@ router.delete("/image/:publicId(*)", authenticate, async (req, res) => {
   }
 });
 
+router.post(
+  "/verification-document",
+  authenticate,
+  upload.single("document"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return sendValidationError(res, ["No file uploaded"]);
+      }
+
+      // Upload to Cloudinary in verification_documents folder
+      const result = await uploadToCloudinary(
+        req.file.buffer,
+        "uninest/verification_documents",
+        {
+          transformation: [
+            { width: 1500, height: 1500, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        }
+      );
+
+      return sendSuccess(
+        res,
+        {
+          url: result.secure_url,
+          publicId: result.public_id,
+        },
+        "Verification document uploaded successfully"
+      );
+    } catch (error) {
+      console.error("Verification document upload error:", error);
+      return sendError(
+        res,
+        "Failed to upload verification document",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
 module.exports = router;

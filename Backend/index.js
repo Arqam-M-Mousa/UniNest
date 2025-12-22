@@ -152,6 +152,9 @@ server.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
   console.log("WebSocket server ready");
   await DatabaseConnection.connect();
+
+  const { initScheduler } = require("./utils/scheduler");
+  initScheduler();
 });
 
 process.on("SIGTERM", () => {

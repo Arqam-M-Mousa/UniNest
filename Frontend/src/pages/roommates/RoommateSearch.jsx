@@ -23,6 +23,7 @@ function RoommateSearch() {
     const [profiles, setProfiles] = useState([]);
     const [matches, setMatches] = useState([]);
     const [hasProfile, setHasProfile] = useState(false);
+    const [isProfileActive, setIsProfileActive] = useState(true);
     const [error, setError] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
     const [connectingTo, setConnectingTo] = useState(null);
@@ -63,6 +64,7 @@ function RoommateSearch() {
             if (searchRes.data) {
                 setProfiles(searchRes.data.profiles || []);
                 setHasProfile(searchRes.data.hasProfile);
+                setIsProfileActive(searchRes.data.isProfileActive !== false);
             }
             if (matchesRes.data) {
                 setMatches(matchesRes.data.matches || []);
@@ -81,6 +83,7 @@ function RoommateSearch() {
             if (res.data) {
                 setProfiles(res.data.profiles || []);
                 setHasProfile(res.data.hasProfile);
+                setIsProfileActive(res.data.isProfileActive !== false);
             }
         } catch (err) {
             setError(err.message);
@@ -183,6 +186,22 @@ function RoommateSearch() {
                                 className="px-4 py-2 bg-white text-[var(--color-accent)] rounded-lg font-medium hover:bg-white/90 transition-all"
                             >
                                 {t("createProfile")}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Inactive Profile Warning */}
+                    {hasProfile && !isProfileActive && (
+                        <div className="mt-6 p-4 bg-yellow-500/20 backdrop-blur rounded-xl flex items-center justify-between border border-yellow-500/30">
+                            <div>
+                                <p className="font-medium text-yellow-100">{t("profileInactiveWarning")}</p>
+                                <p className="text-sm text-yellow-200/70">{t("profileInactiveHint")}</p>
+                            </div>
+                            <button
+                                onClick={() => navigate("/roommates/profile")}
+                                className="px-4 py-2 bg-yellow-500 text-black rounded-lg font-bold hover:bg-yellow-400 transition-all"
+                            >
+                                {t("activateProfile")}
                             </button>
                         </div>
                     )}

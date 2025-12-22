@@ -12,110 +12,337 @@ const { sendSuccess, sendError, HTTP_STATUS } = require("../utils/responses");
 
 const router = express.Router();
 
-function calculateCompatibilityScore(profileA, profileB) {
-    let score = 0;
+// ============================================================================
+// FEATURE WEIGHTS CONFIGURATION
+// These weights determine how important each factor is in compatibility scoring
+// All weights should sum to 1.0 for proper normalization
+// ============================================================================
+const FEATURE_WEIGHTS = {
+    budget: 0.20,           // Financial compatibility - crucial for shared living
+    cleanliness: 0.15,      // Daily living habits
+    noise: 0.15,            // Study/rest environment compatibility
+    sleepSchedule: 0.12,    // Lifestyle alignment
+    studyHabits: 0.10,      // Academic lifestyle
+    interests: 0.10,        // Social bonding potential
+    major: 0.05,            // Academic connection
+    smoking: 0.05,          // Binary dealbreaker
+    pets: 0.04,             // Binary preference
+    guests: 0.04,           // Social preference
+};
+
+// Dealbreaker features - if these don't match, apply a penalty multiplier
+const DEALBREAKER_PENALTY = 0.7; // 30% reduction for dealbreaker mismatches
+const DEALBREAKER_FEATURES = ['smoking', 'pets'];
+
+/**
+ * Convert user's priority preferences (1-5 scale) to normalized weights
+ * Users can specify how important each factor is to them
+ * @param {Object} userPriorities - User's matching priorities { budget: 1-5, cleanliness: 1-5, etc. }
+ * @returns {Object} Normalized weights that sum to ~1.0
+ */
+function getUserWeights(userPriorities) {
+    if (!userPriorities || typeof userPriorities !== 'object') {
+        return FEATURE_WEIGHTS; // Use defaults if no custom priorities
+    }
+
+    // Map priority keys to feature weight keys
+    const priorityToWeight = {
+        budget: 'budget',
+        cleanliness: 'cleanliness',
+        noise: 'noise',
+        sleepSchedule: 'sleepSchedule',
+        studyHabits: 'studyHabits',
+        interests: 'interests',
+        major: 'major',
+        smoking: 'smoking',
+        pets: 'pets',
+        guests: 'guests',
+    };
+
+    // Priority 1 = 0.5x default, Priority 3 = 1x default, Priority 5 = 2x default
+    const rawWeights = {};
+    let totalRaw = 0;
+
+    for (const [priorityKey, weightKey] of Object.entries(priorityToWeight)) {
+        const userPriority = userPriorities[priorityKey];
+        const defaultWeight = FEATURE_WEIGHTS[weightKey];
+
+        if (userPriority !== undefined && userPriority >= 1 && userPriority <= 5) {
+            // Scale: 1->0.5, 2->0.75, 3->1.0, 4->1.5, 5->2.0
+            const multiplier = 0.25 + (userPriority * 0.35);
+            rawWeights[weightKey] = defaultWeight * multiplier;
+        } else {
+            rawWeights[weightKey] = defaultWeight;
+        }
+        totalRaw += rawWeights[weightKey];
+    }
+
+    const normalizedWeights = {};
+    for (const [key, value] of Object.entries(rawWeights)) {
+        normalizedWeights[key] = value / totalRaw;
+    }
+
+    return normalizedWeights;
+}
+
+// ============================================================================
+// FEATURE EXTRACTION FUNCTIONS
+// Extract and normalize each feature to a [0, 1] scale
+// ============================================================================
+
+/**
+ * Extracts normalized features from a roommate profile
+ * All features are normalized to [0, 1] where 1 = perfect match potential
+ * @param {Object} profile - The roommate profile
+ * @returns {Object} Normalized feature vector
+ */
+function extractFeatures(profile) {
+    return {
+        // Continuous/ordinal features normalized to [0, 1]
+        budgetMid: normalizeBudget(profile.minBudget, profile.maxBudget),
+        budgetRange: getBudgetRange(profile.minBudget, profile.maxBudget),
+        cleanliness: normalizeOrdinal(profile.cleanlinessLevel, 1, 5),
+        noise: normalizeOrdinal(profile.noiseLevel, 1, 5),
+
+        // Categorical features encoded as ordinal
+        sleepSchedule: encodeSleepSchedule(profile.sleepSchedule),
+        studyHabits: encodeStudyHabits(profile.studyHabits),
+        guests: encodeGuests(profile.guestsAllowed),
+
+        // Binary features
+        smoking: profile.smokingAllowed ? 1 : 0,
+        pets: profile.petsAllowed ? 1 : 0,
+
+        // Set-based features (for Jaccard similarity)
+        interests: Array.isArray(profile.interests) ? profile.interests : [],
+        major: profile.major || null,
+    };
+}
+
+/**
+ * Normalize ordinal value to [0, 1]
+ */
+function normalizeOrdinal(value, min, max) {
+    if (value === null || value === undefined) return null;
+    return (value - min) / (max - min);
+}
+
+/**
+ * Calculate normalized budget midpoint (for distance calculation)
+ * Uses log scale since budget differences matter more at lower ranges
+ */
+function normalizeBudget(minBudget, maxBudget) {
+    if (!minBudget || !maxBudget) return null;
+    const midpoint = (parseFloat(minBudget) + parseFloat(maxBudget)) / 2;
+    // Normalize using log scale (assuming budget range 100-5000)
+    const logMin = Math.log(100);
+    const logMax = Math.log(5000);
+    const logMid = Math.log(Math.max(100, Math.min(5000, midpoint)));
+    return (logMid - logMin) / (logMax - logMin);
+}
+
+/**
+ * Get budget range for overlap calculation
+ */
+function getBudgetRange(minBudget, maxBudget) {
+    if (!minBudget || !maxBudget) return { min: null, max: null };
+    return {
+        min: parseFloat(minBudget),
+        max: parseFloat(maxBudget)
+    };
+}
+
+/**
+ * Encode sleep schedule as ordinal (early bird = 0, normal = 0.5, night owl = 1)
+ */
+function encodeSleepSchedule(schedule) {
+    const mapping = {
+        'early_bird': 0,
+        'early': 0,
+        'normal': 0.5,
+        'night_owl': 1,
+        'night': 1,
+        'late': 1,
+    };
+    return schedule ? (mapping[schedule.toLowerCase()] ?? 0.5) : null;
+}
+
+/**
+ * Encode study habits as ordinal
+ */
+function encodeStudyHabits(habits) {
+    const mapping = {
+        'home': 0,
+        'at_home': 0,
+        'mixed': 0.5,
+        'library': 1,
+        'outside': 1,
+    };
+    return habits ? (mapping[habits.toLowerCase()] ?? 0.5) : null;
+}
+
+/**
+ * Encode guest preference as ordinal
+ */
+function encodeGuests(guests) {
+    const mapping = {
+        'never': 0,
+        'rarely': 0.25,
+        'sometimes': 0.5,
+        'often': 0.75,
+        'always': 1,
+    };
+    return guests ? (mapping[guests.toLowerCase()] ?? 0.5) : null;
+}
+
+// ============================================================================
+// DISTANCE CALCULATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Calculate weighted Euclidean distance between two feature vectors
+ * Returns a similarity score [0, 100] where 100 = perfect match
+ * @param {Object} profileA - First roommate profile (the searcher)
+ * @param {Object} profileB - Second roommate profile (potential match)
+ * @param {Object} customWeights - Optional custom weights based on user priorities
+ */
+function calculateCompatibilityScore(profileA, profileB, customWeights = null) {
+    const featuresA = extractFeatures(profileA);
+    const featuresB = extractFeatures(profileB);
+
+    const weights = customWeights || FEATURE_WEIGHTS;
+
+    let weightedDistanceSum = 0;
     let totalWeight = 0;
+    let hasDealbreaker = false;
 
-    const budgetWeight = 25;
-    totalWeight += budgetWeight;
-    if (profileA.minBudget && profileA.maxBudget && profileB.minBudget && profileB.maxBudget) {
-        const overlapStart = Math.max(parseFloat(profileA.minBudget), parseFloat(profileB.minBudget));
-        const overlapEnd = Math.min(parseFloat(profileA.maxBudget), parseFloat(profileB.maxBudget));
-        if (overlapEnd >= overlapStart) {
-            const overlapRange = overlapEnd - overlapStart;
-            const maxRange = Math.max(
-                parseFloat(profileA.maxBudget) - parseFloat(profileA.minBudget),
-                parseFloat(profileB.maxBudget) - parseFloat(profileB.minBudget)
-            );
-            score += budgetWeight * Math.min(1, overlapRange / (maxRange || 1));
+    const budgetSimilarity = calculateBudgetSimilarity(
+        featuresA.budgetRange,
+        featuresB.budgetRange
+    );
+    if (budgetSimilarity !== null) {
+        weightedDistanceSum += weights.budget * Math.pow(1 - budgetSimilarity, 2);
+        totalWeight += weights.budget;
+    }
+
+    const ordinalFeatures = [
+        { key: 'cleanliness', weight: weights.cleanliness },
+        { key: 'noise', weight: weights.noise },
+    ];
+
+    for (const { key, weight } of ordinalFeatures) {
+        const valA = featuresA[key];
+        const valB = featuresB[key];
+        if (valA !== null && valB !== null) {
+            const distance = Math.abs(valA - valB);
+            weightedDistanceSum += weight * Math.pow(distance, 2);
+            totalWeight += weight;
         }
-    } else {
-        score += budgetWeight * 0.5;
     }
 
-    const majorWeight = 10;
-    totalWeight += majorWeight;
-    if (profileA.major && profileB.major) {
-        if (profileA.major === profileB.major) score += majorWeight;
-    } else {
-        score += majorWeight * 0.5;
-    }
+    const categoricalFeatures = [
+        { key: 'sleepSchedule', weight: weights.sleepSchedule },
+        { key: 'studyHabits', weight: weights.studyHabits },
+        { key: 'guests', weight: weights.guests },
+    ];
 
-    const interestsWeight = 10;
-    totalWeight += interestsWeight;
-    const interestsA = Array.isArray(profileA.interests) ? profileA.interests : [];
-    const interestsB = Array.isArray(profileB.interests) ? profileB.interests : [];
-    if (interestsA.length > 0 && interestsB.length > 0) {
-        const shared = interestsA.filter((i) => interestsB.includes(i)).length;
-        const maxPossible = Math.max(interestsA.length, interestsB.length);
-        score += interestsWeight * (shared / maxPossible);
-    } else {
-        score += interestsWeight * 0.3;
-    }
-
-    const cleanlinessWeight = 10;
-    totalWeight += cleanlinessWeight;
-    if (profileA.cleanlinessLevel && profileB.cleanlinessLevel) {
-        const diff = Math.abs(profileA.cleanlinessLevel - profileB.cleanlinessLevel);
-        score += cleanlinessWeight * (1 - diff / 4);
-    } else {
-        score += cleanlinessWeight * 0.5;
-    }
-
-    const noiseWeight = 10;
-    totalWeight += noiseWeight;
-    if (profileA.noiseLevel && profileB.noiseLevel) {
-        const diff = Math.abs(profileA.noiseLevel - profileB.noiseLevel);
-        score += noiseWeight * (1 - diff / 4);
-    } else {
-        score += noiseWeight * 0.5;
-    }
-
-    const sleepWeight = 10;
-    totalWeight += sleepWeight;
-    if (profileA.sleepSchedule && profileB.sleepSchedule) {
-        if (profileA.sleepSchedule === profileB.sleepSchedule) {
-            score += sleepWeight;
-        } else if (profileA.sleepSchedule === "normal" || profileB.sleepSchedule === "normal") {
-            score += sleepWeight * 0.5;
+    for (const { key, weight } of categoricalFeatures) {
+        const valA = featuresA[key];
+        const valB = featuresB[key];
+        if (valA !== null && valB !== null) {
+            const distance = Math.abs(valA - valB);
+            weightedDistanceSum += weight * Math.pow(distance, 2);
+            totalWeight += weight;
         }
-    } else {
-        score += sleepWeight * 0.5;
     }
 
-    const studyWeight = 10;
-    totalWeight += studyWeight;
-    if (profileA.studyHabits && profileB.studyHabits) {
-        if (profileA.studyHabits === profileB.studyHabits) {
-            score += studyWeight;
-        } else if (profileA.studyHabits === "mixed" || profileB.studyHabits === "mixed") {
-            score += studyWeight * 0.7;
+    const binaryFeatures = [
+        { key: 'smoking', weight: weights.smoking },
+        { key: 'pets', weight: weights.pets },
+    ];
+
+    for (const { key, weight } of binaryFeatures) {
+        const valA = featuresA[key];
+        const valB = featuresB[key];
+        const distance = valA === valB ? 0 : 1;
+        weightedDistanceSum += weight * Math.pow(distance, 2);
+        totalWeight += weight;
+
+        if (DEALBREAKER_FEATURES.includes(key) && valA !== valB) {
+            hasDealbreaker = true;
         }
-    } else {
-        score += studyWeight * 0.5;
     }
 
-    const smokingWeight = 5;
-    totalWeight += smokingWeight;
-    if (profileA.smokingAllowed === profileB.smokingAllowed) score += smokingWeight;
-
-    const petsWeight = 5;
-    totalWeight += petsWeight;
-    if (profileA.petsAllowed === profileB.petsAllowed) score += petsWeight;
-
-    const guestsWeight = 5;
-    totalWeight += guestsWeight;
-    if (profileA.guestsAllowed && profileB.guestsAllowed) {
-        if (profileA.guestsAllowed === profileB.guestsAllowed) {
-            score += guestsWeight;
-        } else if (profileA.guestsAllowed === "sometimes" || profileB.guestsAllowed === "sometimes") {
-            score += guestsWeight * 0.7;
-        }
-    } else {
-        score += guestsWeight * 0.5;
+    const interestsSimilarity = calculateJaccardSimilarity(
+        featuresA.interests,
+        featuresB.interests
+    );
+    if (interestsSimilarity !== null) {
+        weightedDistanceSum += weights.interests * Math.pow(1 - interestsSimilarity, 2);
+        totalWeight += weights.interests;
     }
 
-    return Math.round((score / totalWeight) * 100);
+    if (featuresA.major && featuresB.major) {
+        const majorMatch = featuresA.major.toLowerCase() === featuresB.major.toLowerCase() ? 0 : 1;
+        weightedDistanceSum += weights.major * Math.pow(majorMatch, 2);
+        totalWeight += weights.major;
+    }
+
+    if (totalWeight === 0) {
+        return 50;
+    }
+
+    const normalizedDistance = Math.sqrt(weightedDistanceSum / totalWeight);
+
+    let similarity = (1 - normalizedDistance) * 100;
+
+    if (hasDealbreaker) {
+        similarity *= DEALBREAKER_PENALTY;
+    }
+
+    return Math.round(Math.max(0, Math.min(100, similarity)));
+}
+
+/**
+ * Calculate budget range overlap similarity
+ * Returns similarity [0, 1] based on how much budget ranges overlap
+ */
+function calculateBudgetSimilarity(rangeA, rangeB) {
+    if (!rangeA.min || !rangeA.max || !rangeB.min || !rangeB.max) {
+        return null;
+    }
+
+    const overlapStart = Math.max(rangeA.min, rangeB.min);
+    const overlapEnd = Math.min(rangeA.max, rangeB.max);
+
+    if (overlapEnd < overlapStart) {
+        const gap = overlapStart - overlapEnd;
+        const avgRange = ((rangeA.max - rangeA.min) + (rangeB.max - rangeB.min)) / 2;
+        return Math.max(0, 1 - (gap / (avgRange || 1)));
+    }
+
+    const overlapRange = overlapEnd - overlapStart;
+    const unionRange = Math.max(rangeA.max, rangeB.max) - Math.min(rangeA.min, rangeB.min);
+
+    return overlapRange / (unionRange || 1);
+}
+
+/**
+ * Calculate Jaccard similarity for set-based features (interests)
+ * Returns similarity [0, 1] where 1 = identical sets
+ */
+function calculateJaccardSimilarity(setA, setB) {
+    if (!setA.length || !setB.length) {
+        return null;
+    }
+
+    const setALower = setA.map(i => i.toLowerCase());
+    const setBLower = setB.map(i => i.toLowerCase());
+
+    const intersection = setALower.filter(i => setBLower.includes(i)).length;
+    const union = new Set([...setALower, ...setBLower]).size;
+
+    return union > 0 ? intersection / union : 0;
 }
 
 
@@ -175,6 +402,7 @@ router.post(
                 interests,
                 moveInDate,
                 preferredAreas,
+                matchingPriorities,
                 isActive,
             } = req.body;
 
@@ -215,6 +443,7 @@ router.post(
                 interests: interests || [],
                 moveInDate: moveInDate || null,
                 preferredAreas: preferredAreas || [],
+                matchingPriorities: matchingPriorities || null,
                 isActive: isActive ?? true,
             };
 
@@ -301,14 +530,22 @@ router.get(
                 offset = 0,
             } = req.query;
 
-            // Get current user's profile for compatibility calculation
             const myProfile = await RoommateProfile.findOne({
                 where: { userId: req.user.id },
             });
 
-            // Build where clause for search
+            if (myProfile && !myProfile.isActive) {
+                return sendSuccess(res, {
+                    profiles: [],
+                    total: 0,
+                    hasProfile: true,
+                    isProfileActive: false,
+                    message: "Activate your profile to search for roommates",
+                });
+            }
+
             const where = {
-                userId: { [Op.ne]: req.user.id }, // Exclude self
+                userId: { [Op.ne]: req.user.id },
                 isActive: true,
             };
 
@@ -337,7 +574,6 @@ router.get(
                 where.major = major;
             }
 
-            // Get current user's gender for filtering
             const currentUser = await User.findByPk(req.user.id);
             const currentUserGender = currentUser?.gender;
 
@@ -348,7 +584,6 @@ router.get(
                         model: User,
                         as: "user",
                         attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
-                        // Filter by same gender if current user has gender set
                         where: currentUserGender ? { gender: currentUserGender } : {},
                     },
                     {
@@ -362,10 +597,11 @@ router.get(
                 order: [["createdAt", "DESC"]],
             });
 
-            // Calculate compatibility scores
+            const userWeights = myProfile ? getUserWeights(myProfile.matchingPriorities) : null;
+
             const results = profiles.map((profile) => {
                 const compatibilityScore = myProfile
-                    ? calculateCompatibilityScore(myProfile, profile)
+                    ? calculateCompatibilityScore(myProfile, profile, userWeights)
                     : null;
 
                 return {
@@ -391,7 +627,6 @@ router.get(
                 };
             });
 
-            // Sort by compatibility score if user has a profile
             if (myProfile) {
                 results.sort((a, b) => (b.compatibilityScore || 0) - (a.compatibilityScore || 0));
             }
@@ -421,7 +656,6 @@ router.get(
         try {
             const userId = req.user.id;
 
-            // Get both sent and received matches
             const matches = await RoommateMatch.findAll({
                 where: {
                     [Op.or]: [{ requesterId: userId }, { targetId: userId }],
@@ -441,13 +675,11 @@ router.get(
                 order: [["createdAt", "DESC"]],
             });
 
-            // Fetch requester profiles for pending received matches
             const transformedMatches = await Promise.all(matches.map(async (match) => {
                 const isSender = match.requesterId === userId;
                 const otherUser = isSender ? match.target : match.requester;
                 const otherUserId = isSender ? match.targetId : match.requesterId;
 
-                // Include the other user's profile
                 let otherUserProfile = null;
                 const profile = await RoommateProfile.findOne({
                     where: { userId: otherUserId },
@@ -504,12 +736,10 @@ router.post(
             const targetUserId = req.params.userId;
             const { message } = req.body;
 
-            // Can't match yourself
             if (targetUserId === req.user.id) {
                 return sendError(res, "Cannot send match request to yourself", HTTP_STATUS.BAD_REQUEST);
             }
 
-            // Check if SENDER has a roommate profile (required to send match request)
             const senderProfile = await RoommateProfile.findOne({
                 where: { userId: req.user.id, isActive: true },
             });
@@ -517,7 +747,6 @@ router.post(
                 return sendError(res, "You must create a roommate profile before sending match requests", HTTP_STATUS.BAD_REQUEST);
             }
 
-            // Check if target user exists and is a student
             const targetUser = await User.findByPk(targetUserId);
             if (!targetUser) {
                 return sendError(res, "User not found", HTTP_STATUS.NOT_FOUND);
@@ -526,7 +755,6 @@ router.post(
                 return sendError(res, "Can only match with students", HTTP_STATUS.BAD_REQUEST);
             }
 
-            // Check if target has a roommate profile
             const targetProfile = await RoommateProfile.findOne({
                 where: { userId: targetUserId, isActive: true },
             });
@@ -534,13 +762,11 @@ router.post(
                 return sendError(res, "User does not have an active roommate profile", HTTP_STATUS.BAD_REQUEST);
             }
 
-            // GENDER VALIDATION: Only same gender can match
             const currentUser = await User.findByPk(req.user.id);
             if (currentUser.gender && targetUser.gender && currentUser.gender !== targetUser.gender) {
                 return sendError(res, "You can only connect with roommates of the same gender", HTTP_STATUS.BAD_REQUEST);
             }
 
-            // Check for existing match (in either direction)
             const existingMatch = await RoommateMatch.findOne({
                 where: {
                     [Op.or]: [
@@ -554,16 +780,15 @@ router.post(
                 return sendError(res, "Match request already exists", HTTP_STATUS.CONFLICT);
             }
 
-            // Calculate compatibility score
             const myProfile = await RoommateProfile.findOne({
                 where: { userId: req.user.id },
             });
 
+            const userWeights = myProfile ? getUserWeights(myProfile.matchingPriorities) : null;
             const compatibilityScore = myProfile
-                ? calculateCompatibilityScore(myProfile, targetProfile)
+                ? calculateCompatibilityScore(myProfile, targetProfile, userWeights)
                 : null;
 
-            // Create match request
             const match = await RoommateMatch.create({
                 requesterId: req.user.id,
                 targetId: targetUserId,
@@ -572,7 +797,6 @@ router.post(
                 message: message || null,
             });
 
-            // Send notification to target user about the match request
             const notification = await Notification.create({
                 userId: targetUserId,
                 title: "New Roommate Request",
@@ -582,7 +806,6 @@ router.post(
                 actionUrl: "/roommates",
             });
 
-            // Emit real-time notification via socket
             const io = req.app.get("io");
             if (io) {
                 io.to(`user:${targetUserId}`).emit("notification:new", notification);
@@ -620,12 +843,10 @@ router.put(
                 return sendError(res, "Match not found", HTTP_STATUS.NOT_FOUND);
             }
 
-            // Only the target can respond to the match
             if (match.targetId !== req.user.id) {
                 return sendError(res, "Only the recipient can respond to a match request", HTTP_STATUS.FORBIDDEN);
             }
 
-            // Can only respond to pending matches
             if (match.status !== "pending") {
                 return sendError(res, "Match has already been responded to", HTTP_STATUS.BAD_REQUEST);
             }
@@ -635,10 +856,9 @@ router.put(
                 respondedAt: new Date(),
             });
 
-            // Send notification to the requester about the response
             const currentUser = await User.findByPk(req.user.id);
-            const notificationTitle = status === "accepted" 
-                ? "Roommate Request Accepted!" 
+            const notificationTitle = status === "accepted"
+                ? "Roommate Request Accepted!"
                 : "Roommate Request Declined";
             const notificationMessage = status === "accepted"
                 ? `${currentUser.firstName} ${currentUser.lastName} accepted your roommate request! You can now message each other.`
@@ -653,7 +873,6 @@ router.put(
                 actionUrl: "/roommates",
             });
 
-            // Emit real-time notification via socket
             const io = req.app.get("io");
             if (io) {
                 io.to(`user:${match.requesterId}`).emit("notification:new", notification);
@@ -687,7 +906,6 @@ router.delete(
                 return sendError(res, "Match not found", HTTP_STATUS.NOT_FOUND);
             }
 
-            // Only the requester or the target can delete the match
             if (match.requesterId !== userId && match.targetId !== userId) {
                 return sendError(res, "You are not authorized to remove this match", HTTP_STATUS.FORBIDDEN);
             }

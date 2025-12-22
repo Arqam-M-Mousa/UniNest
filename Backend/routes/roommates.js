@@ -282,14 +282,16 @@ function calculateCompatibilityScore(profileA, profileB, customWeights = null) {
         totalWeight += weights.interests;
     }
 
+    let sameMajor = 0;
     if (featuresA.major && featuresB.major) {
         const majorMatch = featuresA.major.toLowerCase() === featuresB.major.toLowerCase() ? 0 : 1;
+        sameMajor = majorMatch === 0 ? 1 : 0; // Invert: 0 distance = 1 same, 1 distance = 0 different
         weightedDistanceSum += weights.major * Math.pow(majorMatch, 2);
         totalWeight += weights.major;
     }
 
     if (totalWeight === 0) {
-        return 50;
+        return { score: 50, sameMajor: 0 };
     }
 
     const normalizedDistance = Math.sqrt(weightedDistanceSum / totalWeight);
@@ -300,7 +302,10 @@ function calculateCompatibilityScore(profileA, profileB, customWeights = null) {
         similarity *= DEALBREAKER_PENALTY;
     }
 
-    return Math.round(Math.max(0, Math.min(100, similarity)));
+    return {
+        score: Math.round(Math.max(0, Math.min(100, similarity))),
+        sameMajor
+    };
 }
 
 /**
@@ -600,7 +605,7 @@ router.get(
             const userWeights = myProfile ? getUserWeights(myProfile.matchingPriorities) : null;
 
             const results = profiles.map((profile) => {
-                const compatibilityScore = myProfile
+                const compatibilityResult = myProfile
                     ? calculateCompatibilityScore(myProfile, profile, userWeights)
                     : null;
 
@@ -623,7 +628,8 @@ router.get(
                     interests: profile.interests,
                     moveInDate: profile.moveInDate,
                     preferredAreas: profile.preferredAreas,
-                    compatibilityScore,
+                    compatibilityScore: compatibilityResult?.score || null,
+                    sameMajor: compatibilityResult?.sameMajor || 0,
                 };
             });
 
@@ -785,14 +791,14 @@ router.post(
             });
 
             const userWeights = myProfile ? getUserWeights(myProfile.matchingPriorities) : null;
-            const compatibilityScore = myProfile
+            const compatibilityResult = myProfile
                 ? calculateCompatibilityScore(myProfile, targetProfile, userWeights)
                 : null;
 
             const match = await RoommateMatch.create({
                 requesterId: req.user.id,
                 targetId: targetUserId,
-                compatibilityScore,
+                compatibilityScore: compatibilityResult?.score || null,
                 status: "pending",
                 message: message || null,
             });

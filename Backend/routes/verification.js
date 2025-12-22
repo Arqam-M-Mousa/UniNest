@@ -48,10 +48,8 @@ router.post("/submit", authenticate, async (req, res) => {
 
         if (adminNotifications.length > 0) {
             await Notification.bulkCreate(adminNotifications);
-            console.log(`Created ${adminNotifications.length} notifications for admins`);
         }
 
-        console.log("Sending success response");
         res.status(201).json(request);
     } catch (error) {
         console.error("Error submitting verification request:", error);
@@ -105,20 +103,6 @@ router.get("/requests", authenticate, authorize(["Admin", "SuperAdmin"]), async 
             ],
             order: [["createdAt", "DESC"]],
         });
-
-        if (requests.length > 0) {
-            console.log("Request IDs:", requests.map(r => r.id));
-            console.log("First request details:", {
-                id: requests[0].id,
-                userId: requests[0].userId,
-                status: requests[0].status,
-                documentType: requests[0].documentType,
-                user: requests[0].user ? {
-                    id: requests[0].user.id,
-                    name: `${requests[0].user.firstName} ${requests[0].user.lastName}`
-                } : null
-            });
-        }
 
         res.json(requests);
     } catch (error) {

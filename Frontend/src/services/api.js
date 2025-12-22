@@ -268,6 +268,16 @@ export const uploadsAPI = {
       body: formData,
     });
   },
+
+  uploadVerificationDocument: async (file) => {
+    const formData = new FormData();
+    formData.append("document", file);
+
+    return apiRequest("/api/uploads/verification-document", {
+      method: "POST",
+      body: formData,
+    });
+  },
 };
 
 /**

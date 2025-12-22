@@ -87,7 +87,7 @@ const PropertyDetails = () => {
               : DEFAULT_OWNER_NAME,
             avatar: data.owner?.avatarUrl || data.owner?.profilePictureUrl || data.owner?.avatar || null,
             phone: data.owner?.phoneNumber || data.owner?.phone || DEFAULT_CONTACT,
-            isVerified: data.owner?.isIdentityVerified || false,
+            isIdentityVerified: data.owner?.isIdentityVerified || false,
           },
         };
 
@@ -402,7 +402,7 @@ const PropertyDetails = () => {
               </div>
               <h3 className="text-xl text-[var(--color-text)] mb-1 heading-font text-center flex items-center justify-center gap-2">
                 {property.owner.name}
-                {property.owner.isVerified && <VerifiedBadge size="md" />}
+                {property.owner.isIdentityVerified && <VerifiedBadge size="md" />}
               </h3>
               <p className="text-[var(--color-text-soft)] text-sm mb-6 text-center">
                 {t("ownerOfProperty")}

@@ -22,7 +22,6 @@ const SignIn = () => {
     const result = await signin(formData.email, formData.password);
 
     if (result.success) {
-      // Check if this is a landlord who needs verification prompt
       if (
         result.user?.role === "Landlord" &&
         !result.user?.isIdentityVerified &&

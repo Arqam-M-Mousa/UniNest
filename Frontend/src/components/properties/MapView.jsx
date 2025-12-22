@@ -103,6 +103,7 @@ export default function MapView({
     height = "500px",
     showRadiusCircle = false,
     onPropertySelect = null,
+    showPropertyCount = true,
 }) {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
@@ -215,11 +216,13 @@ export default function MapView({
                 </div>
             </div>
 
-            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 z-[1000]">
-                <span className="text-sm font-medium text-gray-900">
-                    {validProperties.length} {t("propertiesOnMap") || "properties on map"}
-                </span>
-            </div>
+            {showPropertyCount && (
+                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 z-[1000]">
+                    <span className="text-sm font-medium text-gray-900">
+                        {validProperties.length} {t("propertiesOnMap") || "properties on map"}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

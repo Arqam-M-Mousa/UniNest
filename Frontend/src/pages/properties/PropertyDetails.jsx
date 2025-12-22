@@ -8,6 +8,8 @@ import Alert from "../../components/common/Alert";
 import { useState, useEffect } from "react";
 import PageLoader from "../../components/common/PageLoader";
 import Image360Viewer from "../../components/media/Image360Viewer";
+import MapView from "../../components/properties/MapView";
+import { MapPinIcon, XMarkIcon, MapIcon } from "@heroicons/react/24/outline";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -20,7 +22,6 @@ const PropertyDetails = () => {
   const DEFAULT_OWNER_NAME = "Property Owner";
   const DEFAULT_CONTACT = "Contact via message";
   const DEFAULT_SQUARE_METER = "N/A";
-  const DEFAULT_AVAILABLE = "Now";
 
   // State
   const [property, setProperty] = useState(null);
@@ -30,19 +31,20 @@ const PropertyDetails = () => {
   const [activeImage, setActiveImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
-  const [show360View, setShow360View] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   // Add ESC key listener for closing image modal
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape' && showImageModal) {
-        setShowImageModal(false);
+      if (event.key === 'Escape') {
+        if (showImageModal) setShowImageModal(false);
+        if (showMapModal) setShowMapModal(false);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showImageModal]);
+  }, [showImageModal, showMapModal]);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -63,21 +65,19 @@ const PropertyDetails = () => {
           currency: data.currency,
           location: data.city,
           squareMeter: data.squareFeet ? `${data.squareFeet} ` : DEFAULT_SQUARE_METER,
-          availableIn: data.availableFrom
-            ? new Date(data.availableFrom).toLocaleDateString()
-            : DEFAULT_AVAILABLE,
-          garage: data.amenitiesJson?.garage || false,
-          partner: data.amenitiesJson?.partner || false,
           rooms: {
             bedrooms: data.bedrooms || 0,
             bathrooms: data.bathrooms || 0,
-            kitchen: data.amenitiesJson?.kitchen || 0,
-            livingRoom: data.amenitiesJson?.livingRoom || 0,
           },
           images: data.images?.map(img => ({
             url: img.url || img,
             is360: img.is360 || false,
           })) || [],
+          distanceToUniversity: data.distanceToUniversity ? `${data.distanceToUniversity}m` : null,
+          maxOccupants: data.maxOccupants || 1,
+          leaseDuration: data.leaseDuration || "N/A",
+          latitude: data.latitude,
+          longitude: data.longitude,
           owner: {
             id: data.owner?.id || data.ownerId,
             name: data.owner
@@ -150,8 +150,6 @@ const PropertyDetails = () => {
       const studentId = user.id;
       const landlordId = property.owner?.id;
 
-      console.log('Creating conversation:', { studentId, landlordId, propertyId: property.id });
-
       if (!landlordId) {
         setError("Property owner information not available");
         return;
@@ -164,11 +162,7 @@ const PropertyDetails = () => {
         propertyId: property.id,
       });
 
-      console.log('Conversation created/fetched:', response);
-
       const conversationId = response.data.id;
-      console.log('Navigating to conversation:', conversationId);
-
       // Navigate to messages page with this conversation
       navigate(`/messages/${conversationId}`);
     } catch (err) {
@@ -244,14 +238,23 @@ const PropertyDetails = () => {
                   aria-hidden="true"
                 />
                 <div className="absolute top-4 left-4 flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-slate-900">
-                    {t("availableIn")}: {property.availableIn}
-                  </span>
                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-accent)] text-white shadow-md">
                     {property.price}
                   </span>
                 </div>
-                <div className="absolute top-4 right-4">
+
+                {/* Header Actions: Map & Heart */}
+                <div className="absolute top-4 right-4 flex items-center gap-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMapModal(true);
+                    }}
+                    className="w-12 h-12 flex items-center justify-center rounded-full bg-white/90 backdrop-blur border-2 border-white/60 shadow-sm hover:scale-105 transition-transform"
+                    title={t("showOnMap") || "Show on Map"}
+                  >
+                    <MapIcon className="w-6 h-6 text-slate-700" />
+                  </button>
                   <HeartButton
                     size={48}
                     propertyId={property.id}
@@ -259,6 +262,7 @@ const PropertyDetails = () => {
                     className="bg-white/90 backdrop-blur border-2 border-white/60"
                   />
                 </div>
+
                 <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-3">
                   <h1 className="heading-font text-3xl md:text-4xl text-white m-0 drop-shadow">
                     {property.name}
@@ -340,7 +344,6 @@ const PropertyDetails = () => {
               </div>
             )}
 
-
             <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl p-6 shadow-sm space-y-4">
               <div>
                 <h2 className="heading-font text-2xl text-[var(--color-text)] m-0">
@@ -358,30 +361,20 @@ const PropertyDetails = () => {
                 <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
                   {property.rooms.bathrooms} {t("baths")}
                 </span>
-                {property.rooms.kitchen > 0 && (
-                  <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                    {t("kitchen")}
-                  </span>
-                )}
-                {property.rooms.livingRoom > 0 && (
-                  <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                    {t("livingRoom")}
-                  </span>
-                )}
                 <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
                   {property.squareMeter} m²
                 </span>
-                <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                  {t("availableIn")}: {property.availableIn}
-                </span>
-                <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                  {t("partner")}: {property.partner ? t("yes") : t("no")}
-                </span>
-                {property.garage && (
+                {property.distanceToUniversity && (
                   <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                    {t("garage")}: {t("yes")}
+                    {t("distance")}: {property.distanceToUniversity}
                   </span>
                 )}
+                <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                  {t("maxOccupants")}: {property.maxOccupants}
+                </span>
+                <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
+                  {t("leaseDuration")}: {property.leaseDuration}
+                </span>
               </div>
             </div>
 
@@ -436,6 +429,30 @@ const PropertyDetails = () => {
           onConfirm={() => navigate("/signin")}
           type="warning"
         />
+
+        {/* Map Modal */}
+        {showMapModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="relative w-full max-w-4xl h-[80vh] bg-[var(--color-surface)] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+              <div className="absolute top-4 right-4 z-[1001]">
+                <button
+                  onClick={() => setShowMapModal(false)}
+                  className="p-2 rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors text-gray-800"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="w-full h-full">
+                <MapView
+                  properties={[property]}
+                  universities={[]}
+                  height="100%"
+                  showPropertyCount={false}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Image Modal */}
         {showImageModal && property.images && (

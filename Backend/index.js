@@ -134,28 +134,8 @@ app.get("/api", (req, res) => {
   res.status(200).json({ message: "Welcome to UniNest Backend API" });
 });
 
-// Auth routes
-app.use("/api/auth", require("./routes/auth"));
-
-// User routes
-app.use("/api/users", require("./routes/users"));
-app.use("/api/universities", require("./routes/universities"));
-
-// Contact route
-app.use("/api/contact", require("./routes/contact"));
-app.use("/api/notifications", require("./routes/notifications"));
-app.use("/api/conversations", require("./routes/conversations"));
-app.use("/api/property-listings", require("./routes/propertyListings"));
-app.use("/api/favorites", require("./routes/favorites"));
-
-// Upload routes
-app.use("/api/uploads", require("./routes/uploads"));
-
-// Admin management routes
-app.use("/api/admin", require("./routes/admin"));
-
-// Roommates routes
-app.use("/api/roommates", require("./routes/roommates"));
+// API Routes
+app.use("/api", require("./routes"));
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
@@ -170,7 +150,7 @@ app.use((err, req, res, next) => {
 
 server.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
-  console.log("🔌 WebSocket server ready");
+  console.log("WebSocket server ready");
   await DatabaseConnection.connect();
 });
 

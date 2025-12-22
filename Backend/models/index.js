@@ -13,6 +13,7 @@ const Notification = require("./Notification");
 const VerificationCode = require("./VerificationCode");
 const RoommateProfile = require("./RoommateProfile");
 const RoommateMatch = require("./RoommateMatch");
+const VerificationRequest = require("./VerificationRequest");
 
 // User - University relationship
 User.belongsTo(University, {
@@ -148,6 +149,20 @@ User.hasMany(RoommateMatch, {
 });
 RoommateMatch.belongsTo(User, { foreignKey: "targetId", as: "target" });
 
+// VerificationRequest relationships
+User.hasMany(VerificationRequest, {
+  foreignKey: "userId",
+  as: "verificationRequests",
+  onDelete: "CASCADE",
+});
+VerificationRequest.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+User.hasMany(VerificationRequest, {
+  foreignKey: "reviewedBy",
+  as: "reviewedVerifications",
+});
+VerificationRequest.belongsTo(User, { foreignKey: "reviewedBy", as: "reviewer" });
+
 const db = {
   sequelize,
   User,
@@ -163,7 +178,9 @@ const db = {
   Notification,
   VerificationCode,
   RoommateProfile,
+  RoommateProfile,
   RoommateMatch,
+  VerificationRequest,
 };
 
 module.exports = db;

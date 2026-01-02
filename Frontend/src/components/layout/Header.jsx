@@ -38,6 +38,11 @@ const navLinksConfig = (t, user) => [
     label: t("marketplace"),
     match: (p) => p.startsWith("/marketplace"),
   },
+  {
+    to: "/community",
+    label: t("community"),
+    match: (p) => p.startsWith("/community"),
+  },
   { to: "/about", label: t("about"), match: (p) => p === "/about" },
   { to: "/contact", label: t("contact"), match: (p) => p === "/contact" },
 ];

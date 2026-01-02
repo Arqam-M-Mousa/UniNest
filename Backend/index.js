@@ -114,6 +114,15 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Forum events
+  socket.on("forum:join", () => {
+    socket.join("forum");
+  });
+
+  socket.on("forum:leave", () => {
+    socket.leave("forum");
+  });
+
   // Disconnect handling
   socket.on("disconnect", () => {
     // User disconnected

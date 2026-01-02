@@ -11,6 +11,7 @@ import Image360Viewer from "../../components/media/Image360Viewer";
 import MapView from "../../components/properties/MapView";
 import VerifiedBadge from "../../components/common/VerifiedBadge";
 import CostCalculator from "../../components/properties/CostCalculator";
+import PropertyReviews from "../../components/reviews/PropertyReviews";
 import { MapPinIcon, XMarkIcon, MapIcon } from "@heroicons/react/24/outline";
 
 const PropertyDetails = () => {
@@ -424,6 +425,11 @@ const PropertyDetails = () => {
             </div>
             <CostCalculator rent={property.pricePerMonth} currency={property.currency} />
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="max-w-7xl mx-auto mt-8 px-4 md:px-8">
+          <PropertyReviews propertyId={property.id} />
         </div>
 
         <Alert

@@ -28,5 +28,8 @@ router.use("/admin", adminRoutes);
 router.use("/roommates", roommateRoutes);
 router.use("/verification", verificationRoutes);
 router.use("/announcements", announcementRoutes);
+router.use("/forum", require("./forum"));
+router.use("/reviews", require("./reviews"));
 
 module.exports = router;
+

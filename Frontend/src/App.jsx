@@ -32,6 +32,8 @@ import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
 import RoommateView from "./pages/roommates/RoommateView";
 import VerificationPage from "./pages/profile/VerificationPage";
+import Community from "./pages/general/Forum";
+import CommunityPostDetails from "./pages/general/ForumPostDetails";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -78,6 +80,8 @@ function ThemedLayout() {
           <Route path="/roommates" element={<RoommateSearch />} />
           <Route path="/roommates/profile" element={<RoommateProfile />} />
           <Route path="/roommates/view/:userId" element={<RoommateView />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/community/:id" element={<CommunityPostDetails />} />
         </Routes>
       </main>
       <Footer />

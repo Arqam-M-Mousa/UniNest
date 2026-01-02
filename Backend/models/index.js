@@ -14,6 +14,11 @@ const VerificationCode = require("./VerificationCode");
 const RoommateProfile = require("./RoommateProfile");
 const RoommateMatch = require("./RoommateMatch");
 const VerificationRequest = require("./VerificationRequest");
+const ForumPost = require("./ForumPost");
+const ForumComment = require("./ForumComment");
+const ForumLike = require("./ForumLike");
+const ReviewHelpful = require("./ReviewHelpful");
+
 
 // User - University relationship
 User.belongsTo(University, {
@@ -163,6 +168,60 @@ User.hasMany(VerificationRequest, {
 });
 VerificationRequest.belongsTo(User, { foreignKey: "reviewedBy", as: "reviewer" });
 
+// ForumPost relationships
+User.hasMany(ForumPost, {
+  foreignKey: "userId",
+  as: "forumPosts",
+  onDelete: "CASCADE",
+});
+ForumPost.belongsTo(User, { foreignKey: "userId", as: "author" });
+
+ForumPost.hasMany(ForumComment, {
+  foreignKey: "postId",
+  as: "comments",
+  onDelete: "CASCADE",
+});
+ForumComment.belongsTo(ForumPost, { foreignKey: "postId", as: "post" });
+
+ForumPost.hasMany(ForumLike, {
+  foreignKey: "postId",
+  as: "likes",
+  onDelete: "CASCADE",
+});
+ForumLike.belongsTo(ForumPost, { foreignKey: "postId", as: "post" });
+
+// ForumComment relationships
+User.hasMany(ForumComment, {
+  foreignKey: "userId",
+  as: "forumComments",
+  onDelete: "CASCADE",
+});
+ForumComment.belongsTo(User, { foreignKey: "userId", as: "author" });
+
+// ForumLike relationships
+User.hasMany(ForumLike, {
+  foreignKey: "userId",
+  as: "forumLikes",
+  onDelete: "CASCADE",
+});
+ForumLike.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+// ReviewHelpful relationships
+Review.hasMany(ReviewHelpful, {
+  foreignKey: "reviewId",
+  as: "helpfulVotes",
+  onDelete: "CASCADE",
+});
+ReviewHelpful.belongsTo(Review, { foreignKey: "reviewId", as: "review" });
+
+User.hasMany(ReviewHelpful, {
+  foreignKey: "userId",
+  as: "helpfulReviews",
+  onDelete: "CASCADE",
+});
+ReviewHelpful.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+
 const db = {
   sequelize,
   User,
@@ -178,9 +237,13 @@ const db = {
   Notification,
   VerificationCode,
   RoommateProfile,
-  RoommateProfile,
   RoommateMatch,
   VerificationRequest,
+  ForumPost,
+  ForumComment,
+  ForumLike,
+  ReviewHelpful,
 };
+
 
 module.exports = db;

@@ -392,4 +392,77 @@ export const announcementsAPI = {
     }),
 };
 
+/**
+ * Forum API
+ */
+export const forumAPI = {
+  getPosts: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(`/api/forum/posts${queryString ? `?${queryString}` : ""}`);
+  },
+  getPostById: async (id) => apiRequest(`/api/forum/posts/${id}`),
+  createPost: async (data) =>
+    apiRequest("/api/forum/posts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updatePost: async (id, data) =>
+    apiRequest(`/api/forum/posts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deletePost: async (id) =>
+    apiRequest(`/api/forum/posts/${id}`, { method: "DELETE" }),
+  addComment: async (postId, content) =>
+    apiRequest(`/api/forum/posts/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+  deleteComment: async (commentId) =>
+    apiRequest(`/api/forum/comments/${commentId}`, { method: "DELETE" }),
+  vote: async (postId, voteType) =>
+    apiRequest(`/api/forum/posts/${postId}/vote`, {
+      method: "POST",
+      body: JSON.stringify({ voteType }),
+    }),
+  toggleLike: async (postId) =>
+    apiRequest(`/api/forum/posts/${postId}/like`, { method: "POST" }),
+  togglePin: async (postId) =>
+    apiRequest(`/api/forum/posts/${postId}/pin`, { method: "PATCH" }),
+  toggleLock: async (postId) =>
+    apiRequest(`/api/forum/posts/${postId}/lock`, { method: "PATCH" }),
+};
+
+/**
+ * Reviews API
+ */
+export const reviewsAPI = {
+  getPropertyReviews: async (propertyId, sortBy = "createdAt", sortOrder = "DESC") =>
+    apiRequest(`/api/reviews/property/${propertyId}?sortBy=${sortBy}&sortOrder=${sortOrder}`),
+  getLandlordReviews: async (landlordId, sortBy = "createdAt", sortOrder = "DESC") =>
+    apiRequest(`/api/reviews/landlord/${landlordId}?sortBy=${sortBy}&sortOrder=${sortOrder}`),
+  getStats: async (targetType, targetId) =>
+    apiRequest(`/api/reviews/stats/${targetType}/${targetId}`),
+  createReview: async (data) =>
+    apiRequest("/api/reviews", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateReview: async (id, data) =>
+    apiRequest(`/api/reviews/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteReview: async (id) =>
+    apiRequest(`/api/reviews/${id}`, { method: "DELETE" }),
+  toggleHelpful: async (reviewId) =>
+    apiRequest(`/api/reviews/${reviewId}/helpful`, { method: "POST" }),
+};
+
 export default apiRequest;

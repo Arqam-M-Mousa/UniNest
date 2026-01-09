@@ -3,15 +3,16 @@ import {
   ChatBubbleLeftRightIcon,
   BellIcon,
   UserCircleIcon,
-  ArrowRightOnRectangleIcon,
-  SunIcon,
-  MoonIcon,
-  LanguageIcon,
   Bars3Icon,
   XMarkIcon,
-  BuildingLibraryIcon,
+  MoonIcon,
+  SunIcon,
+  LanguageIcon,
+  ArrowRightOnRectangleIcon,
   HomeModernIcon,
-  MegaphoneIcon,
+  BuildingLibraryIcon,
+  SpeakerWaveIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -439,6 +440,18 @@ const Header = () => {
                         <HomeModernIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                         <span className="font-medium">
                           {t("myListings") || "My Listings"}
+                        </span>
+                      </Link>
+                    )}
+                    {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "superadmin") && (
+                      <Link
+                        to="/landlord/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                      >
+                        <ChartBarIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">
+                          {t("landlordDashboard") || "Dashboard"}
                         </span>
                       </Link>
                     )}

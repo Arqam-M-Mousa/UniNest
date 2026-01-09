@@ -35,6 +35,10 @@ import RoommateView from "./pages/roommates/RoommateView";
 import VerificationPage from "./pages/profile/VerificationPage";
 import Community from "./pages/general/Forum";
 import CommunityPostDetails from "./pages/general/ForumPostDetails";
+import LandlordDashboard from "./pages/landlord/LandlordDashboard";
+import AvailabilityManager from "./pages/landlord/AvailabilityManager";
+import PropertyPriceHistory from "./pages/properties/PropertyPriceHistory";
+import PropertyAllReviews from "./pages/properties/PropertyAllReviews";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -83,6 +87,10 @@ function ThemedLayout() {
           <Route path="/roommates/view/:userId" element={<RoommateView />} />
           <Route path="/community" element={<Community />} />
           <Route path="/community/:id" element={<CommunityPostDetails />} />
+          <Route path="/landlord/dashboard" element={<LandlordDashboard />} />
+          <Route path="/landlord/availability" element={<AvailabilityManager />} />
+          <Route path="/apartments/:id/price-history" element={<PropertyPriceHistory />} />
+          <Route path="/apartments/:id/reviews" element={<PropertyAllReviews />} />
         </Routes>
       </main>
       <Footer />

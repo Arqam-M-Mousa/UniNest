@@ -68,7 +68,7 @@ router.get("/posts", async (req, res) => {
                 {
                     model: ForumLike,
                     as: "likes",
-                    attributes: ["id"],
+                    attributes: ["id", "userId", "voteType"],
                     required: false,
                 },
             ],
@@ -92,6 +92,7 @@ router.get("/posts", async (req, res) => {
                 updatedAt: post.updatedAt,
                 author: post.author,
                 commentCount: post.comments ? post.comments.length : 0,
+                likes: post.likes || [],
                 upvotes,
                 downvotes,
                 voteScore: upvotes - downvotes,

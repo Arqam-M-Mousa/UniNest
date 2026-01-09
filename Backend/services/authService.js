@@ -325,6 +325,7 @@ const signin = async (req, res) => {
           role: user.role,
           firstName: user.firstName,
           lastName: user.lastName,
+          avatarUrl: user.avatarUrl,
           profilePictureUrl: user.profilePictureUrl,
           preferredLanguage: user.preferredLanguage,
         },

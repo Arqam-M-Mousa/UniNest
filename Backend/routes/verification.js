@@ -98,7 +98,7 @@ router.get("/requests", authenticate, authorize(["Admin", "SuperAdmin"]), async 
                 {
                     model: User,
                     as: "user",
-                    attributes: ["id", "firstName", "lastName", "email"],
+                    attributes: ["id", "firstName", "lastName", "email", "avatarUrl", "profilePictureUrl"],
                 },
             ],
             order: [["createdAt", "DESC"]],

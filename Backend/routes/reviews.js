@@ -33,7 +33,7 @@ router.get("/property/:propertyId", async (req, res) => {
                 {
                     model: User,
                     as: "student",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"],
                 },
                 {
                     model: ReviewHelpful,
@@ -76,7 +76,7 @@ router.get("/landlord/:landlordId", async (req, res) => {
                 {
                     model: User,
                     as: "student",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"],
                 },
                 {
                     model: ReviewHelpful,
@@ -238,7 +238,7 @@ router.post("/", authenticate, authorize(["Student"]), async (req, res) => {
                 {
                     model: User,
                     as: "student",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"],
                 },
             ],
         });
@@ -290,7 +290,7 @@ router.put("/:id", authenticate, async (req, res) => {
                 {
                     model: User,
                     as: "student",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"],
                 },
             ],
         });

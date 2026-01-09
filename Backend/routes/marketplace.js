@@ -91,7 +91,7 @@ router.get("/", async (req, res) => {
                 {
                     model: User,
                     as: "owner",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"],
                 },
             ],
             order,
@@ -222,7 +222,7 @@ router.get("/:id", async (req, res) => {
                 {
                     model: User,
                     as: "owner",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl", "email", "phoneNumber"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "email", "phoneNumber"],
                 },
             ],
         });
@@ -316,7 +316,7 @@ router.post("/", authenticate, authorize(["Student", "Admin", "SuperAdmin"]), bl
             include: [
                 { model: ItemListing, as: "itemDetails" },
                 { model: ListingImage, as: "images" },
-                { model: User, as: "owner", attributes: ["id", "firstName", "lastName", "avatarUrl"] },
+                { model: User, as: "owner", attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"] },
             ],
         });
 
@@ -382,7 +382,7 @@ router.put("/:id", authenticate, blockLandlords, async (req, res) => {
             include: [
                 { model: ItemListing, as: "itemDetails" },
                 { model: ListingImage, as: "images" },
-                { model: User, as: "owner", attributes: ["id", "firstName", "lastName", "avatarUrl"] },
+                { model: User, as: "owner", attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"] },
             ],
         });
 

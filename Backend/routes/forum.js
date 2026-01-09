@@ -57,7 +57,7 @@ router.get("/posts", async (req, res) => {
                 {
                     model: User,
                     as: "author",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role"],
                 },
                 {
                     model: ForumComment,
@@ -126,7 +126,7 @@ router.get("/posts/:id", async (req, res) => {
                 {
                     model: User,
                     as: "author",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl", "role", "isIdentityVerified"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role", "isIdentityVerified"],
                 },
                 {
                     model: ForumComment,
@@ -135,7 +135,7 @@ router.get("/posts/:id", async (req, res) => {
                         {
                             model: User,
                             as: "author",
-                            attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                            attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role"],
                         },
                     ],
                     order: [["createdAt", "ASC"]],
@@ -214,7 +214,7 @@ router.post("/posts", authenticate, async (req, res) => {
                 {
                     model: User,
                     as: "author",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role"],
                 },
             ],
         });
@@ -271,7 +271,7 @@ router.put("/posts/:id", authenticate, async (req, res) => {
                 {
                     model: User,
                     as: "author",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role"],
                 },
             ],
         });
@@ -372,7 +372,7 @@ router.post("/posts/:id/comments", authenticate, async (req, res) => {
                 {
                     model: User,
                     as: "author",
-                    attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+                    attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role"],
                 },
             ],
         });

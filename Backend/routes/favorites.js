@@ -7,6 +7,7 @@ const {
   ListingImage,
   User,
   University,
+  PropertyAnalytics,
 } = require("../models");
 const { authenticate } = require("../middleware/auth");
 const { sendSuccess, sendError, HTTP_STATUS } = require("../utils/responses");
@@ -54,7 +55,7 @@ router.get("/", authenticate, async (req, res) => {
             {
               model: User,
               as: "owner",
-              attributes: ["id", "firstName", "lastName", "avatarUrl", "role"],
+              attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role"],
               required: false,
             },
           ],
@@ -161,6 +162,26 @@ router.post("/:listingId", authenticate, async (req, res) => {
       studentId: userId,
       listingId,
     });
+
+    // Track favorite in analytics (find property by listingId)
+    const property = await PropertyListing.findOne({
+      where: { listingId },
+      attributes: ["id"],
+    });
+
+    if (property) {
+      const today = new Date().toISOString().split("T")[0];
+      const [analytics, created] = await PropertyAnalytics.findOrCreate({
+        where: { propertyId: property.id, date: today },
+        defaults: { views: 0, uniqueViews: 0, favorites: 1, inquiries: 0 },
+      });
+      // Only increment if record already existed (not newly created)
+      if (!created) {
+        await PropertyAnalytics.increment("favorites", {
+          where: { propertyId: property.id, date: today },
+        });
+      }
+    }
 
     return sendSuccess(
       res,

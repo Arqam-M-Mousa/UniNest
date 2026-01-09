@@ -21,6 +21,8 @@ router.get("/users", authenticate, authorize("SuperAdmin"), async (req, res) => 
                 "firstName",
                 "lastName",
                 "role",
+                "avatarUrl",
+                "profilePictureUrl",
                 "isVerified",
                 "createdAt",
                 "updatedAt",
@@ -94,6 +96,8 @@ router.post("/users", authenticate, authorize("SuperAdmin"), async (req, res) =>
             firstName: newAdmin.firstName,
             lastName: newAdmin.lastName,
             role: newAdmin.role,
+            avatarUrl: newAdmin.avatarUrl,
+            profilePictureUrl: newAdmin.profilePictureUrl,
             isVerified: newAdmin.isVerified,
             createdAt: newAdmin.createdAt,
         };

@@ -165,25 +165,40 @@ function RoommateSearch() {
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-dark,var(--color-accent))] text-white py-12 px-4">
-                <div className="max-w-6xl mx-auto">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            <div className="relative py-16 px-4 overflow-hidden">
+                {/* Background with decorative shapes - same as Marketplace */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/20 via-[var(--color-surface)] to-[var(--color-accent)]/10" />
+                <div className="absolute inset-0 overflow-hidden">
+                    {/* Large gradient circle - top right */}
+                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-br from-[var(--color-accent)]/30 to-transparent rounded-full blur-3xl" />
+                    {/* Medium circle - bottom left */}
+                    <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-full blur-2xl" />
+                    {/* Small accent circle - center */}
+                    <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-r from-blue-500/15 to-[var(--color-accent)]/15 rounded-full blur-2xl" />
+                    {/* Floating shapes */}
+                    <div className="absolute top-12 left-[15%] w-20 h-20 bg-[var(--color-accent)]/10 rounded-2xl rotate-12 blur-sm" />
+                    <div className="absolute bottom-12 right-[20%] w-16 h-16 bg-purple-500/10 rounded-full blur-sm" />
+                    <div className="absolute top-1/3 right-[10%] w-12 h-12 bg-blue-500/10 rounded-lg rotate-45 blur-sm" />
+                </div>
+
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-[var(--color-text)]">
                         {t("findRoommates")}
                     </h1>
-                    <p className="text-white/80 text-lg">
+                    <p className="text-[var(--color-text-soft)] text-lg">
                         {t("findRoommatesSubtitle")}
                     </p>
 
                     {/* Profile CTA if no profile */}
                     {!hasProfile && (
-                        <div className="mt-6 p-4 bg-white/10 backdrop-blur rounded-xl flex items-center justify-between">
+                        <div className="mt-6 p-4 bg-[var(--color-accent)]/10 backdrop-blur rounded-xl flex items-center justify-between border border-[var(--color-accent)]/20">
                             <div>
-                                <p className="font-medium">{t("createProfileToMatch")}</p>
-                                <p className="text-sm text-white/70">{t("createProfileHint")}</p>
+                                <p className="font-medium text-[var(--color-text)]">{t("createProfileToMatch")}</p>
+                                <p className="text-sm text-[var(--color-text-soft)]">{t("createProfileHint")}</p>
                             </div>
                             <button
                                 onClick={() => navigate("/roommates/profile")}
-                                className="px-4 py-2 bg-white text-[var(--color-accent)] rounded-lg font-medium hover:bg-white/90 transition-all"
+                                className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:opacity-90 transition-all"
                             >
                                 {t("createProfile")}
                             </button>
@@ -192,10 +207,10 @@ function RoommateSearch() {
 
                     {/* Inactive Profile Warning */}
                     {hasProfile && !isProfileActive && (
-                        <div className="mt-6 p-4 bg-yellow-500/20 backdrop-blur rounded-xl flex items-center justify-between border border-yellow-500/30">
+                        <div className="mt-6 p-4 bg-yellow-500/10 backdrop-blur rounded-xl flex items-center justify-between border border-yellow-500/30">
                             <div>
-                                <p className="font-medium text-yellow-100">{t("profileInactiveWarning")}</p>
-                                <p className="text-sm text-yellow-200/70">{t("profileInactiveHint")}</p>
+                                <p className="font-medium text-yellow-600 dark:text-yellow-400">{t("profileInactiveWarning")}</p>
+                                <p className="text-sm text-yellow-600/70 dark:text-yellow-400/70">{t("profileInactiveHint")}</p>
                             </div>
                             <button
                                 onClick={() => navigate("/roommates/profile")}

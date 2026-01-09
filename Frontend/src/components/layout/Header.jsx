@@ -28,15 +28,16 @@ const navLinksConfig = (t, user) => [
     match: (p) => p === "/apartments",
   },
   {
+    to: "/marketplace",
+    label: t("marketplace"),
+    match: (p) => p.startsWith("/marketplace"),
+    requiresAuth: true,
+  },
+  {
     to: "/roommates",
     label: t("roommates"),
     match: (p) => p.startsWith("/roommates"),
     studentOnly: true,
-  },
-  {
-    to: "/marketplace",
-    label: t("marketplace"),
-    match: (p) => p.startsWith("/marketplace"),
   },
   {
     to: "/community",
@@ -173,7 +174,7 @@ const Header = () => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           {navLinksConfig(t, user)
-            .filter(link => !link.studentOnly || (user?.role === "Student"))
+            .filter(link => (!link.studentOnly || user?.role === "Student") && (!link.requiresAuth || user))
             .map((link) => (
               <Link
                 key={link.to}
@@ -633,7 +634,7 @@ const Header = () => {
             role="navigation"
           >
             {navLinksConfig(t, user)
-              .filter(link => !link.studentOnly || (user?.role === "Student"))
+              .filter(link => (!link.studentOnly || user?.role === "Student") && (!link.requiresAuth || user))
               .map((link) => (
                 <Link
                   key={link.to}

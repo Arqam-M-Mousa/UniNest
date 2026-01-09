@@ -30,6 +30,7 @@ router.use("/verification", verificationRoutes);
 router.use("/announcements", announcementRoutes);
 router.use("/forum", require("./forum"));
 router.use("/reviews", require("./reviews"));
+router.use("/marketplace", require("./marketplace"));
 
 module.exports = router;
 

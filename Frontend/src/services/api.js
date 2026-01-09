@@ -465,4 +465,37 @@ export const reviewsAPI = {
     apiRequest(`/api/reviews/${reviewId}/helpful`, { method: "POST" }),
 };
 
+/**
+ * Marketplace API
+ */
+export const marketplaceAPI = {
+  list: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(`/api/marketplace${queryString ? `?${queryString}` : ""}`);
+  },
+  getById: async (id) => apiRequest(`/api/marketplace/${id}`),
+  getFilterOptions: async () => apiRequest("/api/marketplace/filter-options"),
+  create: async (data) =>
+    apiRequest("/api/marketplace", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: async (id, data) =>
+    apiRequest(`/api/marketplace/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: async (id) =>
+    apiRequest(`/api/marketplace/${id}`, { method: "DELETE" }),
+  getMyItems: async () => apiRequest("/api/marketplace/my-items"),
+  toggleVisibility: async (id) =>
+    apiRequest(`/api/marketplace/${id}/toggle-visibility`, { method: "PATCH" }),
+};
+
 export default apiRequest;

@@ -15,6 +15,7 @@ import {
   ExclamationCircleIcon,
   XMarkIcon,
   CheckIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80";
@@ -320,31 +321,43 @@ const MyListings = () => {
                     {listing.squareFeet} m²
                   </p>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 pt-3 border-t themed-border">
+                  {/* Actions - Row 1 */}
+                  <div className="flex items-center gap-1 pt-3 border-t themed-border">
                     {/* View */}
                     <Link
                       to={`/apartments/${listing.id}`}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-[var(--color-text-soft)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 rounded-lg transition-colors no-underline"
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-2 text-sm font-medium text-[var(--color-text-soft)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 rounded-lg transition-colors no-underline"
                     >
                       <EyeIcon className="w-4 h-4" />
                       {t("view") || "View"}
                     </Link>
 
+                    {/* Price History */}
+                    <Link
+                      to={`/apartments/${listing.id}/price-history`}
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-2 text-sm font-medium text-[var(--color-text-soft)] hover:text-purple-500 hover:bg-purple-500/10 rounded-lg transition-colors no-underline"
+                    >
+                      <ChartBarIcon className="w-4 h-4" />
+                      {t("prices") || "Prices"}
+                    </Link>
+
                     {/* Edit */}
                     <button
                       onClick={() => openEditModal(listing)}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-[var(--color-text-soft)] hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-2 text-sm font-medium text-[var(--color-text-soft)] hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                     >
                       <PencilIcon className="w-4 h-4" />
                       {t("edit") || "Edit"}
                     </button>
+                  </div>
 
+                  {/* Actions - Row 2 */}
+                  <div className="flex items-center gap-1 pt-1">
                     {/* Toggle Visibility */}
                     <button
                       onClick={() => handleToggleVisibility(listing)}
                       disabled={actionLoading === listing.id}
-                      className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${listing.isPublished
+                      className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 text-sm font-medium rounded-lg transition-colors ${listing.isPublished
                         ? "text-yellow-600 hover:bg-yellow-500/10"
                         : "text-green-600 hover:bg-green-500/10"
                         }`}
@@ -367,7 +380,7 @@ const MyListings = () => {
                     {/* Delete */}
                     <button
                       onClick={() => setDeleteConfirm(listing)}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                     >
                       <TrashIcon className="w-4 h-4" />
                       {t("delete") || "Delete"}

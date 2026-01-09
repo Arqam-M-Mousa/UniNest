@@ -7,7 +7,7 @@ import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import ReviewCard from "./ReviewCard";
 import WriteReviewModal from "./WriteReviewModal";
 
-const PropertyReviews = ({ propertyId }) => {
+const PropertyReviews = ({ propertyId, listingId, maxReviews }) => {
     const { t } = useLanguage();
     const { user } = useAuth();
     const [reviews, setReviews] = useState([]);
@@ -15,6 +15,8 @@ const PropertyReviews = ({ propertyId }) => {
     const [loading, setLoading] = useState(true);
     const [showWriteModal, setShowWriteModal] = useState(false);
     const [sortBy, setSortBy] = useState("createdAt");
+
+    const isLimited = maxReviews !== undefined && maxReviews > 0;
 
     useEffect(() => {
         fetchReviews();
@@ -83,8 +85,8 @@ const PropertyReviews = ({ propertyId }) => {
                 )}
             </div>
 
-            {/* Rating Distribution */}
-            {stats && stats.count > 0 && (
+            {/* Rating Distribution - only show in full view */}
+            {!isLimited && stats && stats.count > 0 && (
                 <div className="mb-6 p-4 bg-[var(--color-bg)] rounded-lg">
                     <h3 className="text-sm font-medium text-[var(--color-text)] mb-3">
                         {t("ratingDistribution")}
@@ -112,8 +114,8 @@ const PropertyReviews = ({ propertyId }) => {
                 </div>
             )}
 
-            {/* Sort Options */}
-            {reviews.length > 0 && (
+            {/* Sort Options - only show in full view */}
+            {!isLimited && reviews.length > 0 && (
                 <div className="mb-4">
                     <label className="text-sm text-[var(--color-text)] mr-2">{t("sortBy")}:</label>
                     <select
@@ -126,6 +128,8 @@ const PropertyReviews = ({ propertyId }) => {
                     </select>
                 </div>
             )}
+
+            {/* Get reviews to display (limited or all) */}
 
             {/* Reviews List */}
             {loading ? (
@@ -145,16 +149,21 @@ const PropertyReviews = ({ propertyId }) => {
                     )}
                 </div>
             ) : (
-                <div className="space-y-4">
-                    {reviews.map((review) => (
-                        <ReviewCard
-                            key={review.id}
-                            review={review}
-                            onUpdate={fetchReviews}
-                            onDelete={fetchReviews}
-                        />
-                    ))}
-                </div>
+                (() => {
+                    const displayReviews = isLimited ? reviews.slice(0, maxReviews) : reviews;
+                    return (
+                        <div className="space-y-4">
+                            {displayReviews.map((review) => (
+                                <ReviewCard
+                                    key={review.id}
+                                    review={review}
+                                    onUpdate={fetchReviews}
+                                    onDelete={fetchReviews}
+                                />
+                            ))}
+                        </div>
+                    );
+                })()
             )}
 
             {/* Write Review Modal */}

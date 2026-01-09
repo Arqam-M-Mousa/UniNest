@@ -16,6 +16,7 @@ import Home from "./pages/general/Home";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Marketplace from "./pages/properties/Marketplace";
+import MarketplaceItemDetails from "./pages/properties/MarketplaceItemDetails";
 import PropertyDetails from "./pages/properties/PropertyDetails";
 import About from "./pages/general/About";
 import Contact from "./pages/general/Contact";
@@ -34,6 +35,10 @@ import RoommateView from "./pages/roommates/RoommateView";
 import VerificationPage from "./pages/profile/VerificationPage";
 import Community from "./pages/general/Forum";
 import CommunityPostDetails from "./pages/general/ForumPostDetails";
+import LandlordDashboard from "./pages/landlord/LandlordDashboard";
+import AvailabilityManager from "./pages/landlord/AvailabilityManager";
+import PropertyPriceHistory from "./pages/properties/PropertyPriceHistory";
+import PropertyAllReviews from "./pages/properties/PropertyAllReviews";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -64,7 +69,7 @@ function ThemedLayout() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/verification" element={<VerificationPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/marketplace/:id" element={<PropertyDetails />} />
+          <Route path="/marketplace/:id" element={<MarketplaceItemDetails />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/apartments" element={<Apartments />} />
@@ -82,6 +87,10 @@ function ThemedLayout() {
           <Route path="/roommates/view/:userId" element={<RoommateView />} />
           <Route path="/community" element={<Community />} />
           <Route path="/community/:id" element={<CommunityPostDetails />} />
+          <Route path="/landlord/dashboard" element={<LandlordDashboard />} />
+          <Route path="/landlord/availability" element={<AvailabilityManager />} />
+          <Route path="/apartments/:id/price-history" element={<PropertyPriceHistory />} />
+          <Route path="/apartments/:id/reviews" element={<PropertyAllReviews />} />
         </Routes>
       </main>
       <Footer />

@@ -3,15 +3,16 @@ import {
   ChatBubbleLeftRightIcon,
   BellIcon,
   UserCircleIcon,
-  ArrowRightOnRectangleIcon,
-  SunIcon,
-  MoonIcon,
-  LanguageIcon,
   Bars3Icon,
   XMarkIcon,
-  BuildingLibraryIcon,
+  MoonIcon,
+  SunIcon,
+  LanguageIcon,
+  ArrowRightOnRectangleIcon,
   HomeModernIcon,
-  MegaphoneIcon,
+  BuildingLibraryIcon,
+  SpeakerWaveIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -28,15 +29,16 @@ const navLinksConfig = (t, user) => [
     match: (p) => p === "/apartments",
   },
   {
+    to: "/marketplace",
+    label: t("marketplace"),
+    match: (p) => p.startsWith("/marketplace"),
+    requiresAuth: true,
+  },
+  {
     to: "/roommates",
     label: t("roommates"),
     match: (p) => p.startsWith("/roommates"),
     studentOnly: true,
-  },
-  {
-    to: "/marketplace",
-    label: t("marketplace"),
-    match: (p) => p.startsWith("/marketplace"),
   },
   {
     to: "/community",
@@ -173,7 +175,7 @@ const Header = () => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           {navLinksConfig(t, user)
-            .filter(link => !link.studentOnly || (user?.role === "Student"))
+            .filter(link => (!link.studentOnly || user?.role === "Student") && (!link.requiresAuth || user))
             .map((link) => (
               <Link
                 key={link.to}
@@ -441,6 +443,18 @@ const Header = () => {
                         </span>
                       </Link>
                     )}
+                    {(user?.role?.toLowerCase() === "landlord" || user?.role?.toLowerCase() === "superadmin") && (
+                      <Link
+                        to="/landlord/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                      >
+                        <ChartBarIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">
+                          {t("landlordDashboard") || "Dashboard"}
+                        </span>
+                      </Link>
+                    )}
                     {user?.role?.toLowerCase() === "superadmin" && (
                       <div className="border-t themed-border">
                         <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">
@@ -633,7 +647,7 @@ const Header = () => {
             role="navigation"
           >
             {navLinksConfig(t, user)
-              .filter(link => !link.studentOnly || (user?.role === "Student"))
+              .filter(link => (!link.studentOnly || user?.role === "Student") && (!link.requiresAuth || user))
               .map((link) => (
                 <Link
                   key={link.to}

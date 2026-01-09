@@ -18,6 +18,10 @@ const ForumPost = require("./ForumPost");
 const ForumComment = require("./ForumComment");
 const ForumLike = require("./ForumLike");
 const ReviewHelpful = require("./ReviewHelpful");
+const PropertyViewing = require("./PropertyViewing");
+const LandlordAvailability = require("./LandlordAvailability");
+const PriceHistory = require("./PriceHistory");
+const PropertyAnalytics = require("./PropertyAnalytics");
 
 
 // User - University relationship
@@ -47,6 +51,14 @@ Listing.hasOne(PropertyListing, {
   onDelete: "CASCADE",
 });
 PropertyListing.belongsTo(Listing, { foreignKey: "listingId", as: "listing" });
+
+// Listing - ItemListing relationship
+Listing.hasOne(ItemListing, {
+  foreignKey: "listingId",
+  as: "itemDetails",
+  onDelete: "CASCADE",
+});
+ItemListing.belongsTo(Listing, { foreignKey: "listingId", as: "listing" });
 
 // Listing - Favorite relationship
 Listing.hasMany(Favorite, {
@@ -221,6 +233,52 @@ User.hasMany(ReviewHelpful, {
 });
 ReviewHelpful.belongsTo(User, { foreignKey: "userId", as: "user" });
 
+// PropertyViewing relationships
+PropertyListing.hasMany(PropertyViewing, {
+  foreignKey: "propertyId",
+  as: "viewings",
+  onDelete: "CASCADE",
+});
+PropertyViewing.belongsTo(PropertyListing, { foreignKey: "propertyId", as: "property" });
+
+User.hasMany(PropertyViewing, {
+  foreignKey: "studentId",
+  as: "studentViewings",
+  onDelete: "CASCADE",
+});
+PropertyViewing.belongsTo(User, { foreignKey: "studentId", as: "student" });
+
+User.hasMany(PropertyViewing, {
+  foreignKey: "landlordId",
+  as: "landlordViewings",
+  onDelete: "CASCADE",
+});
+PropertyViewing.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
+
+// LandlordAvailability relationships
+User.hasMany(LandlordAvailability, {
+  foreignKey: "landlordId",
+  as: "availability",
+  onDelete: "CASCADE",
+});
+LandlordAvailability.belongsTo(User, { foreignKey: "landlordId", as: "landlord" });
+
+// PriceHistory relationships
+PropertyListing.hasMany(PriceHistory, {
+  foreignKey: "propertyId",
+  as: "priceHistory",
+  onDelete: "CASCADE",
+});
+PriceHistory.belongsTo(PropertyListing, { foreignKey: "propertyId", as: "property" });
+
+// PropertyAnalytics relationships
+PropertyListing.hasMany(PropertyAnalytics, {
+  foreignKey: "propertyId",
+  as: "analytics",
+  onDelete: "CASCADE",
+});
+PropertyAnalytics.belongsTo(PropertyListing, { foreignKey: "propertyId", as: "property" });
+
 
 const db = {
   sequelize,
@@ -243,6 +301,10 @@ const db = {
   ForumComment,
   ForumLike,
   ReviewHelpful,
+  PropertyViewing,
+  LandlordAvailability,
+  PriceHistory,
+  PropertyAnalytics,
 };
 
 

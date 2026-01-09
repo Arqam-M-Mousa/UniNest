@@ -23,12 +23,13 @@ const Community = () => {
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [showMyPosts, setShowMyPosts] = useState(false);
     const [sortBy, setSortBy] = useState("createdAt");
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         fetchPosts();
-    }, [selectedCategory, sortBy]);
+    }, [selectedCategory, sortBy, showMyPosts]);
 
     useEffect(() => {
         if (!socket) return;
@@ -66,7 +67,14 @@ const Community = () => {
                 sortOrder: "DESC",
             };
             const response = await forumAPI.getPosts(filters);
-            setPosts(response.data.posts || []);
+            let fetchedPosts = response.data.posts || [];
+
+            // Filter to only show user's posts if My Posts is active
+            if (showMyPosts && user) {
+                fetchedPosts = fetchedPosts.filter(post => post.author?.id === user.id);
+            }
+
+            setPosts(fetchedPosts);
         } catch (error) {
             console.error("Failed to fetch posts:", error);
         } finally {
@@ -160,13 +168,30 @@ const Community = () => {
                                 {t("categories")}
                             </h3>
                             <div className="space-y-1">
+                                {user && (
+                                    <button
+                                        onClick={() => {
+                                            setShowMyPosts(!showMyPosts);
+                                            if (!showMyPosts) setSelectedCategory("All");
+                                        }}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-2 ${showMyPosts
+                                            ? "bg-[var(--color-accent)] text-white"
+                                            : "text-[var(--color-accent)] border border-[var(--color-accent)] hover:bg-[var(--color-accent)]/10"
+                                            }`}
+                                    >
+                                        <span>#{t("myPosts")}</span>
+                                    </button>
+                                )}
                                 {categories.map((category) => (
                                     <button
                                         key={category}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === category
-                                                ? "bg-[var(--color-accent)] text-white"
-                                                : "text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)]"
+                                        onClick={() => {
+                                            setSelectedCategory(category);
+                                            setShowMyPosts(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === category && !showMyPosts
+                                            ? "bg-[var(--color-accent)] text-white"
+                                            : "text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)]"
                                             }`}
                                     >
                                         <span>#{t(category.toLowerCase())}</span>
@@ -180,13 +205,30 @@ const Community = () => {
                     <div className="flex-1">
                         {/* Mobile Category Pills */}
                         <div className="flex gap-2 overflow-x-auto pb-3 lg:hidden mb-4">
+                            {user && (
+                                <button
+                                    onClick={() => {
+                                        setShowMyPosts(!showMyPosts);
+                                        if (!showMyPosts) setSelectedCategory("All");
+                                    }}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${showMyPosts
+                                        ? "bg-[var(--color-accent)] text-white"
+                                        : "bg-[var(--color-bg-secondary)] text-[var(--color-accent)] border border-[var(--color-accent)]"
+                                        }`}
+                                >
+                                    #{t("myPosts")}
+                                </button>
+                            )}
                             {categories.map((category) => (
                                 <button
                                     key={category}
-                                    onClick={() => setSelectedCategory(category)}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === category
-                                            ? "bg-[var(--color-accent)] text-white"
-                                            : "bg-[var(--color-bg-secondary)] text-[var(--color-text)] border border-[var(--color-border)]"
+                                    onClick={() => {
+                                        setSelectedCategory(category);
+                                        setShowMyPosts(false);
+                                    }}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === category && !showMyPosts
+                                        ? "bg-[var(--color-accent)] text-white"
+                                        : "bg-[var(--color-bg-secondary)] text-[var(--color-text)] border border-[var(--color-border)]"
                                         }`}
                                 >
                                     #{t(category.toLowerCase())}
@@ -202,14 +244,14 @@ const Community = () => {
                             <div className="text-center py-12 bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)]">
                                 <ChatBubbleLeftRightIcon className="w-16 h-16 text-[var(--color-text-secondary)] mx-auto mb-4" />
                                 <p className="text-[var(--color-text-secondary)] text-lg">
-                                    {t("noPostsFound")}
+                                    {showMyPosts ? t("noMyPostsYet") : t("noPostsFound")}
                                 </p>
                                 {user && (
                                     <button
                                         onClick={() => setShowCreateModal(true)}
                                         className="mt-4 text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium"
                                     >
-                                        {t("createFirstPost")}
+                                        {showMyPosts ? t("createYourFirstPost") : t("createFirstPost")}
                                     </button>
                                 )}
                             </div>

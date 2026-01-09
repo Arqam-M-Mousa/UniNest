@@ -24,6 +24,8 @@ const ForumPostCard = ({ post }) => {
     };
 
     const [voteScore, setVoteScore] = useState(post.voteScore || 0);
+    const [upvotes, setUpvotes] = useState(post.upvotes || 0);
+    const [downvotes, setDownvotes] = useState(post.downvotes || 0);
     const [userVote, setUserVote] = useState(getUserVote());
     const [isVoting, setIsVoting] = useState(false);
 
@@ -64,6 +66,8 @@ const ForumPostCard = ({ post }) => {
             setIsVoting(true);
             const response = await forumAPI.vote(post.id, voteType);
             setVoteScore(response.data.voteScore);
+            setUpvotes(response.data.upvotes);
+            setDownvotes(response.data.downvotes);
             setUserVote(response.data.userVote);
         } catch (error) {
             console.error("Failed to vote:", error);
@@ -80,8 +84,8 @@ const ForumPostCard = ({ post }) => {
                     onClick={(e) => handleVote(e, "up")}
                     disabled={!user || isVoting}
                     className={`p-1 rounded transition-colors ${userVote === "up"
-                            ? "text-green-500"
-                            : "text-[var(--color-text-secondary)] hover:text-green-500"
+                        ? "text-green-500"
+                        : "text-[var(--color-text-secondary)] hover:text-green-500"
                         } disabled:opacity-50 disabled:cursor-not-allowed`}
                     title={t("upvote")}
                 >
@@ -91,18 +95,19 @@ const ForumPostCard = ({ post }) => {
                         <ChevronUpIcon className="w-6 h-6" />
                     )}
                 </button>
-                <span className={`text-sm font-bold my-1 ${voteScore > 0 ? "text-green-500" :
-                        voteScore < 0 ? "text-red-500" :
-                            "text-[var(--color-text-secondary)]"
-                    }`}>
-                    {voteScore}
+                <span className="text-xs font-bold text-green-500">
+                    {upvotes}
+                </span>
+                <div className="h-1" />
+                <span className="text-xs font-bold text-red-500">
+                    {downvotes}
                 </span>
                 <button
                     onClick={(e) => handleVote(e, "down")}
                     disabled={!user || isVoting}
                     className={`p-1 rounded transition-colors ${userVote === "down"
-                            ? "text-red-500"
-                            : "text-[var(--color-text-secondary)] hover:text-red-500"
+                        ? "text-red-500"
+                        : "text-[var(--color-text-secondary)] hover:text-red-500"
                         } disabled:opacity-50 disabled:cursor-not-allowed`}
                     title={t("downvote")}
                 >

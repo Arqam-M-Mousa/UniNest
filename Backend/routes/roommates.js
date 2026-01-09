@@ -588,7 +588,7 @@ router.get(
                     {
                         model: User,
                         as: "user",
-                        attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
+                        attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "gender"],
                         where: currentUserGender ? { gender: currentUserGender } : {},
                     },
                     {
@@ -670,12 +670,12 @@ router.get(
                     {
                         model: User,
                         as: "requester",
-                        attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
+                        attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "gender"],
                     },
                     {
                         model: User,
                         as: "target",
-                        attributes: ["id", "firstName", "lastName", "profilePictureUrl", "gender"],
+                        attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "gender"],
                     },
                 ],
                 order: [["createdAt", "DESC"]],

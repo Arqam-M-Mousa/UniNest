@@ -2,7 +2,7 @@ const express = require("express");
 const { Op } = require("sequelize");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
-const { Conversation, Message, User, PropertyListing, Listing } = require("../models");
+const { Conversation, Message, User, PropertyListing, Listing, PropertyAnalytics } = require("../models");
 const {
   sendSuccess,
   sendError,
@@ -138,6 +138,21 @@ router.post("/", authenticate, async (req, res) => {
 
     if (!convo) {
       convo = await Conversation.create({ studentId, landlordId, propertyId });
+
+      // Track inquiry in analytics (only for NEW property conversations)
+      if (propertyId) {
+        const today = new Date().toISOString().split("T")[0];
+        const [analytics, created] = await PropertyAnalytics.findOrCreate({
+          where: { propertyId, date: today },
+          defaults: { views: 0, uniqueViews: 0, favorites: 0, inquiries: 1 },
+        });
+        // Only increment if record already existed (not newly created)
+        if (!created) {
+          await PropertyAnalytics.increment("inquiries", {
+            where: { propertyId, date: today },
+          });
+        }
+      }
     }
 
     return sendSuccess(res, convo, "Conversation ready");
@@ -176,7 +191,7 @@ router.get("/:id/messages", authenticate, async (req, res) => {
         {
           model: User,
           as: "sender",
-          attributes: ["id", "firstName", "lastName", "avatarUrl"],
+          attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl"],
         },
       ],
     });

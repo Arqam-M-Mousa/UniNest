@@ -12,7 +12,10 @@ import MapView from "../../components/properties/MapView";
 import VerifiedBadge from "../../components/common/VerifiedBadge";
 import CostCalculator from "../../components/properties/CostCalculator";
 import PropertyReviews from "../../components/reviews/PropertyReviews";
-import { MapPinIcon, XMarkIcon, MapIcon } from "@heroicons/react/24/outline";
+import PriceHistoryChart from "../../components/landlord/PriceHistoryChart";
+import ViewingSchedulerModal from "../../components/landlord/ViewingSchedulerModal";
+import MarketInsightsWidget from "../../components/landlord/MarketInsightsWidget";
+import { MapPinIcon, XMarkIcon, MapIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -35,6 +38,9 @@ const PropertyDetails = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [showViewingModal, setShowViewingModal] = useState(false);
+  const [priceHistory, setPriceHistory] = useState([]);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Add ESC key listener for closing image modal
   useEffect(() => {
@@ -94,6 +100,16 @@ const PropertyDetails = () => {
 
         setProperty(transformedProperty);
         setActiveImage(transformedProperty.images[0]?.url || transformedProperty.images[0] || null);
+
+        // Fetch price history for landlords
+        if (user?.role?.toLowerCase() === "landlord" && user?.id === data.owner?.id) {
+          try {
+            const priceResponse = await propertyListingsAPI.getPriceHistory(data.id);
+            setPriceHistory(priceResponse.data || []);
+          } catch (err) {
+            console.error("Failed to fetch price history:", err);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch property:", err);
         setError(err.message);
@@ -423,14 +439,66 @@ const PropertyDetails = () => {
                 </a>
               </div>
             </div>
+
+            {/* Book Viewing Button for Students */}
+            {user?.role?.toLowerCase() === "student" && user?.id !== property.owner?.id && (
+              <button
+                onClick={() => setShowViewingModal(true)}
+                className="w-full p-4 rounded-xl border-2 themed-border hover:border-[var(--color-accent)] transition-colors flex items-center justify-center gap-2 text-[var(--color-text)] font-medium"
+              >
+                <CalendarIcon className="w-5 h-5" />
+                {t("scheduleViewing")}
+              </button>
+            )}
+
+            {/* Market Insights for Landlords */}
+            {user?.role?.toLowerCase() === "landlord" && user?.id === property.owner?.id && (
+              <MarketInsightsWidget property={property} />
+            )}
+
             <CostCalculator rent={property.pricePerMonth} currency={property.currency} />
           </div>
         </div>
 
-        {/* Reviews Section */}
+        {/* Reviews Section - Show top 2 with link to all */}
         <div className="max-w-7xl mx-auto mt-8 px-4 md:px-8">
-          <PropertyReviews propertyId={property.id} />
+          <PropertyReviews propertyId={property.id} listingId={property.listingId} maxReviews={2} />
+          <div className="mt-4 text-center">
+            <Link
+              to={`/apartments/${property.id}/reviews`}
+              className="inline-flex items-center gap-2 text-[var(--accent-primary)] hover:underline font-medium"
+            >
+              {t("seeAllReviews")} →
+            </Link>
+          </div>
         </div>
+
+        {/* Price History Link for Landlords */}
+        {user?.role?.toLowerCase() === "landlord" && user?.id === property.owner?.id && (
+          <div className="max-w-7xl mx-auto mt-8 px-4 md:px-8">
+            <Link
+              to={`/apartments/${property.id}/price-history`}
+              className="block w-full p-4 rounded-xl border-2 themed-border hover:border-[var(--color-accent)] transition-colors bg-[var(--bg-secondary)]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-[var(--accent-primary)]/10">
+                    <svg className="w-5 h-5 text-[var(--accent-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-[var(--text-primary)]">{t("viewPriceHistory")}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{t("trackPriceChanges")}</p>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+          </div>
+        )}
 
         <Alert
           isOpen={showAuthModal}
@@ -508,6 +576,35 @@ const PropertyDetails = () => {
             >
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Viewing Scheduler Modal */}
+        {showViewingModal && (
+          <ViewingSchedulerModal
+            property={property}
+            onClose={() => setShowViewingModal(false)}
+            onSuccess={() => {
+              setShowViewingModal(false);
+              setSuccessMessage(t("viewingBookedSuccess") || "Viewing booked successfully! The landlord will be notified.");
+              // Auto dismiss after 5 seconds
+              setTimeout(() => setSuccessMessage(""), 5000);
+            }}
+          />
+        )}
+
+        {/* Success Message Toast */}
+        {successMessage && (
+          <div className="fixed bottom-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-in slide-in-from-bottom">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{successMessage}</span>
+            <button onClick={() => setSuccessMessage("")} className="ml-2 hover:opacity-75">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>

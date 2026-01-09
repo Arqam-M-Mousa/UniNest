@@ -26,9 +26,12 @@ const ForumLike = sequelize.define(
             },
         },
         voteType: {
-            type: DataTypes.ENUM("up", "down"),
+            type: DataTypes.STRING(10),
             allowNull: false,
             defaultValue: "up",
+            validate: {
+                isIn: [["up", "down"]],
+            },
         },
         createdAt: {
             type: DataTypes.DATE,

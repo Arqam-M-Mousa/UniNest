@@ -171,6 +171,9 @@ export const propertyListingsAPI = {
       method: "DELETE",
     });
   },
+
+  getPriceHistory: async (id) =>
+    apiRequest(`/api/property-listings/${id}/price-history`),
 };
 
 /**
@@ -463,6 +466,86 @@ export const reviewsAPI = {
     apiRequest(`/api/reviews/${id}`, { method: "DELETE" }),
   toggleHelpful: async (reviewId) =>
     apiRequest(`/api/reviews/${reviewId}/helpful`, { method: "POST" }),
+};
+
+/**
+ * Marketplace API
+ */
+export const marketplaceAPI = {
+  list: async (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return apiRequest(`/api/marketplace${queryString ? `?${queryString}` : ""}`);
+  },
+  getById: async (id) => apiRequest(`/api/marketplace/${id}`),
+  getFilterOptions: async () => apiRequest("/api/marketplace/filter-options"),
+  create: async (data) =>
+    apiRequest("/api/marketplace", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: async (id, data) =>
+    apiRequest(`/api/marketplace/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: async (id) =>
+    apiRequest(`/api/marketplace/${id}`, { method: "DELETE" }),
+  getMyItems: async () => apiRequest("/api/marketplace/my-items"),
+  toggleVisibility: async (id) =>
+    apiRequest(`/api/marketplace/${id}/toggle-visibility`, { method: "PATCH" }),
+};
+
+/**
+ * Viewings API
+ */
+export const viewingsAPI = {
+  getAvailability: async (landlordId) =>
+    apiRequest(`/api/viewings/availability/${landlordId}`),
+  setAvailability: async (slots) =>
+    apiRequest("/api/viewings/availability", {
+      method: "POST",
+      body: JSON.stringify({ slots }),
+    }),
+  book: async (data) =>
+    apiRequest("/api/viewings/book", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMyBookings: async () => apiRequest("/api/viewings/my-bookings"),
+  updateStatus: async (id, status) =>
+    apiRequest(`/api/viewings/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    }),
+  cancel: async (id) =>
+    apiRequest(`/api/viewings/${id}`, { method: "DELETE" }),
+};
+
+/**
+ * Landlord Analytics API
+ */
+export const landlordAnalyticsAPI = {
+  getOverview: async () => apiRequest("/api/analytics/landlord/overview"),
+  getPropertyStats: async (propertyId) =>
+    apiRequest(`/api/analytics/landlord/property/${propertyId}`),
+  getTrends: async () => apiRequest("/api/analytics/landlord/trends"),
+};
+
+/**
+ * Market Analytics API
+ */
+export const marketAnalyticsAPI = {
+  getCityAnalytics: async (city) =>
+    apiRequest(`/api/analytics/market/city/${city}`),
+  getUniversityAnalytics: async (id) =>
+    apiRequest(`/api/analytics/market/university/${id}`),
+  getTrends: async () => apiRequest("/api/analytics/market/trends"),
 };
 
 export default apiRequest;

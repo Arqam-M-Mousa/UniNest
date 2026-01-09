@@ -7,6 +7,8 @@ const {
   User,
   University,
   Favorite,
+  PriceHistory,
+  PropertyAnalytics,
 } = require("../models");
 const { authenticate, authorize } = require("../middleware/auth");
 const { sendSuccess, sendError, HTTP_STATUS } = require("../utils/responses");
@@ -108,7 +110,7 @@ router.get("/", async (req, res) => {
             {
               model: User,
               as: "owner",
-              attributes: ["id", "firstName", "lastName", "avatarUrl", "role", "isIdentityVerified"],
+              attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role", "isIdentityVerified"],
               required: false,
             },
           ],
@@ -291,7 +293,7 @@ router.get(
               {
                 model: User,
                 as: "owner",
-                attributes: ["id", "firstName", "lastName", "avatarUrl", "role", "isIdentityVerified"],
+                attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "role", "isIdentityVerified"],
                 required: false,
               },
             ],
@@ -405,6 +407,18 @@ router.get("/:id", async (req, res) => {
       await Listing.increment("viewCount", {
         where: { id: property.listingId },
       });
+
+      // Track view in PropertyAnalytics
+      const today = new Date().toISOString().split("T")[0];
+      const [analytics, created] = await PropertyAnalytics.findOrCreate({
+        where: { propertyId: property.id, date: today },
+        defaults: { views: 1, uniqueViews: 0, favorites: 0, inquiries: 0 },
+      });
+      if (!created) {
+        await PropertyAnalytics.increment("views", {
+          where: { propertyId: property.id, date: today },
+        });
+      }
     }
 
     const result = {
@@ -528,6 +542,24 @@ router.put(
             where: { id },
             transaction,
           });
+
+          // Track price changes
+          if (pricePerMonth && parseFloat(pricePerMonth) !== parseFloat(property.pricePerMonth)) {
+            const oldPrice = parseFloat(property.pricePerMonth);
+            const newPrice = parseFloat(pricePerMonth);
+            const changePercentage = ((newPrice - oldPrice) / oldPrice) * 100;
+
+            await PriceHistory.create(
+              {
+                propertyId: id,
+                price: newPrice,
+                recordedAt: new Date(),
+                changeType: newPrice > oldPrice ? "increase" : "decrease",
+                changePercentage: changePercentage,
+              },
+              { transaction }
+            );
+          }
         }
 
         // Update images if provided
@@ -933,6 +965,18 @@ router.post(
         }
       }
 
+      // Create initial price history record
+      await PriceHistory.create(
+        {
+          propertyId: property.id,
+          price: pricePerMonth,
+          recordedAt: new Date(),
+          changeType: "initial",
+          changePercentage: null,
+        },
+        { transaction }
+      );
+
       await transaction.commit();
 
       return sendSuccess(
@@ -953,5 +997,32 @@ router.post(
     }
   }
 );
+
+// GET /api/property-listings/:id/price-history - Get price history for a property
+router.get("/:id/price-history", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const property = await PropertyListing.findByPk(id);
+    if (!property) {
+      return sendError(res, "Property not found", HTTP_STATUS.NOT_FOUND);
+    }
+
+    const history = await PriceHistory.findAll({
+      where: { propertyId: id },
+      order: [["recordedAt", "DESC"]],
+    });
+
+    return sendSuccess(res, history);
+  } catch (error) {
+    console.error("Failed to fetch price history", error);
+    return sendError(
+      res,
+      "Failed to fetch price history",
+      HTTP_STATUS.SERVER_ERROR,
+      error
+    );
+  }
+});
 
 module.exports = router;

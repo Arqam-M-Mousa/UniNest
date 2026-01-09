@@ -32,6 +32,8 @@ const CommunityPostDetails = () => {
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [submittingComment, setSubmittingComment] = useState(false);
     const [voteScore, setVoteScore] = useState(0);
+    const [upvotes, setUpvotes] = useState(0);
+    const [downvotes, setDownvotes] = useState(0);
     const [userVote, setUserVote] = useState(null);
     const [isVoting, setIsVoting] = useState(false);
 
@@ -72,6 +74,8 @@ const CommunityPostDetails = () => {
             const response = await forumAPI.getPostById(id);
             setPost(response.data);
             setVoteScore(response.data.voteScore || 0);
+            setUpvotes(response.data.upvotes || 0);
+            setDownvotes(response.data.downvotes || 0);
             // Check user's vote on this post
             if (user && response.data.likes) {
                 const userVoteData = response.data.likes.find((like) => like.userId === user.id);
@@ -91,6 +95,8 @@ const CommunityPostDetails = () => {
             setIsVoting(true);
             const response = await forumAPI.vote(id, voteType);
             setVoteScore(response.data.voteScore);
+            setUpvotes(response.data.upvotes);
+            setDownvotes(response.data.downvotes);
             setUserVote(response.data.userVote);
         } catch (error) {
             console.error("Failed to vote:", error);
@@ -184,8 +190,8 @@ const CommunityPostDetails = () => {
                             onClick={() => handleVote("up")}
                             disabled={!user || isVoting}
                             className={`p-1 rounded transition-colors ${userVote === "up"
-                                    ? "text-green-500"
-                                    : "text-[var(--color-text-secondary)] hover:text-green-500"
+                                ? "text-green-500"
+                                : "text-[var(--color-text-secondary)] hover:text-green-500"
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                             title={t("upvote")}
                         >
@@ -195,18 +201,19 @@ const CommunityPostDetails = () => {
                                 <ChevronUpIcon className="w-8 h-8" />
                             )}
                         </button>
-                        <span className={`text-lg font-bold my-1 ${voteScore > 0 ? "text-green-500" :
-                                voteScore < 0 ? "text-red-500" :
-                                    "text-[var(--color-text-secondary)]"
-                            }`}>
-                            {voteScore}
+                        <span className="text-sm font-bold text-green-500">
+                            {upvotes}
+                        </span>
+                        <div className="h-1" />
+                        <span className="text-sm font-bold text-red-500">
+                            {downvotes}
                         </span>
                         <button
                             onClick={() => handleVote("down")}
                             disabled={!user || isVoting}
                             className={`p-1 rounded transition-colors ${userVote === "down"
-                                    ? "text-red-500"
-                                    : "text-[var(--color-text-secondary)] hover:text-red-500"
+                                ? "text-red-500"
+                                : "text-[var(--color-text-secondary)] hover:text-red-500"
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                             title={t("downvote")}
                         >

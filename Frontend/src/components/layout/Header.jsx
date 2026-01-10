@@ -13,6 +13,7 @@ import {
   BuildingLibraryIcon,
   SpeakerWaveIcon,
   ChartBarIcon,
+  MegaphoneIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { forumAPI } from '../services/api';
 import { format } from 'date-fns';
@@ -43,6 +44,13 @@ export default function CommunityScreen({ navigation }: any) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    backButton: {
+      marginRight: 12,
     },
     title: {
       fontSize: 28,
@@ -120,10 +128,16 @@ export default function CommunityScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Community</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ChevronLeftIcon size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Community</Text>
+        </View>
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => navigation.navigate('CreatePost')}
+          activeOpacity={0.7}
         >
           <Text style={styles.createButtonText}>+ New Post</Text>
         </TouchableOpacity>

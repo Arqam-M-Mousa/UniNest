@@ -70,9 +70,16 @@ router.get("/search", async (req, res) => {
   }
 });
 
+// List of Overpass API mirrors for fallback
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
 /**
  * POST /api/geocode/nearby-places
- * Fetch nearby places using Overpass API
+ * Fetch nearby places using Overpass API with retry and fallback
  */
 router.post("/nearby-places", async (req, res) => {
   try {
@@ -99,28 +106,50 @@ router.post("/nearby-places", async (req, res) => {
     }
 
     const query = `
-      [out:json][timeout:25];
+      [out:json][timeout:10];
       (
         ${categoryQueries.map(cat => `node[${cat}](around:${radius},${lat},${lng});`).join('\n')}
       );
-      out body;
+      out body 30;
     `;
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: query,
-      headers: {
-        'User-Agent': 'UniNest/1.0 (student housing platform)',
-      },
-    });
+    let data = null;
+    let lastError = null;
 
-    if (!response.ok) {
-      throw new Error(`Overpass API error: ${response.status}`);
+    // Try each endpoint until one works
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: query,
+          headers: {
+            'User-Agent': 'UniNest/1.0 (student housing platform)',
+          },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          data = await response.json();
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        console.log(`Overpass endpoint ${endpoint} failed, trying next...`);
+      }
     }
 
-    const data = await response.json();
+    // If all endpoints failed, return empty array instead of error
+    if (!data) {
+      console.warn("All Overpass endpoints failed, returning empty places array");
+      return sendSuccess(res, []);
+    }
     
-    const places = data.elements.map(el => {
+    const places = (data.elements || []).map(el => {
       let category = 'other';
       if (el.tags?.shop === 'supermarket') category = 'supermarket';
       else if (el.tags?.amenity === 'restaurant') category = 'restaurant';
@@ -136,12 +165,13 @@ router.post("/nearby-places", async (req, res) => {
         name: el.tags?.name || category,
         category,
       };
-    }).slice(0, 50);
+    }).slice(0, 30);
 
     return sendSuccess(res, places);
   } catch (error) {
     console.error("Nearby places fetch failed:", error);
-    return sendError(res, "Failed to fetch nearby places", HTTP_STATUS.SERVER_ERROR, error);
+    // Return empty array on error instead of failing
+    return sendSuccess(res, []);
   }
 });
 

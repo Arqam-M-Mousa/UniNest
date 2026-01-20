@@ -15,7 +15,7 @@ import PropertyReviews from "../../components/reviews/PropertyReviews";
 import PriceHistoryChart from "../../components/landlord/PriceHistoryChart";
 import ViewingSchedulerModal from "../../components/landlord/ViewingSchedulerModal";
 import MarketInsightsWidget from "../../components/landlord/MarketInsightsWidget";
-import { MapPinIcon, XMarkIcon, MapIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, XMarkIcon, MapIcon, CalendarIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -412,8 +412,9 @@ const PropertyDetails = () => {
                   {property.squareMeter} m²
                 </span>
                 {property.distanceToUniversity && (
-                  <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                    {t("distance")}: {property.distanceToUniversity}
+                  <span className="px-3 py-2 rounded-full text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5">
+                    <AcademicCapIcon className="w-4 h-4" />
+                    {property.distanceToUniversity} {t("distanceAway")}
                   </span>
                 )}
                 <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">

@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useLanguage } from "../../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import apiRequest from "../../services/api";
 import { getUniversityIcon, getPropertyIcon } from "../../utils/mapUtils";
 import {
     HomeIcon,
@@ -99,25 +100,36 @@ function PropertyPopup({ property, onViewDetails }) {
     );
 }
 
-// POI categories with icons and colors
-const POI_CATEGORIES = {
-    supermarket: { icon: ShoppingCartIcon, color: '#f59e0b', label: 'Supermarkets' },
-    restaurant: { icon: CakeIcon, color: '#ef4444', label: 'Restaurants' },
-    pharmacy: { icon: HeartIcon, color: '#10b981', label: 'Pharmacies' },
-    bank: { icon: BuildingLibraryIcon, color: '#3b82f6', label: 'Banks' },
-    bus_station: { icon: TruckIcon, color: '#8b5cf6', label: 'Bus Stations' },
-    cafe: { icon: BuildingStorefrontIcon, color: '#ec4899', label: 'Cafes' },
+// SVG paths for POI icons (from Heroicons)
+const POI_SVG_PATHS = {
+    supermarket: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>',
+    restaurant: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+    pharmacy: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>',
+    bank: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>',
+    bus_station: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m-8 5h8m-4-9v2m0 12v2m-7-7h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2z"/>',
+    cafe: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>',
 };
 
-// Create POI icon
+// POI categories with icons and colors
+const POI_CATEGORIES = {
+    supermarket: { icon: ShoppingCartIcon, color: '#f59e0b', label: 'Supermarkets', svg: POI_SVG_PATHS.supermarket },
+    restaurant: { icon: CakeIcon, color: '#ef4444', label: 'Restaurants', svg: POI_SVG_PATHS.restaurant },
+    pharmacy: { icon: HeartIcon, color: '#10b981', label: 'Pharmacies', svg: POI_SVG_PATHS.pharmacy },
+    bank: { icon: BuildingLibraryIcon, color: '#3b82f6', label: 'Banks', svg: POI_SVG_PATHS.bank },
+    bus_station: { icon: TruckIcon, color: '#8b5cf6', label: 'Bus Stations', svg: POI_SVG_PATHS.bus_station },
+    cafe: { icon: BuildingStorefrontIcon, color: '#ec4899', label: 'Cafes', svg: POI_SVG_PATHS.cafe },
+};
+
+// Create POI icon using SVG
 const createPOIIcon = (category) => {
-    const config = POI_CATEGORIES[category] || { color: '#6b7280' };
+    const config = POI_CATEGORIES[category] || { color: '#6b7280', svg: POI_SVG_PATHS.supermarket };
+    const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;">${config.svg}</svg>`;
     return L.divIcon({
         className: 'poi-marker',
-        html: `<div style="background: ${config.color}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 12px;">📍</div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-        popupAnchor: [0, -12],
+        html: `<div style="background: ${config.color}; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${svgIcon}</div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -13],
     });
 };
 
@@ -170,11 +182,8 @@ export default function MapView({
                 return;
             }
 
-            const response = await fetch('/api/geocode/nearby-places', {
+            const result = await apiRequest('/api/geocode/nearby-places', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     lat,
                     lng,
@@ -182,8 +191,6 @@ export default function MapView({
                     categories: selectedCategories,
                 }),
             });
-
-            const result = await response.json();
             
             if (result.data) {
                 // Add labels to places that don't have names
@@ -298,10 +305,13 @@ export default function MapView({
                             <div className="p-2 min-w-[150px]">
                                 <div className="flex items-center gap-2 mb-1">
                                     <div 
-                                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-white"
                                         style={{ backgroundColor: POI_CATEGORIES[place.category]?.color || '#6b7280' }}
                                     >
-                                        📍
+                                        {(() => {
+                                            const IconComponent = POI_CATEGORIES[place.category]?.icon || ShoppingCartIcon;
+                                            return <IconComponent className="w-3.5 h-3.5" />;
+                                        })()}
                                     </div>
                                     <span className="font-semibold text-sm text-gray-900">{place.name}</span>
                                 </div>

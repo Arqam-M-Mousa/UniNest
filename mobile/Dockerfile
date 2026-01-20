@@ -4,10 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
-
-COPY . .
-
 EXPOSE 19000 19001 19006 8081
 
-CMD ["npx", "expo", "start", "--web"]
+#For development npm install with tunnel mode for QR code scanning
+CMD ["sh", "-c", "npm install && npm install -g @expo/ngrok@^4.1.0 && npx expo start --tunnel"]

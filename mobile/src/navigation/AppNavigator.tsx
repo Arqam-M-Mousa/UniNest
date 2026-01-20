@@ -34,6 +34,10 @@ import NotificationsScreen from '../screens/NotificationsScreen';
 import MyListingsScreen from '../screens/MyListingsScreen';
 import AboutScreen from '../screens/AboutScreen';
 import HelpScreen from '../screens/HelpScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import RoommateProfileScreen from '../screens/RoommateProfileScreen';
+import CreatePostScreen from '../screens/CreatePostScreen';
+import AddListingScreen from '../screens/AddListingScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -148,6 +152,10 @@ export default function AppNavigator() {
             <Stack.Screen name="MyListings" component={MyListingsScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+            <Stack.Screen name="RoommateProfile" component={RoommateProfileScreen} />
+            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+            <Stack.Screen name="AddListing" component={AddListingScreen} />
           </>
         )}
       </Stack.Navigator>

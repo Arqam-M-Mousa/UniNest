@@ -36,9 +36,11 @@ export default function SettingsScreen({ navigation }: any) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await userAPI.deleteProfile();
+              const response = await userAPI.deleteProfile();
+              console.log('Delete account response:', response);
               await signout();
             } catch (error: any) {
+              console.error('Delete account error:', error);
               Alert.alert('Error', error.message || 'Failed to delete account.');
             }
           },
@@ -191,7 +193,10 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security</Text>
           <View style={styles.sectionContent}>
-            <TouchableOpacity style={[styles.item, styles.itemLast]}>
+            <TouchableOpacity 
+              style={[styles.item, styles.itemLast]}
+              onPress={() => navigation.navigate('ChangePassword')}
+            >
               <View style={styles.itemLeft}>
                 <LockClosedIcon size={22} color={colors.text} style={styles.itemIcon} />
                 <Text style={styles.itemText}>Change Password</Text>
@@ -201,14 +206,18 @@ export default function SettingsScreen({ navigation }: any) {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.dangerItem} onPress={handleDeleteAccount}>
-          <View style={[styles.item, styles.itemLast]}>
+        <View style={styles.dangerItem}>
+          <TouchableOpacity 
+            style={[styles.item, styles.itemLast]}
+            onPress={handleDeleteAccount}
+            activeOpacity={0.7}
+          >
             <View style={styles.itemLeft}>
               <TrashIcon size={22} color={colors.error} style={styles.itemIcon} />
               <Text style={[styles.itemText, styles.dangerText]}>Delete Account</Text>
             </View>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );

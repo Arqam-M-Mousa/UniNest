@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { roommatesAPI } from '../services/api';
 
@@ -41,11 +42,18 @@ export default function RoommatesScreen({ navigation }: any) {
       paddingTop: 60,
       backgroundColor: colors.primary,
     },
+    headerTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    backButton: {
+      marginRight: 12,
+    },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
       color: '#FFFFFF',
-      marginBottom: 10,
     },
     subtitle: {
       fontSize: 14,
@@ -120,7 +128,12 @@ export default function RoommatesScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Find Roommates</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ChevronLeftIcon size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Find Roommates</Text>
+        </View>
         <Text style={styles.subtitle}>Connect with potential roommates</Text>
       </View>
 
@@ -134,6 +147,7 @@ export default function RoommatesScreen({ navigation }: any) {
             <TouchableOpacity
               style={styles.profileCard}
               onPress={() => navigation.navigate('RoommateProfile', { userId: item.userId })}
+              activeOpacity={0.7}
             >
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>

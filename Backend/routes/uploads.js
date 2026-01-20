@@ -2,8 +2,11 @@ const express = require("express");
 const router = express.Router();
 const {
   upload,
+  videoUpload,
   uploadToCloudinary,
+  uploadVideoToCloudinary,
   deleteFromCloudinary,
+  deleteVideoFromCloudinary,
 } = require("../middleware/upload");
 const { authenticate } = require("../middleware/auth");
 const { User } = require("../models");
@@ -231,5 +234,82 @@ router.post(
     }
   }
 );
+
+/**
+ * Upload Listing Video (single video, max 50MB)
+ * POST /api/uploads/listing-video
+ */
+router.post(
+  "/listing-video",
+  authenticate,
+  videoUpload.single("video"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return sendValidationError(res, ["No video file uploaded"]);
+      }
+
+      // Upload video to Cloudinary
+      const result = await uploadVideoToCloudinary(
+        req.file.buffer,
+        "uninest/listing_videos",
+        {
+          resource_type: "video",
+          eager: [
+            { width: 720, height: 480, crop: "limit", format: "mp4" }
+          ],
+          eager_async: true,
+        }
+      );
+
+      return sendSuccess(
+        res,
+        {
+          url: result.secure_url,
+          publicId: result.public_id,
+          duration: result.duration,
+          width: result.width,
+          height: result.height,
+          format: result.format,
+        },
+        "Video uploaded successfully"
+      );
+    } catch (error) {
+      console.error("Listing video upload error:", error);
+      return sendError(
+        res,
+        "Failed to upload video",
+        HTTP_STATUS.SERVER_ERROR,
+        error
+      );
+    }
+  }
+);
+
+/**
+ * Delete a listing video from Cloudinary
+ * DELETE /api/uploads/video/:publicId
+ */
+router.delete("/video/:publicId(*)", authenticate, async (req, res) => {
+  try {
+    const publicId = req.params.publicId;
+
+    if (!publicId) {
+      return sendValidationError(res, ["Public ID is required"]);
+    }
+
+    const result = await deleteVideoFromCloudinary(publicId);
+
+    return sendSuccess(res, result, "Video deleted successfully");
+  } catch (error) {
+    console.error("Video deletion error:", error);
+    return sendError(
+      res,
+      "Failed to delete video",
+      HTTP_STATUS.SERVER_ERROR,
+      error
+    );
+  }
+});
 
 module.exports = router;

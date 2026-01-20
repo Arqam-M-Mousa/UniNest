@@ -93,6 +93,14 @@ const PropertyListing = sequelize.define(
       allowNull: false,
       defaultValue: 1,
     },
+    videoUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    videoPublicId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "property_listings",

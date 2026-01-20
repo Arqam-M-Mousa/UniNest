@@ -901,6 +901,15 @@ export const translations = {
     unauthorized: "You are not authorized to view this page",
     prices: "Prices",
     viewingBookedSuccess: "Viewing booked successfully! The landlord will be notified.",
+    // Distance Filter
+    distanceFromUniversity: "Distance from University",
+    distance200m: "200m",
+    distance500m: "500m",
+    distance1km: "1 km",
+    distance2km: "2 km",
+    distance5km: "5 km",
+    distanceHint: "Show properties within this radius",
+    selectUniversityForDistance: "Select a university first to filter by distance",
   },
   ar: {
     apartments: "الشقق",
@@ -1838,6 +1847,15 @@ export const translations = {
     unauthorized: "غير مصرح لك بعرض هذه الصفحة",
     prices: "الأسعار",
     viewingBookedSuccess: "تم حجز المعاينة بنجاح! سيتم إبلاغ المالك.",
+    // Distance Filter
+    distanceFromUniversity: "المسافة من الجامعة",
+    distance200m: "200 متر",
+    distance500m: "500 متر",
+    distance1km: "1 كم",
+    distance2km: "2 كم",
+    distance5km: "5 كم",
+    distanceHint: "عرض العقارات ضمن هذا النطاق",
+    selectUniversityForDistance: "اختر جامعة أولاً للتصفية حسب المسافة",
   },
 };
 

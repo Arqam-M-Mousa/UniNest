@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "re
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useLanguage } from "../../context/LanguageContext";
-import { MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, MapPinIcon, MapIcon } from "@heroicons/react/24/outline";
 import { getUniversityIcon, createDraggablePropertyIcon } from "../../utils/mapUtils";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -60,16 +60,12 @@ function LocationMarker({ position, setPosition, onLocationChange }) {
 async function reverseGeocode(lat, lng, callback) {
     try {
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-            {
-                headers: {
-                    "Accept-Language": "en",
-                },
-            }
+            `/api/geocode/reverse?lat=${lat}&lng=${lng}&language=en`
         );
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.data;
 
-        if (data.address) {
+        if (data?.address) {
             const city = data.address.city || data.address.town || data.address.village || data.address.municipality || "";
             callback(lat, lng, city);
         }
@@ -78,7 +74,7 @@ async function reverseGeocode(lat, lng, callback) {
     }
 }
 
-function SearchControl({ onSearchResult }) {
+function SearchControl({ onSearchResult, onUseMyLocation, gpsLoading }) {
     const { t, language } = useLanguage();
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
@@ -91,15 +87,10 @@ function SearchControl({ onSearchResult }) {
         setLoading(true);
         try {
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
-                {
-                    headers: {
-                        "Accept-Language": language,
-                    },
-                }
+                `/api/geocode/search?q=${encodeURIComponent(query)}&limit=5&language=${language}`
             );
-            const data = await response.json();
-            setResults(data);
+            const result = await response.json();
+            setResults(result.data || []);
             setShowResults(true);
         } catch (error) {
             console.error("Search failed:", error);
@@ -134,6 +125,22 @@ function SearchControl({ onSearchResult }) {
                     className="px-4 py-2.5 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50"
                 >
                     {loading ? "..." : t("search") || "Search"}
+                </button>
+                <button
+                    onClick={onUseMyLocation}
+                    disabled={gpsLoading}
+                    className="px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    title={t("useMyLocation") || "Use my current location"}
+                >
+                    {gpsLoading ? (
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : (
+                        <MapIcon className="w-5 h-5" />
+                    )}
+                    <span className="hidden sm:inline">{t("gps") || "GPS"}</span>
                 </button>
             </div>
 
@@ -179,6 +186,51 @@ export default function LocationPicker({
     const [position, setPosition] = useState(
         latitude && longitude ? [latitude, longitude] : null
     );
+    const [gpsLoading, setGpsLoading] = useState(false);
+    const [gpsError, setGpsError] = useState("");
+
+    const handleUseMyLocation = () => {
+        if (!navigator.geolocation) {
+            setGpsError(t("gpsNotSupported") || "Geolocation is not supported by your browser");
+            return;
+        }
+
+        setGpsLoading(true);
+        setGpsError("");
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const newPos = [lat, lng];
+                setPosition(newPos);
+                onLocationChange(lat, lng, "");
+                reverseGeocode(lat, lng, onLocationChange);
+                setGpsLoading(false);
+            },
+            (error) => {
+                setGpsLoading(false);
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        setGpsError(t("gpsPermissionDenied") || "Location permission denied. Please enable location access.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        setGpsError(t("gpsUnavailable") || "Location information is unavailable.");
+                        break;
+                    case error.TIMEOUT:
+                        setGpsError(t("gpsTimeout") || "Location request timed out.");
+                        break;
+                    default:
+                        setGpsError(t("gpsError") || "An error occurred while getting your location.");
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    };
 
     const handleSearchResult = (lat, lng, displayName) => {
         const newPos = [lat, lng];
@@ -193,7 +245,17 @@ export default function LocationPicker({
 
     return (
         <div className="location-picker">
-            <SearchControl onSearchResult={handleSearchResult} />
+            <SearchControl 
+                onSearchResult={handleSearchResult} 
+                onUseMyLocation={handleUseMyLocation}
+                gpsLoading={gpsLoading}
+            />
+
+            {gpsError && (
+                <div className="mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-600 dark:text-red-400">
+                    {gpsError}
+                </div>
+            )}
 
             <div className="rounded-xl overflow-hidden border border-[var(--color-border)]" style={{ height, position: 'relative', zIndex: 0 }}>
                 <MapContainer

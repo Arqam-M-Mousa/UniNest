@@ -165,22 +165,40 @@ export default function HomeScreen({ navigation }: any) {
           <TouchableOpacity
             style={styles.actionCard}
             onPress={() => navigation.navigate('Properties')}
+            activeOpacity={0.7}
           >
             <HomeModernIcon size={32} color={colors.primary} style={styles.actionIcon} />
             <Text style={styles.actionText}>Browse Properties</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => navigation.navigate('Roommates')}
-          >
-            <UserGroupIcon size={32} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Find Roommates</Text>
-          </TouchableOpacity>
+          {/* Find Roommates - Only for Students */}
+          {user?.role === 'Student' && (
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('Roommates')}
+              activeOpacity={0.7}
+            >
+              <UserGroupIcon size={32} color={colors.primary} style={styles.actionIcon} />
+              <Text style={styles.actionText}>Find Roommates</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* My Listings - Only for Landlord and SuperAdmin */}
+          {(user?.role === 'Landlord' || user?.role === 'SuperAdmin') && (
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('MyListings')}
+              activeOpacity={0.7}
+            >
+              <HomeModernIcon size={32} color={colors.primary} style={styles.actionIcon} />
+              <Text style={styles.actionText}>My Listings</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={styles.actionCard}
             onPress={() => navigation.navigate('Marketplace')}
+            activeOpacity={0.7}
           >
             <ShoppingBagIcon size={32} color={colors.primary} style={styles.actionIcon} />
             <Text style={styles.actionText}>Marketplace</Text>
@@ -189,6 +207,7 @@ export default function HomeScreen({ navigation }: any) {
           <TouchableOpacity
             style={styles.actionCard}
             onPress={() => navigation.navigate('Community')}
+            activeOpacity={0.7}
           >
             <ChatBubbleLeftRightIcon size={32} color={colors.primary} style={styles.actionIcon} />
             <Text style={styles.actionText}>Community</Text>
@@ -206,6 +225,7 @@ export default function HomeScreen({ navigation }: any) {
               key={property.id}
               style={styles.propertyCard}
               onPress={() => navigation.navigate('PropertyDetails', { id: property.id })}
+              activeOpacity={0.7}
             >
               {property.images?.[0] && (
                 <Image

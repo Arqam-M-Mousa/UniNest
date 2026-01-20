@@ -143,6 +143,7 @@ export default function SignInScreen({ navigation }: any) {
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignIn}
           disabled={loading}
+          activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>
             {loading ? 'Signing In...' : 'Sign In'}
@@ -152,13 +153,14 @@ export default function SignInScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.forgotPassword}
           onPress={() => navigation.navigate('ForgotPassword')}
+          activeOpacity={0.7}
         >
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
 
         <View style={styles.signUpContainer}>
           <Text style={styles.signUpText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')} activeOpacity={0.7}>
             <Text style={styles.signUpLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>

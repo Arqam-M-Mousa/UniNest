@@ -9,6 +9,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { marketplaceAPI } from '../services/api';
 
@@ -44,11 +45,19 @@ export default function MarketplaceScreen({ navigation }: any) {
       paddingTop: 60,
       backgroundColor: colors.primary,
     },
+    headerTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    backButton: {
+      marginRight: 12,
+    },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
       color: '#FFFFFF',
-      marginBottom: 15,
+      flex: 1,
     },
     searchContainer: {
       backgroundColor: '#FFFFFF',
@@ -113,7 +122,12 @@ export default function MarketplaceScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Marketplace</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ChevronLeftIcon size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Marketplace</Text>
+        </View>
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -138,6 +152,7 @@ export default function MarketplaceScreen({ navigation }: any) {
                 key={item.id}
                 style={styles.itemCard}
                 onPress={() => navigation.navigate('MarketplaceItemDetails', { id: item.id })}
+                activeOpacity={0.7}
               >
                 {item.images?.[0] && (
                   <Image

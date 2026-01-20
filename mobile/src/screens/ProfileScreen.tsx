@@ -20,6 +20,7 @@ import {
   QuestionMarkCircleIcon,
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
+  UserGroupIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -34,7 +35,17 @@ export default function ProfileScreen({ navigation }: any) {
       'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: signout },
+        { 
+          text: 'Sign Out', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              await signout();
+            } catch (error) {
+              console.error('Sign out error:', error);
+            }
+          }
+        },
       ]
     );
   };
@@ -140,6 +151,7 @@ export default function ProfileScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.sectionItem}
           onPress={() => navigation.navigate('EditProfile')}
+          activeOpacity={0.7}
         >
           <View style={styles.sectionItemLeft}>
             <PencilSquareIcon size={22} color={colors.text} style={styles.sectionIcon} />
@@ -148,20 +160,40 @@ export default function ProfileScreen({ navigation }: any) {
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.sectionItem}
-          onPress={() => navigation.navigate('MyListings')}
-        >
-          <View style={styles.sectionItemLeft}>
-            <HomeModernIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>My Listings</Text>
-          </View>
-          <ChevronRightIcon size={20} color={colors.secondary} />
-        </TouchableOpacity>
+        {/* My Listings - Only for Landlord and SuperAdmin */}
+        {(user?.role === 'Landlord' || user?.role === 'SuperAdmin') && (
+          <TouchableOpacity
+            style={styles.sectionItem}
+            onPress={() => navigation.navigate('MyListings')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.sectionItemLeft}>
+              <HomeModernIcon size={22} color={colors.text} style={styles.sectionIcon} />
+              <Text style={styles.sectionText}>My Listings</Text>
+            </View>
+            <ChevronRightIcon size={20} color={colors.secondary} />
+          </TouchableOpacity>
+        )}
+
+        {/* Roommate Profile - Only for Students */}
+        {user?.role === 'Student' && (
+          <TouchableOpacity
+            style={styles.sectionItem}
+            onPress={() => navigation.navigate('RoommateProfile')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.sectionItemLeft}>
+              <UserGroupIcon size={22} color={colors.text} style={styles.sectionIcon} />
+              <Text style={styles.sectionText}>Roommate Profile</Text>
+            </View>
+            <ChevronRightIcon size={20} color={colors.secondary} />
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[styles.sectionItem, styles.sectionItemLast]}
           onPress={() => navigation.navigate('Favorites')}
+          activeOpacity={0.7}
         >
           <View style={styles.sectionItemLeft}>
             <HeartIcon size={22} color={colors.text} style={styles.sectionIcon} />
@@ -187,6 +219,7 @@ export default function ProfileScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.sectionItem}
           onPress={() => navigation.navigate('Notifications')}
+          activeOpacity={0.7}
         >
           <View style={styles.sectionItemLeft}>
             <BellIcon size={22} color={colors.text} style={styles.sectionIcon} />
@@ -198,6 +231,7 @@ export default function ProfileScreen({ navigation }: any) {
         <TouchableOpacity
           style={[styles.sectionItem, styles.sectionItemLast]}
           onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
         >
           <View style={styles.sectionItemLeft}>
             <Cog6ToothIcon size={22} color={colors.text} style={styles.sectionIcon} />
@@ -211,6 +245,7 @@ export default function ProfileScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.sectionItem}
           onPress={() => navigation.navigate('About')}
+          activeOpacity={0.7}
         >
           <View style={styles.sectionItemLeft}>
             <InformationCircleIcon size={22} color={colors.text} style={styles.sectionIcon} />
@@ -222,6 +257,7 @@ export default function ProfileScreen({ navigation }: any) {
         <TouchableOpacity
           style={[styles.sectionItem, styles.sectionItemLast]}
           onPress={() => navigation.navigate('Help')}
+          activeOpacity={0.7}
         >
           <View style={styles.sectionItemLeft}>
             <QuestionMarkCircleIcon size={22} color={colors.text} style={styles.sectionIcon} />
@@ -231,7 +267,7 @@ export default function ProfileScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <ArrowRightOnRectangleIcon size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.signOutText}>Sign Out</Text>

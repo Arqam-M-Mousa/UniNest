@@ -14,6 +14,7 @@ import {
   MapPinIcon,
   HomeModernIcon,
   AdjustmentsHorizontalIcon,
+  ChevronLeftIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { propertyListingsAPI } from '../services/api';
@@ -57,11 +58,18 @@ export default function PropertiesScreen({ navigation }: any) {
       paddingTop: 60,
       backgroundColor: colors.primary,
     },
+    headerTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    backButton: {
+      marginRight: 12,
+    },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
       color: '#FFFFFF',
-      marginBottom: 15,
     },
     searchContainer: {
       backgroundColor: '#FFFFFF',
@@ -150,7 +158,12 @@ export default function PropertiesScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Properties</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ChevronLeftIcon size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Properties</Text>
+        </View>
         <View style={styles.searchContainer}>
           <MagnifyingGlassIcon size={20} color={colors.secondary} style={{ marginRight: 10 }} />
           <TextInput
@@ -207,6 +220,7 @@ export default function PropertiesScreen({ navigation }: any) {
               key={property.id}
               style={styles.propertyCard}
               onPress={() => navigation.navigate('PropertyDetails', { id: property.id })}
+              activeOpacity={0.7}
             >
               {property.images?.[0] && (
                 <Image

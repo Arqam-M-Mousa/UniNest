@@ -269,6 +269,7 @@ export default function MyListingsScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => handleToggleVisibility(item.id)}
+          activeOpacity={0.7}
         >
           {item.isVisible ? (
             <>
@@ -282,13 +283,14 @@ export default function MyListingsScreen({ navigation }: any) {
             </>
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
           <PencilIcon size={18} color={colors.text} />
           <Text style={styles.actionText}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.actionButtonLast]}
           onPress={() => handleDelete(item.id)}
+          activeOpacity={0.7}
         >
           <TrashIcon size={18} color={colors.error} />
           <Text style={[styles.actionText, { color: colors.error }]}>Delete</Text>
@@ -324,7 +326,7 @@ export default function MyListingsScreen({ navigation }: any) {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Listings</Text>
         </View>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddListing')} activeOpacity={0.7}>
           <PlusIcon size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>

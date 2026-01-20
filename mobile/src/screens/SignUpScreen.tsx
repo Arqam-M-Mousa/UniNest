@@ -246,6 +246,7 @@ export default function SignUpScreen({ navigation }: any) {
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignUp}
           disabled={loading}
+          activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>
             {loading ? 'Creating Account...' : 'Sign Up'}
@@ -254,7 +255,7 @@ export default function SignUpScreen({ navigation }: any) {
 
         <View style={styles.signInContainer}>
           <Text style={styles.signInText}>Already have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+          <TouchableOpacity onPress={() => navigation.navigate('SignIn')} activeOpacity={0.7}>
             <Text style={styles.signInLink}>Sign In</Text>
           </TouchableOpacity>
         </View>

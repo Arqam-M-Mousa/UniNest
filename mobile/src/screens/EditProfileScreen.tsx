@@ -35,7 +35,7 @@ export default function EditProfileScreen({ navigation }: any) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -177,6 +177,7 @@ export default function EditProfileScreen({ navigation }: any) {
           style={styles.saveButton}
           onPress={handleSave}
           disabled={loading}
+          activeOpacity={0.7}
         >
           {loading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
@@ -188,7 +189,7 @@ export default function EditProfileScreen({ navigation }: any) {
 
       <ScrollView style={styles.content}>
         <View style={styles.avatarSection}>
-          <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
+          <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} activeOpacity={0.7}>
             {profileImage ? (
               <Image source={{ uri: profileImage }} style={styles.avatar} />
             ) : (

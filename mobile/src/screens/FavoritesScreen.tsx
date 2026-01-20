@@ -179,6 +179,7 @@ export default function FavoritesScreen({ navigation }: any) {
     <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('PropertyDetails', { propertyId: item.id })}
+      activeOpacity={0.7}
     >
       {item.imageUrl ? (
         <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
@@ -192,7 +193,7 @@ export default function FavoritesScreen({ navigation }: any) {
           <Text style={styles.cardTitle} numberOfLines={1}>
             {item.title}
           </Text>
-          <TouchableOpacity onPress={() => handleRemoveFavorite(item.id)}>
+          <TouchableOpacity onPress={() => handleRemoveFavorite(item.id)} activeOpacity={0.7}>
             <HeartSolidIcon size={24} color={colors.error} />
           </TouchableOpacity>
         </View>

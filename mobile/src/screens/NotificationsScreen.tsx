@@ -201,6 +201,7 @@ export default function NotificationsScreen({ navigation }: any) {
     <TouchableOpacity
       style={[styles.notificationItem, !item.isRead && styles.unread]}
       onPress={() => handleMarkAsRead(item.id)}
+      activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>{getNotificationIcon(item.type)}</View>
       <View style={styles.contentContainer}>
@@ -247,7 +248,7 @@ export default function NotificationsScreen({ navigation }: any) {
           <Text style={styles.headerTitle}>Notifications</Text>
         </View>
         {notifications.some((n) => !n.isRead) && (
-          <TouchableOpacity style={styles.markAllButton} onPress={handleMarkAllAsRead}>
+          <TouchableOpacity style={styles.markAllButton} onPress={handleMarkAllAsRead} activeOpacity={0.7}>
             <Text style={styles.markAllText}>Mark all read</Text>
           </TouchableOpacity>
         )}

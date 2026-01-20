@@ -33,6 +33,9 @@ router.get("/", async (req, res) => {
       sortOrder = "DESC",
       limit = 50,
       offset = 0,
+      maxDistance,
+      centerLat,
+      centerLng,
     } = req.query;
 
     // Build PropertyListing where clause
@@ -127,9 +130,34 @@ router.get("/", async (req, res) => {
       subQuery: false, // Disable subquery to fix the FROM clause issue
     });
 
+    // Helper function to calculate distance between two points using Haversine formula
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371e3; // Earth's radius in meters
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // Distance in meters
+    };
+
     // Transform response - handle potential null values safely
-    const listings = properties.map((prop) => {
+    let listings = properties.map((prop) => {
       const listing = prop.listing || {};
+      
+      // Calculate distance from center if provided
+      let distanceFromCenter = null;
+      if (centerLat && centerLng && prop.latitude && prop.longitude) {
+        distanceFromCenter = calculateDistance(
+          parseFloat(centerLat),
+          parseFloat(centerLng),
+          parseFloat(prop.latitude),
+          parseFloat(prop.longitude)
+        );
+      }
+      
       return {
         id: prop.id,
         listingId: prop.listingId,
@@ -143,6 +171,7 @@ router.get("/", async (req, res) => {
         bathrooms: prop.bathrooms,
         squareFeet: prop.squareFeet,
         distanceToUniversity: prop.distanceToUniversity,
+        distanceFromCenter: distanceFromCenter ? Math.round(distanceFromCenter) : null,
         leaseDuration: prop.leaseDuration,
         listingDuration: prop.listingDuration,
         expiresAt: prop.expiresAt,
@@ -150,6 +179,7 @@ router.get("/", async (req, res) => {
         latitude: prop.latitude,
         longitude: prop.longitude,
         images: listing.images || [],
+        video: prop.videoUrl ? { url: prop.videoUrl, publicId: prop.videoPublicId } : null,
         owner: listing.owner || null,
         university: prop.University || null,
         viewCount: listing.viewCount || 0,
@@ -157,6 +187,32 @@ router.get("/", async (req, res) => {
         updatedAt: listing.updatedAt || prop.updatedAt,
       };
     });
+
+    // Filter by distance if maxDistance is provided
+    if (maxDistance && centerLat && centerLng) {
+      const maxDistanceMeters = parseFloat(maxDistance);
+      console.log(`Distance filter: maxDistance=${maxDistanceMeters}m, center=(${centerLat}, ${centerLng})`);
+      console.log(`Before filter: ${listings.length} listings`);
+      listings = listings.filter(listing => {
+        const passes = listing.distanceFromCenter !== null && listing.distanceFromCenter <= maxDistanceMeters;
+        if (!passes && listing.distanceFromCenter !== null) {
+          console.log(`Filtered out: ${listing.title} - distance: ${listing.distanceFromCenter}m > ${maxDistanceMeters}m`);
+        }
+        return passes;
+      });
+      console.log(`After filter: ${listings.length} listings`);
+    }
+
+    // Sort by distance if sorting by distance
+    if (sortBy === "distance" && centerLat && centerLng) {
+      listings.sort((a, b) => {
+        if (a.distanceFromCenter === null) return 1;
+        if (b.distanceFromCenter === null) return -1;
+        return sortOrder.toUpperCase() === "ASC" 
+          ? a.distanceFromCenter - b.distanceFromCenter 
+          : b.distanceFromCenter - a.distanceFromCenter;
+      });
+    }
 
     return sendSuccess(res, {
       listings,
@@ -442,6 +498,7 @@ router.get("/:id", async (req, res) => {
       expiresAt: property.expiresAt,
       isVisible: property.isVisible,
       images: property.listing.images || [],
+      video: property.videoUrl ? { url: property.videoUrl, publicId: property.videoPublicId } : null,
       owner: property.listing.owner,
       university: property.University,
       viewCount: property.listing.viewCount + (isOwner ? 0 : 1),
@@ -501,6 +558,7 @@ router.put(
         latitude,
         longitude,
         images,
+        video,
       } = req.body;
 
       const transaction = await Listing.sequelize.transaction();
@@ -536,6 +594,18 @@ router.put(
         if (leaseDuration) propertyUpdates.leaseDuration = leaseDuration;
         if (latitude !== undefined) propertyUpdates.latitude = latitude;
         if (longitude !== undefined) propertyUpdates.longitude = longitude;
+        
+        // Handle video update
+        if (video !== undefined) {
+          if (video === null) {
+            // Remove video
+            propertyUpdates.videoUrl = null;
+            propertyUpdates.videoPublicId = null;
+          } else if (video.url) {
+            propertyUpdates.videoUrl = video.url;
+            propertyUpdates.videoPublicId = video.publicId || null;
+          }
+        }
 
         if (Object.keys(propertyUpdates).length > 0) {
           await PropertyListing.update(propertyUpdates, {
@@ -845,6 +915,7 @@ router.post(
       leaseDuration,
       universityId,
       images,
+      video,
     } = req.body;
 
     const allowedCurrencies = ["NIS", "JOD"];
@@ -866,12 +937,24 @@ router.post(
       !bedrooms ||
       !bathrooms ||
       !squareFeet ||
-      !distanceToUniversity ||
       !leaseDuration ||
       !universityId
     ) {
       return sendError(res, "Missing required fields", HTTP_STATUS.BAD_REQUEST);
     }
+
+    // Helper function to calculate distance using Haversine formula
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371e3; // Earth's radius in meters
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.round(R * c); // Distance in meters
+    };
 
     if (Array.isArray(images) && images.length > 10) {
       return sendError(
@@ -889,6 +972,17 @@ router.post(
       );
       if (!university) {
         throw new Error("University not found");
+      }
+
+      // Calculate distance to university if not provided but coordinates are available
+      let calculatedDistance = distanceToUniversity;
+      if (!calculatedDistance && latitude && longitude && university.latitude && university.longitude) {
+        calculatedDistance = calculateDistance(
+          parseFloat(latitude),
+          parseFloat(longitude),
+          parseFloat(university.latitude),
+          parseFloat(university.longitude)
+        );
       }
 
       const listing = await Listing.create(
@@ -920,12 +1014,14 @@ router.post(
           bathrooms,
           squareFeet,
           amenitiesJson,
-          distanceToUniversity,
+          distanceToUniversity: calculatedDistance || 0,
           listingDuration,
           expiresAt,
           isVisible: true,
           leaseDuration,
           universityId,
+          videoUrl: video?.url || null,
+          videoPublicId: video?.publicId || null,
         },
         { transaction }
       );

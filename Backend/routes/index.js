@@ -34,5 +34,7 @@ router.use("/marketplace", require("./marketplace"));
 router.use("/viewings", require("./viewings"));
 router.use("/analytics/landlord", require("./landlordAnalytics"));
 router.use("/analytics/market", require("./marketAnalytics"));
+router.use("/reports", require("./reports"));
+router.use("/geocode", require("./geocode"));
 
 module.exports = router;

@@ -262,9 +262,23 @@ const signup = async (req, res) => {
       isVerified: true,
     });
 
+    // Generate token for auto-login after signup
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
     return sendSuccess(
       res,
-      { id: user.id, email: user.email },
+      {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      },
       "User registered successfully",
       HTTP_STATUS.CREATED
     );

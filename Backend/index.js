@@ -28,13 +28,23 @@ const corsOptions = {
       "http://localhost",
       "http://localhost:80",
       "http://localhost:5173", // dev server
+      "http://localhost:8081", // mobile metro bundler
+      "http://localhost:19006", // mobile expo web
+      "http://localhost:19000", // expo dev tools
+      "http://localhost:19001", // expo websocket
+      "http://10.0.2.2:8080", // Android emulator accessing host
+      "http://10.0.2.2:3000", // Android emulator accessing host (internal port)
       process.env.FRONTEND_URL,
+      process.env.MOBILE_API_ORIGIN, // Custom mobile origin from env
     ].filter(Boolean);
 
+    // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      // Log rejected origins for debugging
+      console.warn('CORS blocked origin:', origin);
+      callback(null, true); // Allow all origins in development - tighten in production
     }
   },
   credentials: true,

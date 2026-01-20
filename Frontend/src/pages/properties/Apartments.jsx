@@ -37,7 +37,17 @@ const Apartments = () => {
     bedrooms: "",
     bathrooms: "",
     city: "",
+    universityId: "",
+    maxDistance: "",
   };
+
+  const DISTANCE_OPTIONS = [
+    { value: "200", labelKey: "distance200m" },
+    { value: "500", labelKey: "distance500m" },
+    { value: "1000", labelKey: "distance1km" },
+    { value: "2000", labelKey: "distance2km" },
+    { value: "5000", labelKey: "distance5km" },
+  ];
 
   // Listings state
   const [listings, setListings] = useState([]);
@@ -94,6 +104,8 @@ const Apartments = () => {
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [universitiesFetched, setUniversitiesFetched] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const canPostAd = Boolean(
     user?.role && ["landlord", "superadmin"].includes(user.role.toLowerCase())
@@ -121,9 +133,27 @@ const Apartments = () => {
       if (filters.bedrooms) queryFilters.bedrooms = filters.bedrooms;
       if (filters.bathrooms) queryFilters.bathrooms = filters.bathrooms;
       if (filters.city) queryFilters.city = filters.city;
+      if (filters.universityId) queryFilters.universityId = filters.universityId;
 
-      // Sort based on active tab
-      if (activeTab === "lastListings") {
+      // Distance filter - requires university selection to get center coordinates
+      if (filters.maxDistance && filters.universityId) {
+        const selectedUni = universities.find(u => String(u.id) === String(filters.universityId));
+        console.log("Distance filter - selectedUni:", selectedUni);
+        console.log("Distance filter - filters:", { maxDistance: filters.maxDistance, universityId: filters.universityId });
+        if (selectedUni?.latitude && selectedUni?.longitude) {
+          queryFilters.maxDistance = filters.maxDistance;
+          queryFilters.centerLat = selectedUni.latitude;
+          queryFilters.centerLng = selectedUni.longitude;
+          queryFilters.sortBy = "distance";
+          queryFilters.sortOrder = "ASC";
+          console.log("Distance filter applied:", queryFilters);
+        } else {
+          console.log("Distance filter NOT applied - missing university coordinates");
+        }
+      }
+
+      // Sort based on active tab (if not sorting by distance)
+      if (activeTab === "lastListings" && !queryFilters.sortBy) {
         queryFilters.sortBy = "createdAt";
         queryFilters.sortOrder = "DESC";
       }
@@ -137,7 +167,7 @@ const Apartments = () => {
     } finally {
       setListingsLoading(false);
     }
-  }, [filters, activeTab, t]);
+  }, [filters, activeTab, t, universities]);
 
   // Fetch filter options from backend
   const fetchFilterOptions = useCallback(async () => {
@@ -325,16 +355,35 @@ const Apartments = () => {
       }
 
       // Validate all required fields before uploading
-      if (
-        !postForm.title.trim() ||
-        !postForm.description.trim() ||
-        !postForm.pricePerMonth ||
-        !postForm.squareMeters ||
-        !postForm.distanceToUniversity ||
-        !postForm.leaseDuration.trim() ||
-        !(postForm.universityId || user?.universityId)
-      ) {
-        throw new Error(t("fillRequiredFields") || "Please fill in all required fields");
+      if (!postForm.title.trim()) {
+        throw new Error(t("titleRequired") || "Title is required");
+      }
+      if (!postForm.description.trim()) {
+        throw new Error(t("descriptionRequired") || "Description is required");
+      }
+      if (!postForm.propertyType) {
+        throw new Error(t("propertyTypeRequired") || "Property type is required");
+      }
+      if (!postForm.pricePerMonth) {
+        throw new Error(t("priceRequired") || "Price is required");
+      }
+      if (!postForm.squareMeters) {
+        throw new Error(t("squareMetersRequired") || "Square meters is required");
+      }
+      if (!postForm.bedrooms) {
+        throw new Error(t("bedroomsRequired") || "Number of bedrooms is required");
+      }
+      if (!postForm.bathrooms) {
+        throw new Error(t("bathroomsRequired") || "Number of bathrooms is required");
+      }
+      if (!postForm.leaseDuration.trim()) {
+        throw new Error(t("leaseDurationRequired") || "Lease duration is required");
+      }
+      if (!(postForm.universityId || user?.universityId)) {
+        throw new Error(t("universityRequired") || "Please select a university");
+      }
+      if (!postForm.latitude || !postForm.longitude) {
+        throw new Error(t("locationRequired") || "Please select a location on the map");
       }
 
       setUploadingImages(true);
@@ -355,6 +404,26 @@ const Apartments = () => {
         };
       });
 
+      // Upload video if selected
+      let videoData = null;
+      if (selectedVideo) {
+        setUploadingVideo(true);
+        try {
+          const videoRes = await uploadsAPI.uploadListingVideo(selectedVideo);
+          if (videoRes?.data) {
+            videoData = {
+              url: videoRes.data.url,
+              publicId: videoRes.data.publicId,
+            };
+          }
+        } catch (videoErr) {
+          console.error("Video upload failed:", videoErr);
+          // Continue without video if upload fails
+        } finally {
+          setUploadingVideo(false);
+        }
+      }
+
       const payload = {
         title: postForm.title.trim(),
         description: postForm.description.trim(),
@@ -372,6 +441,7 @@ const Apartments = () => {
         universityId: postForm.universityId || user?.universityId,
         images: imagesWithMetadata,
         maxOccupants: Number(postForm.maxOccupants) || 1,
+        video: videoData,
       };
 
       await propertyListingsAPI.create(payload);
@@ -379,6 +449,7 @@ const Apartments = () => {
       resetForm();
       setSelectedFiles([]);
       setImage360Flags({});
+      setSelectedVideo(null);
       setPostModalOpen(false);
       // Refresh listings
       fetchListings();
@@ -393,8 +464,34 @@ const Apartments = () => {
   const handleCancelModal = () => {
     resetForm();
     setSelectedFiles([]);
+    setSelectedVideo(null);
     setPostError("");
     setPostModalOpen(false);
+  };
+
+  const handleVideoSelect = (files) => {
+    if (!files?.length) return;
+    const file = files[0];
+    
+    // Check file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      setPostError(t("videoTooLarge") || "Video must be less than 50MB");
+      return;
+    }
+    
+    // Check file type
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+    if (!allowedTypes.includes(file.type)) {
+      setPostError(t("invalidVideoFormat") || "Only MP4, WebM, MOV, and AVI videos are allowed");
+      return;
+    }
+    
+    setSelectedVideo(file);
+    setPostError("");
+  };
+
+  const handleRemoveVideo = () => {
+    setSelectedVideo(null);
   };
 
   const remainingImageSlots = useMemo(
@@ -703,6 +800,61 @@ const Apartments = () => {
                     </div>
                   )}
 
+                  {/* University Filter */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-medium mb-3 text-[var(--color-text-soft)]">
+                      {t("university") || "University"}
+                    </h4>
+                    <select
+                      value={pendingFilters.universityId}
+                      onChange={(e) => {
+                        handlePendingFilterChange("universityId", e.target.value);
+                        // Clear distance filter if university is cleared
+                        if (!e.target.value) {
+                          handlePendingFilterChange("maxDistance", "");
+                        }
+                      }}
+                      className="w-full input-field text-sm"
+                    >
+                      <option value="">{t("allUniversities") || "All universities"}</option>
+                      {universities.map((uni) => (
+                        <option key={uni.id} value={uni.id}>
+                          {uni.name}{uni.city ? ` — ${uni.city}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Distance Radius Filter - Only show when university is selected */}
+                  {pendingFilters.universityId && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium mb-3 text-[var(--color-text-soft)]">
+                        {t("distanceFromUniversity") || "Distance from University"}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {DISTANCE_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            className={`px-3 py-2 rounded-lg border text-sm transition-all ${pendingFilters.maxDistance === option.value
+                              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+                              : "bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-accent)]"
+                              }`}
+                            onClick={() =>
+                              handlePendingFilterChange(
+                                "maxDistance",
+                                pendingFilters.maxDistance === option.value ? "" : option.value
+                              )
+                            }
+                          >
+                            {t(option.labelKey)}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-2">
+                        {t("distanceHint") || "Show properties within this radius"}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Apply Filters Button */}
                   <button
@@ -1164,6 +1316,70 @@ const Apartments = () => {
                                   </button>
                                 </div>
                               ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Video Upload */}
+                        <div className="themed-surface-alt border themed-border rounded-xl p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <p className="text-sm font-semibold text-[var(--color-text)]">
+                                {t("uploadVideo") || "Upload Video"} <span className="text-[var(--color-text-muted)]">({t("optional") || "Optional"})</span>
+                              </p>
+                              <p className="text-xs text-[var(--color-text-soft)]">
+                                {t("videoLimit") || "1 video max, up to 50MB (MP4, WebM, MOV, AVI)"}
+                              </p>
+                            </div>
+                            {uploadingVideo && (
+                              <span className="text-xs text-[var(--color-accent)]">
+                                {t("uploadingVideo") || "Uploading video..."}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {!selectedVideo ? (
+                            <label className="mt-2 flex h-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed themed-border text-sm text-[var(--color-text-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+                              <input
+                                type="file"
+                                accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                                className="hidden"
+                                onChange={(e) => handleVideoSelect(e.target.files)}
+                                disabled={uploadingVideo}
+                              />
+                              <div className="flex flex-col items-center gap-1">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <span>{t("clickToUploadVideo") || "Click to upload video"}</span>
+                              </div>
+                            </label>
+                          ) : (
+                            <div className="mt-2 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-[var(--color-accent)]/10 rounded-lg flex items-center justify-center">
+                                  <svg className="w-5 h-5 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-[var(--color-text)] truncate max-w-[200px]">
+                                    {selectedVideo.name}
+                                  </p>
+                                  <p className="text-xs text-[var(--color-text-muted)]">
+                                    {(selectedVideo.size / (1024 * 1024)).toFixed(2)} MB
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleRemoveVideo}
+                                className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                             </div>
                           )}
                         </div>

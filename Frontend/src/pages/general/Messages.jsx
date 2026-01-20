@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { conversationsAPI } from "../../services/api";
+import { conversationsAPI, reportsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useSocket } from "../../context/SocketContext";
 import { useNotifications } from "../../context/NotificationContext";
 import PageLoader from "../../components/common/PageLoader";
 import Alert from "../../components/common/Alert";
-import { PaperAirplaneIcon, ChatBubbleLeftRightIcon, CheckIcon, EllipsisVerticalIcon, TrashIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon, ChatBubbleLeftRightIcon, CheckIcon, EllipsisVerticalIcon, TrashIcon, ClockIcon, FlagIcon } from "@heroicons/react/24/outline";
 
 const MessageBubble = ({ message, isMine, sender, showAvatar = true, showName = true, conversation, onDelete, t, language }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -170,6 +170,172 @@ const MessageBubble = ({ message, isMine, sender, showAvatar = true, showName = 
   );
 };
 
+const ReportButton = ({ conversation, otherUser, t }) => {
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportError, setReportError] = useState("");
+
+  const REPORT_REASONS = [
+    { value: "spam", label: t("reportReasonSpam") || "Spam" },
+    { value: "harassment", label: t("reportReasonHarassment") || "Harassment" },
+    { value: "inappropriate_content", label: t("reportReasonInappropriate") || "Inappropriate Content" },
+    { value: "scam", label: t("reportReasonScam") || "Scam or Fraud" },
+    { value: "hate_speech", label: t("reportReasonHateSpeech") || "Hate Speech" },
+    { value: "threats", label: t("reportReasonThreats") || "Threats" },
+    { value: "other", label: t("reportReasonOther") || "Other" },
+  ];
+
+  const handleSubmitReport = async () => {
+    if (!reportReason) {
+      setReportError(t("selectReportReason") || "Please select a reason");
+      return;
+    }
+
+    setSubmitting(true);
+    setReportError("");
+
+    try {
+      await reportsAPI.reportMessage({
+        conversationId: conversation.id,
+        reportedUserId: otherUser.id,
+        reason: reportReason,
+        description: reportDescription || null,
+      });
+      setReportSuccess(true);
+      setTimeout(() => {
+        setShowReportModal(false);
+        setReportSuccess(false);
+        setReportReason("");
+        setReportDescription("");
+      }, 2000);
+    } catch (error) {
+      setReportError(error.message || t("reportFailed") || "Failed to submit report");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setShowReportModal(true)}
+        className="p-2 rounded-lg hover:bg-[var(--color-surface-alt)] transition-colors text-[var(--color-text-soft)] hover:text-red-500"
+        title={t("reportUser") || "Report User"}
+      >
+        <FlagIcon className="w-5 h-5" />
+      </button>
+
+      {showReportModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={() => !submitting && setShowReportModal(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl themed-surface p-6 shadow-2xl border themed-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">
+                {t("reportUser") || "Report User"}
+              </h3>
+              <button
+                onClick={() => !submitting && setShowReportModal(false)}
+                className="p-2 rounded-lg hover:bg-[var(--color-surface-alt)] transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {reportSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-[var(--color-text)] font-medium">
+                  {t("reportSubmitted") || "Report submitted successfully"}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                  {t("reportReviewMessage") || "Our team will review this report"}
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                  {t("reportDescription") || `Report ${otherUser?.firstName} ${otherUser?.lastName} for inappropriate behavior`}
+                </p>
+
+                {reportError && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-600 dark:text-red-400">
+                    {reportError}
+                  </div>
+                )}
+
+                <div className="mb-4">
+                  <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                    {t("reason") || "Reason"} *
+                  </label>
+                  <div className="space-y-2">
+                    {REPORT_REASONS.map((reason) => (
+                      <button
+                        key={reason.value}
+                        onClick={() => setReportReason(reason.value)}
+                        className={`w-full px-4 py-3 rounded-lg border text-left text-sm transition-all ${
+                          reportReason === reason.value
+                            ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+                            : "bg-[var(--color-surface-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-accent)]"
+                        }`}
+                      >
+                        {reason.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-[var(--color-text)] mb-2 block">
+                    {t("additionalDetails") || "Additional Details"} ({t("optional") || "Optional"})
+                  </label>
+                  <textarea
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    placeholder={t("reportDetailsPlaceholder") || "Provide any additional context..."}
+                    className="w-full input-field min-h-[100px] resize-none"
+                    maxLength={500}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowReportModal(false)}
+                    disabled={submitting}
+                    className="flex-1 px-4 py-2.5 rounded-lg border themed-border text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
+                  >
+                    {t("cancel") || "Cancel"}
+                  </button>
+                  <button
+                    onClick={handleSubmitReport}
+                    disabled={submitting || !reportReason}
+                    className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? (t("submitting") || "Submitting...") : (t("submitReport") || "Submit Report")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 const ThreadView = ({ conversation, messages, onSend, sending, isTyping, viewerId, onDeleteMessage, t, language }) => {
   const [draft, setDraft] = useState("");
   const messagesEndRef = useRef(null);
@@ -292,6 +458,11 @@ const ThreadView = ({ conversation, messages, onSend, sending, isTyping, viewerI
               {conversation?.property?.city && ` • ${conversation.property.city}`}
             </p>
           </div>
+          <ReportButton 
+            conversation={conversation} 
+            otherUser={otherUser} 
+            t={t} 
+          />
         </div>
       </div>
       <div

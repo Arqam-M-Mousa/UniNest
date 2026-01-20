@@ -281,6 +281,21 @@ export const uploadsAPI = {
       body: formData,
     });
   },
+
+  uploadListingVideo: async (file) => {
+    const formData = new FormData();
+    formData.append("video", file);
+
+    return apiRequest("/api/uploads/listing-video", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  deleteListingVideo: async (publicId) =>
+    apiRequest(`/api/uploads/video/${encodeURIComponent(publicId)}`, {
+      method: "DELETE",
+    }),
 };
 
 /**
@@ -546,6 +561,34 @@ export const marketAnalyticsAPI = {
   getUniversityAnalytics: async (id) =>
     apiRequest(`/api/analytics/market/university/${id}`),
   getTrends: async () => apiRequest("/api/analytics/market/trends"),
+};
+
+/**
+ * Reports API
+ */
+export const reportsAPI = {
+  reportMessage: async (data) =>
+    apiRequest("/api/reports/message", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  list: async (status, limit = 50, offset = 0) => {
+    const params = new URLSearchParams();
+    if (status) params.append("status", status);
+    params.append("limit", limit);
+    params.append("offset", offset);
+    return apiRequest(`/api/reports?${params.toString()}`);
+  },
+  getById: async (id) => apiRequest(`/api/reports/${id}`),
+  update: async (id, data) =>
+    apiRequest(`/api/reports/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  getUserHistory: async (userId) =>
+    apiRequest(`/api/reports/user/${userId}/history`),
+  unsuspendUser: async (userId) =>
+    apiRequest(`/api/reports/user/${userId}/unsuspend`, { method: "POST" }),
 };
 
 export default apiRequest;

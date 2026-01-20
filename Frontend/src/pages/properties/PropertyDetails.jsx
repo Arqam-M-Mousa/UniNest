@@ -15,7 +15,7 @@ import PropertyReviews from "../../components/reviews/PropertyReviews";
 import PriceHistoryChart from "../../components/landlord/PriceHistoryChart";
 import ViewingSchedulerModal from "../../components/landlord/ViewingSchedulerModal";
 import MarketInsightsWidget from "../../components/landlord/MarketInsightsWidget";
-import { MapPinIcon, XMarkIcon, MapIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, XMarkIcon, MapIcon, CalendarIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -82,6 +82,7 @@ const PropertyDetails = () => {
             url: img.url || img,
             is360: img.is360 || false,
           })) || [],
+          video: data.video || null,
           distanceToUniversity: data.distanceToUniversity ? `${data.distanceToUniversity}m` : null,
           maxOccupants: data.maxOccupants || 1,
           leaseDuration: data.leaseDuration || "N/A",
@@ -364,6 +365,32 @@ const PropertyDetails = () => {
               </div>
             )}
 
+            {/* Video Section */}
+            {property.video?.url && (
+              <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-lg">
+                <div className="p-4 bg-[var(--color-bg)] dark:bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      {t("propertyVideo") || "Property Video"}
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <video
+                    src={property.video.url}
+                    controls
+                    className="w-full rounded-lg"
+                    style={{ maxHeight: '400px' }}
+                  >
+                    {t("videoNotSupported") || "Your browser does not support the video tag."}
+                  </video>
+                </div>
+              </div>
+            )}
+
             <div className="themed-surface-alt border border-[var(--color-border)] rounded-2xl p-6 shadow-sm space-y-4">
               <div>
                 <h2 className="heading-font text-2xl text-[var(--color-text)] m-0">
@@ -385,8 +412,9 @@ const PropertyDetails = () => {
                   {property.squareMeter} m²
                 </span>
                 {property.distanceToUniversity && (
-                  <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">
-                    {t("distance")}: {property.distanceToUniversity}
+                  <span className="px-3 py-2 rounded-full text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5">
+                    <AcademicCapIcon className="w-4 h-4" />
+                    {property.distanceToUniversity} {t("distanceAway")}
                   </span>
                 )}
                 <span className="px-3 py-2 rounded-full text-sm bg-[var(--color-bg-alt)] dark:bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]">

@@ -14,6 +14,7 @@ import {
   SpeakerWaveIcon,
   ChartBarIcon,
   MegaphoneIcon,
+  FlagIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -495,6 +496,14 @@ const Header = () => {
                           <MegaphoneIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                           <span className="font-medium">{t("announcements") || "Announcements"}</span>
                         </Link>
+                        <Link
+                          to="/admin/reports"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <FlagIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("reportsManagement") || "Reports"}</span>
+                        </Link>
                       </div>
                     )}
                     {(user?.role === "Admin") && (
@@ -519,6 +528,14 @@ const Header = () => {
                         >
                           <MegaphoneIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                           <span className="font-medium">{t("announcements") || "Announcements"}</span>
+                        </Link>
+                        <Link
+                          to="/admin/reports"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <FlagIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("reportsManagement") || "Reports"}</span>
                         </Link>
                       </div>
                     )}

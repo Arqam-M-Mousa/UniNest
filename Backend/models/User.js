@@ -107,6 +107,22 @@ const User = sequelize.define(
         key: "id",
       },
     },
+    isMessagingSuspended: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    messagingSuspendedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    bannedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",

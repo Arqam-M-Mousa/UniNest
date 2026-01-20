@@ -22,6 +22,7 @@ const PropertyViewing = require("./PropertyViewing");
 const LandlordAvailability = require("./LandlordAvailability");
 const PriceHistory = require("./PriceHistory");
 const PropertyAnalytics = require("./PropertyAnalytics");
+const MessageReport = require("./MessageReport");
 
 
 // User - University relationship
@@ -279,6 +280,40 @@ PropertyListing.hasMany(PropertyAnalytics, {
 });
 PropertyAnalytics.belongsTo(PropertyListing, { foreignKey: "propertyId", as: "property" });
 
+// MessageReport relationships
+User.hasMany(MessageReport, {
+  foreignKey: "reporterId",
+  as: "reportsFiled",
+  onDelete: "CASCADE",
+});
+MessageReport.belongsTo(User, { foreignKey: "reporterId", as: "reporter" });
+
+User.hasMany(MessageReport, {
+  foreignKey: "reportedUserId",
+  as: "reportsReceived",
+  onDelete: "CASCADE",
+});
+MessageReport.belongsTo(User, { foreignKey: "reportedUserId", as: "reportedUser" });
+
+Conversation.hasMany(MessageReport, {
+  foreignKey: "conversationId",
+  as: "reports",
+  onDelete: "CASCADE",
+});
+MessageReport.belongsTo(Conversation, { foreignKey: "conversationId", as: "conversation" });
+
+Message.hasMany(MessageReport, {
+  foreignKey: "messageId",
+  as: "reports",
+  onDelete: "SET NULL",
+});
+MessageReport.belongsTo(Message, { foreignKey: "messageId", as: "message" });
+
+User.hasMany(MessageReport, {
+  foreignKey: "reviewedBy",
+  as: "reviewedReports",
+});
+MessageReport.belongsTo(User, { foreignKey: "reviewedBy", as: "reviewer" });
 
 const db = {
   sequelize,
@@ -305,6 +340,7 @@ const db = {
   LandlordAvailability,
   PriceHistory,
   PropertyAnalytics,
+  MessageReport,
 };
 
 

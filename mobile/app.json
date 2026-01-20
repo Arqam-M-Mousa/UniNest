@@ -1,12 +1,15 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "UniNest",
+    "slug": "uninest-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "extra": {
+      "apiUrl": null
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",

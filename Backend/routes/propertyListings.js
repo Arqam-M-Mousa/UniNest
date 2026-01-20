@@ -124,7 +124,7 @@ router.get("/", async (req, res) => {
           attributes: ["id", "name", "city"],
         },
       ],
-      order: [[sortBy === "createdAt" ? "createdAt" : sortBy, order]],
+      order: [[sortBy === "createdAt" || sortBy === "distance" ? "createdAt" : sortBy, order]],
       limit: Math.min(parseInt(limit, 10), 100),
       offset: parseInt(offset, 10),
       subQuery: false, // Disable subquery to fix the FROM clause issue
@@ -179,7 +179,7 @@ router.get("/", async (req, res) => {
         latitude: prop.latitude,
         longitude: prop.longitude,
         images: listing.images || [],
-        video: prop.videoUrl ? { url: prop.videoUrl, publicId: prop.videoPublicId } : null,
+        video: (prop.videoUrl && prop.videoUrl !== null) ? { url: prop.videoUrl, publicId: prop.videoPublicId || null } : null,
         owner: listing.owner || null,
         university: prop.University || null,
         viewCount: listing.viewCount || 0,
@@ -221,7 +221,8 @@ router.get("/", async (req, res) => {
       offset: parseInt(offset, 10),
     });
   } catch (error) {
-    console.error("Failed to fetch property listings", error);
+    console.error("Failed to fetch property listings:", error.message);
+    console.error("Stack trace:", error.stack);
     return sendError(
       res,
       "Failed to fetch property listings",

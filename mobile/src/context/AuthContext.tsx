@@ -38,11 +38,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storedToken = await AsyncStorage.getItem('token');
       if (storedToken) {
         setToken(storedToken);
-        const userData = await userAPI.getProfile();
-        setUser(userData.user);
+        const response = await userAPI.getProfile();
+        // Backend returns { success: true, data: user } via sendSuccess
+        const userData = response.data || response;
+        if (userData) {
+          setUser(userData);
+        }
       }
     } catch (error) {
       console.error('Failed to load stored auth:', error);
+      // Clear invalid token
+      await AsyncStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -66,20 +72,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signout = async () => {
     try {
-      await AsyncStorage.removeItem('token');
-      setToken(null);
+      // Clear state first for immediate UI update
       setUser(null);
+      setToken(null);
+      // Then clear storage
+      await AsyncStorage.removeItem('token');
+      console.log('Sign out successful - token removed');
     } catch (error) {
       console.error('Failed to sign out:', error);
+      // Even if storage fails, keep state cleared
+      setUser(null);
+      setToken(null);
     }
   };
 
   const refreshUser = async () => {
     try {
-      const userData = await userAPI.getProfile();
-      setUser(userData.user);
+      const response = await userAPI.getProfile();
+      // Backend returns { success: true, data: user } via sendSuccess
+      const userData = response.data || response;
+      if (userData) {
+        setUser(userData);
+      }
     } catch (error) {
       console.error('Failed to refresh user:', error);
+      // Don't sign out on refresh failure - just log the error
     }
   };
 

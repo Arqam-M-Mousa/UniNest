@@ -333,6 +333,34 @@ export const forumAPI = {
     apiRequest(`/api/forum/posts/${postId}/like`, { method: 'POST' }),
 };
 
+export const passwordChangeAPI = {
+  sendCode: async () =>
+    apiRequest('/api/users/change-password/send-code', { method: 'POST' }),
+  changePassword: async (code: string, newPassword: string) =>
+    apiRequest('/api/users/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ code, newPassword }),
+    }),
+};
+
+export const universitiesAPI = {
+  list: async () => apiRequest('/api/universities'),
+  getById: async (id: string) => apiRequest(`/api/universities/${id}`),
+};
+
+export const uploadsAPI = {
+  uploadListingImages: async (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('images', file);
+    });
+    return apiRequest('/api/uploads/listing-images', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+};
+
 export const reviewsAPI = {
   getPropertyReviews: async (propertyId: string, sortBy = 'createdAt', sortOrder = 'DESC') =>
     apiRequest(`/api/reviews/property/${propertyId}?sortBy=${sortBy}&sortOrder=${sortOrder}`),

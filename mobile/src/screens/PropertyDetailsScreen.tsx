@@ -195,10 +195,10 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
         {property.images?.[0] && (
           <Image source={{ uri: property.images[0] }} style={styles.image} resizeMode="cover" />
         )}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <Text style={{ color: '#FFFFFF', fontSize: 20 }}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.favoriteButton} onPress={toggleFavorite}>
+        <TouchableOpacity style={styles.favoriteButton} onPress={toggleFavorite} activeOpacity={0.7}>
           <Text style={{ fontSize: 20 }}>{isFavorite ? '❤️' : '🤍'}</Text>
         </TouchableOpacity>
       </View>
@@ -242,6 +242,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
         <TouchableOpacity
           style={styles.contactButton}
           onPress={() => navigation.navigate('Messages', { propertyId: property.id })}
+          activeOpacity={0.7}
         >
           <Text style={styles.contactButtonText}>Contact Landlord</Text>
         </TouchableOpacity>

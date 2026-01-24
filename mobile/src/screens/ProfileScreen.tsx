@@ -9,6 +9,7 @@ import {
   Switch,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   PencilSquareIcon,
   HomeModernIcon,
@@ -28,6 +29,7 @@ import { useAuth } from '../context/AuthContext';
 export default function ProfileScreen({ navigation }: any) {
   const { colors, theme, toggleTheme } = useTheme();
   const { user, signout } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleSignOut = () => {
     Alert.alert(
@@ -57,7 +59,7 @@ export default function ProfileScreen({ navigation }: any) {
     },
     header: {
       padding: 20,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       backgroundColor: colors.primary,
       alignItems: 'center',
     },
@@ -69,6 +71,12 @@ export default function ProfileScreen({ navigation }: any) {
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 15,
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
     },
     avatarText: {
       fontSize: 40,
@@ -117,6 +125,7 @@ export default function ProfileScreen({ navigation }: any) {
     },
     signOutButton: {
       margin: 20,
+      marginBottom: Math.max(insets.bottom + 20, 40),
       padding: 16,
       backgroundColor: colors.error,
       borderRadius: 12,
@@ -132,8 +141,8 @@ export default function ProfileScreen({ navigation }: any) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        {user?.profilePictureUrl ? (
-          <Image source={{ uri: user.profilePictureUrl }} style={styles.avatar} />
+        {user?.profilePictureUrl || (user as any)?.avatarUrl ? (
+          <Image source={{ uri: user?.profilePictureUrl || (user as any)?.avatarUrl }} style={styles.avatarImage} />
         ) : (
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>

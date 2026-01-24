@@ -432,7 +432,7 @@ const MyListings = () => {
         {/* Edit Modal */}
         {editModal && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
             role="dialog"
             aria-modal="true"
             onClick={() => setEditModal(null)}

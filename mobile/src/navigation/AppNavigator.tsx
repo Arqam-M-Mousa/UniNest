@@ -1,7 +1,9 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -38,12 +40,17 @@ import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import RoommateProfileScreen from '../screens/RoommateProfileScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import AddListingScreen from '../screens/AddListingScreen';
+import PropertyReviewsScreen from '../screens/PropertyReviewsScreen';
+import MarketplaceItemDetailsScreen from '../screens/MarketplaceItemDetailsScreen';
+import PostDetailsScreen from '../screens/PostDetailsScreen';
+import EditListingScreen from '../screens/EditListingScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -54,8 +61,8 @@ function TabNavigator() {
           borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingTop: 8,
-          paddingBottom: 8,
-          height: 60,
+          paddingBottom: Math.max(insets.bottom, 8),
+          height: 60 + Math.max(insets.bottom, 0),
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.secondary,
@@ -156,6 +163,10 @@ export default function AppNavigator() {
             <Stack.Screen name="RoommateProfile" component={RoommateProfileScreen} />
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
             <Stack.Screen name="AddListing" component={AddListingScreen} />
+            <Stack.Screen name="PropertyReviews" component={PropertyReviewsScreen} />
+            <Stack.Screen name="MarketplaceItemDetails" component={MarketplaceItemDetailsScreen} />
+            <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+            <Stack.Screen name="EditListing" component={EditListingScreen} />
           </>
         )}
       </Stack.Navigator>

@@ -8,7 +8,10 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
+  RefreshControl,
+  FlatList,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -21,8 +24,11 @@ import { propertyListingsAPI } from '../services/api';
 
 export default function PropertiesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     search: '',
     minPrice: '',
@@ -34,18 +40,35 @@ export default function PropertiesScreen({ navigation }: any) {
     loadProperties();
   }, []);
 
-  const loadProperties = async () => {
+  const loadProperties = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
       const response = await propertyListingsAPI.list(filters);
       const data = response?.data?.listings || response?.listings || response?.data || [];
-      setProperties(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to load properties:', error);
+      const transformed = (Array.isArray(data) ? data : []).map((item: any) => ({
+        ...item,
+        price: item.pricePerMonth || item.price,
+        address: item.city || '',
+        images: item.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [],
+      }));
+      setProperties(transformed);
+    } catch (err) {
+      console.error('Failed to load properties:', err);
+      setError('Unable to load properties. Please try again.');
       setProperties([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    loadProperties(true);
   };
 
   const styles = StyleSheet.create({
@@ -55,8 +78,15 @@ export default function PropertiesScreen({ navigation }: any) {
     },
     header: {
       padding: 20,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       backgroundColor: colors.primary,
+    },
+    imagePlaceholder: {
+      width: '100%',
+      height: 200,
+      backgroundColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     headerTop: {
       flexDirection: 'row',
@@ -72,38 +102,73 @@ export default function PropertiesScreen({ navigation }: any) {
       color: '#FFFFFF',
     },
     searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: '#FFFFFF',
       borderRadius: 10,
-      padding: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
       marginBottom: 10,
     },
     searchInput: {
+      flex: 1,
       fontSize: 16,
       color: colors.text,
+      marginLeft: 8,
     },
     filterContainer: {
       flexDirection: 'row',
-      gap: 10,
+      justifyContent: 'space-between',
       marginTop: 10,
+      gap: 8,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      gap: 8,
+      flex: 1,
     },
     filterInput: {
       flex: 1,
       backgroundColor: '#FFFFFF',
       borderRadius: 8,
-      padding: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
       fontSize: 14,
       color: colors.text,
+      minWidth: 80,
+    },
+    applyButton: {
+      backgroundColor: '#FFFFFF',
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    applyButtonText: {
+      color: colors.primary,
+      fontSize: 14,
+      fontWeight: '600',
     },
     content: {
+      flex: 1,
+    },
+    listContent: {
       padding: 20,
+      paddingBottom: 40,
     },
     propertyCard: {
       backgroundColor: colors.card,
       borderRadius: 12,
-      marginBottom: 15,
+      marginBottom: 16,
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: colors.border,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     propertyImage: {
       width: '100%',
@@ -153,6 +218,24 @@ export default function PropertiesScreen({ navigation }: any) {
       textAlign: 'center',
       marginTop: 8,
     },
+    errorText: {
+      fontSize: 16,
+      color: '#EF4444',
+      textAlign: 'center',
+      marginBottom: 12,
+    },
+    retryButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 8,
+      marginTop: 8,
+    },
+    retryButtonText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '600',
+    },
   });
 
   return (
@@ -165,89 +248,114 @@ export default function PropertiesScreen({ navigation }: any) {
           <Text style={styles.title}>Properties</Text>
         </View>
         <View style={styles.searchContainer}>
-          <MagnifyingGlassIcon size={20} color={colors.secondary} style={{ marginRight: 10 }} />
+          <MagnifyingGlassIcon size={20} color={colors.secondary} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search by location, title..."
             placeholderTextColor={colors.secondary}
             value={filters.search}
             onChangeText={(text) => setFilters({ ...filters, search: text })}
-            onSubmitEditing={loadProperties}
+            onSubmitEditing={() => loadProperties()}
+            returnKeyType="search"
           />
         </View>
         <View style={styles.filterContainer}>
-          <TextInput
-            style={styles.filterInput}
-            placeholder="Min Price"
-            placeholderTextColor={colors.secondary}
-            keyboardType="numeric"
-            value={filters.minPrice}
-            onChangeText={(text) => setFilters({ ...filters, minPrice: text })}
-          />
-          <TextInput
-            style={styles.filterInput}
-            placeholder="Max Price"
-            placeholderTextColor={colors.secondary}
-            keyboardType="numeric"
-            value={filters.maxPrice}
-            onChangeText={(text) => setFilters({ ...filters, maxPrice: text })}
-          />
-          <TextInput
-            style={styles.filterInput}
-            placeholder="Beds"
-            placeholderTextColor={colors.secondary}
-            keyboardType="numeric"
-            value={filters.bedrooms}
-            onChangeText={(text) => setFilters({ ...filters, bedrooms: text })}
-          />
+          <View style={styles.filterRow}>
+            <TextInput
+              style={styles.filterInput}
+              placeholder="Min"
+              placeholderTextColor={colors.secondary}
+              keyboardType="numeric"
+              value={filters.minPrice}
+              onChangeText={(text) => setFilters({ ...filters, minPrice: text })}
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="Max"
+              placeholderTextColor={colors.secondary}
+              keyboardType="numeric"
+              value={filters.maxPrice}
+              onChangeText={(text) => setFilters({ ...filters, maxPrice: text })}
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="Beds"
+              placeholderTextColor={colors.secondary}
+              keyboardType="numeric"
+              value={filters.bedrooms}
+              onChangeText={(text) => setFilters({ ...filters, bedrooms: text })}
+            />
+          </View>
+          <TouchableOpacity style={styles.applyButton} onPress={() => loadProperties()} activeOpacity={0.7}>
+            <Text style={styles.applyButtonText}>Apply</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView style={styles.content}>
-        {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-        ) : properties.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <HomeModernIcon size={64} color={colors.secondary} />
-            <Text style={styles.emptyText}>No properties found</Text>
-            <Text style={styles.emptySubtext}>
-              Try adjusting your filters or check back later for new listings
-            </Text>
-          </View>
-        ) : (
-          properties.map((property) => (
-            <TouchableOpacity
-              key={property.id}
-              style={styles.propertyCard}
-              onPress={() => navigation.navigate('PropertyDetails', { id: property.id })}
-              activeOpacity={0.7}
-            >
-              {property.images?.[0] && (
-                <Image
-                  source={{ uri: property.images[0] }}
-                  style={styles.propertyImage}
-                  resizeMode="cover"
-                />
-              )}
-              <View style={styles.propertyInfo}>
-                <Text style={styles.propertyTitle}>{property.title}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>
-                  <MapPinIcon size={14} color={colors.secondary} />
-                  <Text style={[styles.propertyDetails, { marginLeft: 4, marginBottom: 0 }]}>
-                    {property.address}, {property.city}
-                  </Text>
-                </View>
-                <Text style={styles.propertyDetails}>
-                  {property.bedrooms} Bedrooms • {property.bathrooms} Bathrooms
-                </Text>
-                <Text style={styles.propertyPrice}>
-                  ${property.price}/month
+      <FlatList
+        style={styles.content}
+        contentContainerStyle={styles.listContent}
+        data={properties}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+        }
+        ListEmptyComponent={
+          loading ? (
+            <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+          ) : error ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={() => loadProperties()}>
+                <Text style={styles.retryButtonText}>Try Again</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <HomeModernIcon size={64} color={colors.secondary} />
+              <Text style={styles.emptyText}>No properties found</Text>
+              <Text style={styles.emptySubtext}>
+                Try adjusting your filters or check back later for new listings
+              </Text>
+            </View>
+          )
+        }
+        renderItem={({ item: property }) => (
+          <TouchableOpacity
+            style={styles.propertyCard}
+            onPress={() => navigation.navigate('PropertyDetails', { id: property.id })}
+            activeOpacity={0.7}
+          >
+            {property.images?.[0] ? (
+              <Image
+                source={{ uri: property.images[0] }}
+                style={styles.propertyImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <HomeModernIcon size={48} color={colors.secondary} />
+                <Text style={{ color: colors.secondary, marginTop: 8 }}>No Image</Text>
+              </View>
+            )}
+            <View style={styles.propertyInfo}>
+              <Text style={styles.propertyTitle} numberOfLines={2}>{property.title}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>
+                <MapPinIcon size={14} color={colors.secondary} />
+                <Text style={[styles.propertyDetails, { marginLeft: 4, marginBottom: 0 }]} numberOfLines={1}>
+                  {property.address}, {property.city}
                 </Text>
               </View>
-            </TouchableOpacity>
-          ))
+              <Text style={styles.propertyDetails}>
+                {property.bedrooms} Bed{property.bedrooms > 1 ? 's' : ''} • {property.bathrooms} Bath{property.bathrooms > 1 ? 's' : ''}
+              </Text>
+              <Text style={styles.propertyPrice}>
+                ${property.price}/month
+              </Text>
+            </View>
+          </TouchableOpacity>
         )}
-      </ScrollView>
+      />
     </View>
   );
 }

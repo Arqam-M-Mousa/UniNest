@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronLeftIcon,
   HeartIcon,
@@ -30,6 +31,7 @@ interface Property {
 
 export default function FavoritesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [favorites, setFavorites] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,8 +39,15 @@ export default function FavoritesScreen({ navigation }: any) {
   const fetchFavorites = useCallback(async () => {
     try {
       const response = await favoritesAPI.list();
-      const data = response?.data?.favorites || response?.data || [];
-      setFavorites(Array.isArray(data) ? data : []);
+      const data = response?.data?.listings || response?.listings || response?.data || [];
+      // Transform API response to match expected format
+      const transformed = (Array.isArray(data) ? data : []).map((item: any) => ({
+        ...item,
+        price: item.pricePerMonth || item.price,
+        location: item.city || '',
+        imageUrl: item.images?.[0]?.url || (typeof item.images?.[0] === 'string' ? item.images[0] : null),
+      }));
+      setFavorites(transformed);
     } catch (error) {
       console.error('Failed to fetch favorites:', error);
       setFavorites([]);
@@ -57,10 +66,11 @@ export default function FavoritesScreen({ navigation }: any) {
     fetchFavorites();
   };
 
-  const handleRemoveFavorite = async (id: string) => {
+  const handleRemoveFavorite = async (listingId: string, propertyId: string) => {
     try {
-      await favoritesAPI.remove(id);
-      setFavorites(favorites.filter((f) => f.id !== id));
+      // Favorites API uses listingId (Listing.id), not PropertyListing.id
+      await favoritesAPI.remove(listingId);
+      setFavorites(favorites.filter((f: any) => f.id !== propertyId));
     } catch (error) {
       console.error('Failed to remove favorite:', error);
     }
@@ -75,11 +85,18 @@ export default function FavoritesScreen({ navigation }: any) {
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: 16,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       paddingBottom: 16,
       backgroundColor: colors.card,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
+    },
+    imagePlaceholder: {
+      width: '100%',
+      height: 180,
+      backgroundColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     headerTitle: {
       fontSize: 18,
@@ -175,17 +192,18 @@ export default function FavoritesScreen({ navigation }: any) {
     },
   });
 
-  const renderItem = ({ item }: { item: Property }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate('PropertyDetails', { propertyId: item.id })}
+      onPress={() => navigation.navigate('PropertyDetails', { id: item.id })}
       activeOpacity={0.7}
     >
       {item.imageUrl ? (
         <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
       ) : (
-        <View style={styles.cardImagePlaceholder}>
+        <View style={styles.imagePlaceholder}>
           <MapPinIcon size={48} color={colors.secondary} />
+          <Text style={{ color: colors.secondary, marginTop: 8 }}>No Image</Text>
         </View>
       )}
       <View style={styles.cardContent}>
@@ -193,7 +211,7 @@ export default function FavoritesScreen({ navigation }: any) {
           <Text style={styles.cardTitle} numberOfLines={1}>
             {item.title}
           </Text>
-          <TouchableOpacity onPress={() => handleRemoveFavorite(item.id)} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => handleRemoveFavorite(item.listingId, item.id)} activeOpacity={0.7}>
             <HeartSolidIcon size={24} color={colors.error} />
           </TouchableOpacity>
         </View>

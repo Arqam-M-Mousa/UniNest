@@ -8,12 +8,14 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { roommatesAPI } from '../services/api';
 
 export default function RoommatesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,9 +26,11 @@ export default function RoommatesScreen({ navigation }: any) {
   const loadProfiles = async () => {
     try {
       const response = await roommatesAPI.search();
-      setProfiles(response.profiles || []);
+      const data = response?.data?.profiles || response?.profiles || response?.data || [];
+      setProfiles(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to load roommate profiles:', error);
+      setProfiles([]);
     } finally {
       setLoading(false);
     }
@@ -39,8 +43,14 @@ export default function RoommatesScreen({ navigation }: any) {
     },
     header: {
       padding: 20,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       backgroundColor: colors.primary,
+    },
+    avatarImage: {
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      marginRight: 15,
     },
     headerTop: {
       flexDirection: 'row',
@@ -149,11 +159,18 @@ export default function RoommatesScreen({ navigation }: any) {
               onPress={() => navigation.navigate('RoommateProfile', { userId: item.userId })}
               activeOpacity={0.7}
             >
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {item.user?.firstName?.[0]}{item.user?.lastName?.[0]}
-                </Text>
-              </View>
+              {item.user?.profilePictureUrl || item.user?.avatarUrl ? (
+                <Image
+                  source={{ uri: item.user?.profilePictureUrl || item.user?.avatarUrl }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {item.user?.firstName?.[0]}{item.user?.lastName?.[0]}
+                  </Text>
+                </View>
+              )}
               <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>
                   {item.user?.firstName} {item.user?.lastName}

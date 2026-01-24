@@ -2,9 +2,23 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Install system deps needed by Expo
+RUN apk add --no-cache bash git libc6-compat
 
-EXPOSE 19000 19001 19006 8081
+# Copy dependency files
+COPY package.json package-lock.json* ./
 
-#For development npm install with tunnel mode for QR code scanning
-CMD ["sh", "-c", "npm install && npm install -g @expo/ngrok@^4.1.0 && npx expo start --tunnel"]
+# Install dependencies
+RUN npm install
+
+# Copy app source
+COPY . .
+
+# Expo / Metro / Web
+EXPOSE 19000 19001 19002 19006 8081
+
+# Required so Expo is reachable outside container
+ENV EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+
+# Start Expo in LAN mode (NOT tunnel)
+CMD ["npx", "expo", "start", "--lan"]

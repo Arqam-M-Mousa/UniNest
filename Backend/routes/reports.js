@@ -252,9 +252,11 @@ router.put("/:id", authenticate, authorize(["SuperAdmin", "Admin"]), async (req,
       const { Notification } = require("../models");
       await Notification.create({
         userId: report.reportedUserId,
-        type: "warning",
         title: "Warning from Admin",
         message: warningMessage,
+        relatedEntityType: "report",
+        relatedEntityId: report.id,
+        actionUrl: null,
         isRead: false,
       });
     }

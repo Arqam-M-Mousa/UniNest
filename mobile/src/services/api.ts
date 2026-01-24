@@ -60,6 +60,13 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
     if (!response.ok) {
       const message = data?.message || 'An error occurred';
       console.error('API Error Response:', { status: response.status, message, data });
+      
+      // Handle token expiration - clear token and let AuthContext handle redirect
+      if (response.status === 401 && (message.includes('expired') || message.includes('invalid') || message.includes('Unauthorized'))) {
+        await AsyncStorage.removeItem('token');
+        // The app will redirect to login when token is cleared
+      }
+      
       throw new Error(message);
     }
 
@@ -349,12 +356,51 @@ export const universitiesAPI = {
 };
 
 export const uploadsAPI = {
-  uploadListingImages: async (files: File[]) => {
+  uploadProfilePicture: async (imageUri: string) => {
     const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('images', file);
+    const filename = imageUri.split('/').pop() || 'profile.jpg';
+    const match = /\.([\w]+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : 'image/jpeg';
+    
+    formData.append('profilePicture', {
+      uri: imageUri,
+      name: filename,
+      type,
+    } as any);
+    
+    return apiRequest('/api/uploads/profile-picture', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+  deleteProfilePicture: async () =>
+    apiRequest('/api/uploads/profile-picture', { method: 'DELETE' }),
+  uploadListingImages: async (imageUris: string[]) => {
+    const formData = new FormData();
+    imageUris.forEach((uri, index) => {
+      const filename = uri.split('/').pop() || `image_${index}.jpg`;
+      const match = /\.([\w]+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+      formData.append('images', {
+        uri,
+        name: filename,
+        type,
+      } as any);
     });
     return apiRequest('/api/uploads/listing-images', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+  uploadListingVideo: async (videoUri: string) => {
+    const formData = new FormData();
+    const filename = videoUri.split('/').pop() || 'video.mp4';
+    formData.append('video', {
+      uri: videoUri,
+      name: filename,
+      type: 'video/mp4',
+    } as any);
+    return apiRequest('/api/uploads/listing-video', {
       method: 'POST',
       body: formData,
     });

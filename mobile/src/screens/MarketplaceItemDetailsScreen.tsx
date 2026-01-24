@@ -19,7 +19,7 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { marketplaceAPI } from '../services/api';
+import { marketplaceAPI, conversationsAPI } from '../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -48,7 +48,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
         condition: data.condition || data.itemDetails?.condition,
         category: data.category || data.itemDetails?.category,
         images: data.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [],
-        seller: data.seller || data.student || null,
+        seller: data.owner || data.seller || data.student || null,
       };
       setItem(transformed);
     } catch (err: any) {
@@ -64,31 +64,46 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
       navigation.navigate('SignIn');
       return;
     }
-    if (user.id === item?.seller?.id) {
-      Alert.alert('Info', "This is your listing");
+    
+    if (!item?.seller?.id) {
+      Alert.alert('Error', 'Seller information is not available.');
       return;
     }
+    
+    if (user.id === item.seller.id) {
+      Alert.alert('Info', 'This is your own listing.');
+      return;
+    }
+    
     try {
-      // First go back to close this screen
-      navigation.goBack();
+      // Check for existing conversation first
+      const conversationsResponse = await conversationsAPI.list();
+      const conversations = conversationsResponse?.data?.conversations || conversationsResponse?.conversations || conversationsResponse?.data || [];
       
-      // Then navigate to Messages tab with params using a small delay
-      setTimeout(() => {
-        const parent = navigation.getParent();
-        if (parent) {
-          parent.navigate('Main', {
-            screen: 'Messages',
-            params: {
-              recipientId: item?.seller?.id,
-              recipientName: `${item?.seller?.firstName} ${item?.seller?.lastName}`,
-              itemId: item?.id,
-              itemTitle: item?.title,
-            }
-          });
-        }
-      }, 100);
-    } catch (err) {
-      console.error('Failed to navigate to messages:', err);
+      // Find existing conversation with this seller
+      const existingConv = conversations.find((conv: any) => 
+        (conv.studentId === user.id && conv.landlordId === item.seller.id) ||
+        (conv.landlordId === user.id && conv.studentId === item.seller.id)
+      );
+
+      if (existingConv) {
+        // Open existing conversation
+        navigation.navigate('Main', { screen: 'Messages', params: { conversationId: existingConv.id } });
+        return;
+      }
+
+      // Create new conversation if none exists - use startDirect for marketplace
+      console.log('Creating conversation with seller ID:', item.seller.id);
+      const response = await conversationsAPI.startDirect(item.seller.id);
+      console.log('Conversation response:', response);
+      const conversationId = response?.data?.id || response?.id;
+      if (conversationId) {
+        navigation.navigate('Main', { screen: 'Messages', params: { conversationId } });
+      }
+    } catch (error: any) {
+      console.error('API Request Error:', error.message);
+      console.error('API Error Response:', error.response);
+      console.error('Failed to create conversation:', error);
       Alert.alert('Error', 'Unable to open messages. Please try again.');
     }
   };

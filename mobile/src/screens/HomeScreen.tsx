@@ -9,6 +9,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   MagnifyingGlassIcon,
   HomeModernIcon,
@@ -24,6 +25,7 @@ import { propertyListingsAPI } from '../services/api';
 export default function HomeScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +37,15 @@ export default function HomeScreen({ navigation }: any) {
   const loadProperties = async () => {
     try {
       const response = await propertyListingsAPI.list({ limit: 10 });
-      setProperties(response.listings || []);
+      const data = response?.data?.listings || response?.listings || [];
+      // Transform API response to match expected format
+      const transformed = (Array.isArray(data) ? data : []).map((item: any) => ({
+        ...item,
+        price: item.pricePerMonth || item.price,
+        address: item.city || '',
+        images: item.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [],
+      }));
+      setProperties(transformed);
     } catch (error) {
       console.error('Failed to load properties:', error);
     } finally {
@@ -50,8 +60,15 @@ export default function HomeScreen({ navigation }: any) {
     },
     header: {
       padding: 20,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       backgroundColor: colors.primary,
+    },
+    imagePlaceholder: {
+      width: '100%',
+      height: 200,
+      backgroundColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     greeting: {
       fontSize: 24,
@@ -227,12 +244,17 @@ export default function HomeScreen({ navigation }: any) {
               onPress={() => navigation.navigate('PropertyDetails', { id: property.id })}
               activeOpacity={0.7}
             >
-              {property.images?.[0] && (
+              {property.images?.[0] ? (
                 <Image
                   source={{ uri: property.images[0] }}
                   style={styles.propertyImage}
                   resizeMode="cover"
                 />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <HomeModernIcon size={48} color={colors.secondary} />
+                  <Text style={{ color: colors.secondary, marginTop: 8 }}>No Image</Text>
+                </View>
               )}
               <View style={styles.propertyInfo}>
                 <Text style={styles.propertyTitle}>{property.title}</Text>

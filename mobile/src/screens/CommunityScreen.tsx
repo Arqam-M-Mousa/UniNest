@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -26,10 +27,14 @@ export default function CommunityScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [posts, setPosts] = useState<any[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [votingStates, setVotingStates] = useState<Record<string, { upvoted: boolean; downvoted: boolean }>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  
+  const categories = ['All', 'General', 'Housing', 'Roommates', 'University', 'Tips', 'Questions'];
 
   useEffect(() => {
     loadPosts();
@@ -45,7 +50,17 @@ export default function CommunityScreen({ navigation }: any) {
       setError(null);
       const response = await forumAPI.getPosts();
       const data = response?.data?.posts || response?.posts || response?.data || [];
-      setPosts(Array.isArray(data) ? data : []);
+      const postsArray = Array.isArray(data) ? data : [];
+      
+      // Sort: pinned posts first, then by creation date
+      const sortedPosts = postsArray.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      
+      setPosts(sortedPosts);
+      filterPosts(sortedPosts, selectedCategory);
     } catch (err) {
       console.error('Failed to load posts:', err);
       setError('Unable to load posts. Please try again.');
@@ -58,6 +73,19 @@ export default function CommunityScreen({ navigation }: any) {
 
   const onRefresh = () => {
     loadPosts(true);
+  };
+
+  const filterPosts = (postsToFilter: any[], category: string) => {
+    if (category === 'All') {
+      setFilteredPosts(postsToFilter);
+    } else {
+      setFilteredPosts(postsToFilter.filter(post => post.category === category));
+    }
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    filterPosts(posts, category);
   };
 
   const handleVote = async (postId: string, voteType: 'up' | 'down') => {
@@ -178,6 +206,51 @@ export default function CommunityScreen({ navigation }: any) {
       color: colors.secondary,
       marginBottom: 10,
     },
+    categoryFilter: {
+      paddingHorizontal: 15,
+      paddingVertical: 12,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    categoryScroll: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    categoryChip: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    categoryChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    categoryChipText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.text,
+      textTransform: 'capitalize',
+    },
+    categoryChipTextActive: {
+      color: '#FFFFFF',
+    },
+    pinnedBadge: {
+      backgroundColor: '#F59E0B20',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+      marginBottom: 8,
+      alignSelf: 'flex-start',
+    },
+    pinnedText: {
+      color: '#F59E0B',
+      fontSize: 12,
+      fontWeight: '600',
+    },
     postFooter: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -270,8 +343,33 @@ export default function CommunityScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.categoryFilter}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category}
+              style={[
+                styles.categoryChip,
+                selectedCategory === category && styles.categoryChipActive,
+              ]}
+              onPress={() => handleCategoryChange(category)}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  selectedCategory === category && styles.categoryChipTextActive,
+                ]}
+              >
+                {category}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       <FlatList
-        data={posts}
+        data={filteredPosts}
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
@@ -298,6 +396,11 @@ export default function CommunityScreen({ navigation }: any) {
                 </View>
               </View>
             </View>
+            {item.isPinned && (
+              <View style={styles.pinnedBadge}>
+                <Text style={styles.pinnedText}>📌 Pinned</Text>
+              </View>
+            )}
             <Text style={styles.postTitle}>{item.title}</Text>
             <Text style={styles.postContent} numberOfLines={3}>
               {item.content}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronLeftIcon,
   PlusIcon,
@@ -20,7 +21,8 @@ import {
   EyeSlashIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
-import { propertyListingsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { propertyListingsAPI, marketplaceAPI, forumAPI } from '../services/api';
 
 interface Property {
   id: string;
@@ -35,15 +37,55 @@ interface Property {
 
 export default function MyListingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [listings, setListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'properties' | 'marketplace' | 'posts'>(
+    user?.role === 'landlord' ? 'properties' : 'marketplace'
+  );
 
-  const fetchListings = useCallback(async () => {
+  const fetchListings = async () => {
     try {
-      const response = await propertyListingsAPI.getMyListings();
-      const data = response?.data?.listings || response?.data || [];
-      setListings(Array.isArray(data) ? data : []);
+      setLoading(true);
+      let data = [];
+      
+      if (activeTab === 'properties') {
+        const response = await propertyListingsAPI.getMyListings();
+        data = response?.data?.listings || response?.listings || response?.data || [];
+        const transformed = (Array.isArray(data) ? data : []).map((item: any) => ({
+          ...item,
+          type: 'property',
+          price: item.pricePerMonth || item.price,
+          location: item.city || '',
+          imageUrl: item.images?.[0]?.url || (typeof item.images?.[0] === 'string' ? item.images[0] : null),
+        }));
+        setListings(transformed);
+      } else if (activeTab === 'marketplace') {
+        const response = await marketplaceAPI.getMyItems();
+        data = response?.data?.listings || response?.listings || response?.data || [];
+        const transformed = (Array.isArray(data) ? data : []).map((item: any) => ({
+          ...item,
+          type: 'marketplace',
+          price: item.price || item.itemDetails?.price,
+          location: item.location || 'N/A',
+          imageUrl: item.images?.[0]?.url || (typeof item.images?.[0] === 'string' ? item.images[0] : null),
+        }));
+        setListings(transformed);
+      } else if (activeTab === 'posts') {
+        const response = await forumAPI.getPosts();
+        const allPosts = response?.data?.posts || response?.posts || response?.data || [];
+        const myPosts = (Array.isArray(allPosts) ? allPosts : []).filter(
+          (post: any) => post.author?.id === user?.id
+        );
+        const transformed = myPosts.map((item: any) => ({
+          ...item,
+          type: 'post',
+          imageUrl: null,
+        }));
+        setListings(transformed);
+      }
     } catch (error) {
       console.error('Failed to fetch listings:', error);
       setListings([]);
@@ -51,11 +93,11 @@ export default function MyListingsScreen({ navigation }: any) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchListings();
-  }, [fetchListings]);
+  }, [activeTab]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -73,10 +115,10 @@ export default function MyListingsScreen({ navigation }: any) {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string, type: string) => {
     Alert.alert(
-      'Delete Listing',
-      'Are you sure you want to delete this listing?',
+      `Delete ${type === 'post' ? 'Post' : 'Listing'}`,
+      `Are you sure you want to delete this ${type === 'post' ? 'post' : 'listing'}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -84,10 +126,16 @@ export default function MyListingsScreen({ navigation }: any) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await propertyListingsAPI.delete(id);
+              if (type === 'property') {
+                await propertyListingsAPI.delete(id);
+              } else if (type === 'marketplace') {
+                await marketplaceAPI.delete(id);
+              } else if (type === 'post') {
+                await forumAPI.deletePost(id);
+              }
               setListings(listings.filter((l) => l.id !== id));
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete listing.');
+              Alert.alert('Error', error.message || 'Failed to delete.');
             }
           },
         },
@@ -105,7 +153,7 @@ export default function MyListingsScreen({ navigation }: any) {
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 16,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       paddingBottom: 16,
       backgroundColor: colors.card,
       borderBottomWidth: 1,
@@ -120,6 +168,31 @@ export default function MyListingsScreen({ navigation }: any) {
       fontWeight: '600',
       color: colors.text,
       marginLeft: 16,
+    },
+    tabContainer: {
+      flexDirection: 'row',
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 14,
+      alignItems: 'center',
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    activeTab: {
+      borderBottomColor: colors.primary,
+    },
+    tabText: {
+      fontSize: 15,
+      fontWeight: '500',
+      color: colors.secondary,
+    },
+    activeTabText: {
+      color: colors.primary,
+      fontWeight: '600',
     },
     addButton: {
       width: 36,
@@ -234,10 +307,14 @@ export default function MyListingsScreen({ navigation }: any) {
     },
   });
 
-  const renderItem = ({ item }: { item: Property }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.card}>
       <TouchableOpacity
-        onPress={() => navigation.navigate('PropertyDetails', { propertyId: item.id })}
+        onPress={() => {
+          if (item.type === 'property') navigation.navigate('PropertyDetails', { id: item.id });
+          else if (item.type === 'marketplace') navigation.navigate('MarketplaceItemDetails', { id: item.id });
+          else if (item.type === 'post') navigation.navigate('PostDetails', { id: item.id });
+        }}
       >
         {item.imageUrl ? (
           <View>
@@ -258,38 +335,58 @@ export default function MyListingsScreen({ navigation }: any) {
           <Text style={styles.cardTitle} numberOfLines={1}>
             {item.title}
           </Text>
-          <Text style={styles.cardPrice}>${item.price}/mo</Text>
-          <View style={styles.cardLocation}>
-            <MapPinIcon size={16} color={colors.secondary} />
-            <Text style={styles.cardLocationText}>{item.location}</Text>
-          </View>
+          {item.type !== 'post' && (
+            <Text style={styles.cardPrice}>
+              ${item.price}{item.type === 'property' ? '/mo' : ''}
+            </Text>
+          )}
+          {item.type !== 'post' && item.location && (
+            <View style={styles.cardLocation}>
+              <MapPinIcon size={16} color={colors.secondary} />
+              <Text style={styles.cardLocationText}>{item.location}</Text>
+            </View>
+          )}
+          {item.type === 'post' && (
+            <Text style={styles.cardLocationText} numberOfLines={2}>
+              {item.content}
+            </Text>
+          )}
         </View>
       </TouchableOpacity>
       <View style={styles.cardActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleToggleVisibility(item.id)}
+        {item.type !== 'post' && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => handleToggleVisibility(item.id)}
+            activeOpacity={0.7}
+          >
+            {item.isVisible ? (
+              <>
+                <EyeSlashIcon size={18} color={colors.text} />
+                <Text style={styles.actionText}>Hide</Text>
+              </>
+            ) : (
+              <>
+                <EyeIcon size={18} color={colors.text} />
+                <Text style={styles.actionText}>Show</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity 
+          style={styles.actionButton} 
+          onPress={() => {
+            if (item.type === 'property') navigation.navigate('EditListing', { id: item.id });
+            else if (item.type === 'post') navigation.navigate('EditPost', { id: item.id });
+          }}
           activeOpacity={0.7}
         >
-          {item.isVisible ? (
-            <>
-              <EyeSlashIcon size={18} color={colors.text} />
-              <Text style={styles.actionText}>Hide</Text>
-            </>
-          ) : (
-            <>
-              <EyeIcon size={18} color={colors.text} />
-              <Text style={styles.actionText}>Show</Text>
-            </>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
           <PencilIcon size={18} color={colors.text} />
           <Text style={styles.actionText}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.actionButtonLast]}
-          onPress={() => handleDelete(item.id)}
+          onPress={() => handleDelete(item.id, item.type)}
           activeOpacity={0.7}
         >
           <TrashIcon size={18} color={colors.error} />
@@ -326,17 +423,63 @@ export default function MyListingsScreen({ navigation }: any) {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Listings</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddListing')} activeOpacity={0.7}>
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={() => {
+            if (activeTab === 'properties') navigation.navigate('AddListing');
+            else if (activeTab === 'marketplace') navigation.navigate('AddMarketplaceListing');
+            else if (activeTab === 'posts') navigation.navigate('CreatePost');
+          }} 
+          activeOpacity={0.7}
+        >
           <PlusIcon size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
+      {user?.role === 'student' ? (
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'marketplace' && styles.activeTab]}
+            onPress={() => setActiveTab('marketplace')}
+          >
+            <Text style={[styles.tabText, activeTab === 'marketplace' && styles.activeTabText]}>
+              Marketplace
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
+            onPress={() => setActiveTab('posts')}
+          >
+            <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
+              Posts
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'properties' && styles.activeTab]}
+            onPress={() => setActiveTab('properties')}
+          >
+            <Text style={[styles.tabText, activeTab === 'properties' && styles.activeTabText]}>
+              Properties
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {listings.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MapPinIcon size={64} color={colors.secondary} />
-          <Text style={styles.emptyText}>No listings yet</Text>
+          <Text style={styles.emptyText}>
+            {activeTab === 'posts' ? 'No posts yet' : 'No listings yet'}
+          </Text>
           <Text style={styles.emptySubtext}>
-            Create your first property listing to start renting
+            {activeTab === 'posts' 
+              ? 'Create your first post to start sharing'
+              : activeTab === 'marketplace'
+              ? 'Create your first marketplace listing'
+              : 'Create your first property listing to start renting'}
           </Text>
         </View>
       ) : (

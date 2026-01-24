@@ -46,6 +46,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
         ...data,
         price: data.price || data.itemDetails?.price,
         condition: data.condition || data.itemDetails?.condition,
+        category: data.category || data.itemDetails?.category,
         images: data.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [],
         seller: data.seller || data.student || null,
       };
@@ -68,16 +69,24 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
       return;
     }
     try {
-      // Navigate to messages screen - messaging will be handled there
-      navigation.navigate('Main', { 
-        screen: 'Messages', 
-        params: { 
-          recipientId: item?.seller?.id,
-          recipientName: `${item?.seller?.firstName} ${item?.seller?.lastName}`,
-          itemId: item?.id,
-          itemTitle: item?.title,
-        } 
-      });
+      // First go back to close this screen
+      navigation.goBack();
+      
+      // Then navigate to Messages tab with params using a small delay
+      setTimeout(() => {
+        const parent = navigation.getParent();
+        if (parent) {
+          parent.navigate('Main', {
+            screen: 'Messages',
+            params: {
+              recipientId: item?.seller?.id,
+              recipientName: `${item?.seller?.firstName} ${item?.seller?.lastName}`,
+              itemId: item?.id,
+              itemTitle: item?.title,
+            }
+          });
+        }
+      }, 100);
     } catch (err) {
       console.error('Failed to navigate to messages:', err);
       Alert.alert('Error', 'Unable to open messages. Please try again.');
@@ -138,18 +147,29 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
       color: colors.primary,
       marginBottom: 12,
     },
-    conditionBadge: {
-      alignSelf: 'flex-start',
+    categoryBadge: {
       backgroundColor: colors.primary + '20',
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 16,
-      marginBottom: 16,
     },
-    conditionText: {
+    categoryText: {
+      color: colors.primary,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.primary,
+      textTransform: 'capitalize',
+    },
+    conditionBadge: {
+      backgroundColor: '#10B98120',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+    },
+    conditionText: {
+      color: '#10B981',
+      fontSize: 13,
+      fontWeight: '600',
+      textTransform: 'capitalize',
     },
     section: {
       marginTop: 20,
@@ -166,40 +186,46 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
       lineHeight: 22,
     },
     sellerCard: {
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
       flexDirection: 'row',
       alignItems: 'center',
+      padding: 16,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
     },
     sellerAvatar: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 12,
+      marginRight: 14,
     },
     sellerAvatarText: {
       color: '#FFFFFF',
       fontSize: 20,
-      fontWeight: 'bold',
+      fontWeight: '700',
     },
     sellerInfo: {
       flex: 1,
     },
     sellerName: {
-      fontSize: 16,
-      fontWeight: '600',
+      fontSize: 17,
+      fontWeight: '700',
       color: colors.text,
-      marginBottom: 2,
+      marginBottom: 4,
     },
     sellerRole: {
-      fontSize: 13,
+      fontSize: 14,
       color: colors.secondary,
+      textTransform: 'capitalize',
     },
     detailRow: {
       flexDirection: 'row',
@@ -328,11 +354,18 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.price}>${item.price}</Text>
 
-          {item.condition && (
-            <View style={styles.conditionBadge}>
-              <Text style={styles.conditionText}>{item.condition}</Text>
-            </View>
-          )}
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8, marginBottom: 16 }}>
+            {item.category && (
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>{item.category}</Text>
+              </View>
+            )}
+            {item.condition && (
+              <View style={styles.conditionBadge}>
+                <Text style={styles.conditionText}>{item.condition}</Text>
+              </View>
+            )}
+          </View>
 
           {item.description && (
             <View style={styles.section}>
@@ -343,18 +376,18 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
 
           {item.seller && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Seller</Text>
+              <Text style={styles.sectionTitle}>Seller Information</Text>
               <View style={styles.sellerCard}>
                 <View style={styles.sellerAvatar}>
                   <Text style={styles.sellerAvatarText}>
-                    {item.seller.firstName?.[0] || 'U'}
+                    {item.seller.firstName?.[0]}{item.seller.lastName?.[0]}
                   </Text>
                 </View>
                 <View style={styles.sellerInfo}>
                   <Text style={styles.sellerName}>
                     {item.seller.firstName} {item.seller.lastName}
                   </Text>
-                  <Text style={styles.sellerRole}>Student</Text>
+                  <Text style={styles.sellerRole}>{item.seller.role || 'Student'}</Text>
                 </View>
               </View>
             </View>

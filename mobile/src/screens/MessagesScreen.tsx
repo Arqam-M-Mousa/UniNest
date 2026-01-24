@@ -9,7 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronLeftIcon,
   PaperAirplaneIcon,
@@ -23,6 +25,7 @@ import { format } from 'date-fns';
 export default function MessagesScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -35,15 +38,23 @@ export default function MessagesScreen({ route, navigation }: any) {
 
   useEffect(() => {
     if (route.params?.conversationId) {
-      loadConversation(route.params.conversationId);
+      loadConversationById(route.params.conversationId);
+    } else if (route.params?.recipientId) {
+      handleNewConversation(route.params.recipientId, route.params.recipientName);
     }
-  }, [route.params?.conversationId]);
+  }, [route.params?.conversationId, route.params?.recipientId]);
 
   const loadConversations = async () => {
     try {
       const response = await conversationsAPI.list();
       const data = response?.data?.conversations || response?.conversations || response?.data || [];
-      setConversations(Array.isArray(data) ? data : []);
+      const convList = Array.isArray(data) ? data : [];
+      // Add otherUser field to each conversation
+      const withOtherUser = convList.map((conv: any) => ({
+        ...conv,
+        otherUser: conv.studentId === user?.id ? conv.landlord : conv.student,
+      }));
+      setConversations(withOtherUser);
     } catch (error) {
       console.error('Failed to load conversations:', error);
       setConversations([]);
@@ -52,17 +63,93 @@ export default function MessagesScreen({ route, navigation }: any) {
     }
   };
 
-  const loadConversation = async (conversationId: string) => {
+  const loadConversationById = async (conversationId: string) => {
     try {
-      const conv = conversations.find(c => c.id === conversationId);
-      setSelectedConversation(conv);
+      // First check if we have it in the list
+      let conv = conversations.find(c => c.id === conversationId);
+      
+      // If not found, reload conversations to get the new one
+      if (!conv) {
+        const response = await conversationsAPI.list();
+        const data = response?.data?.conversations || response?.conversations || response?.data || [];
+        const convList = Array.isArray(data) ? data : [];
+        // Add otherUser field to each conversation
+        const withOtherUser = convList.map((c: any) => ({
+          ...c,
+          otherUser: c.studentId === user?.id ? c.landlord : c.student,
+        }));
+        setConversations(withOtherUser);
+        conv = withOtherUser.find((c: any) => c.id === conversationId);
+      }
+      
+      if (conv) {
+        setSelectedConversation(conv);
+        await loadMessages(conversationId);
+      }
+    } catch (error) {
+      console.error('Failed to load conversation:', error);
+    }
+  };
+
+  const loadMessages = async (conversationId: string) => {
+    try {
       const response = await conversationsAPI.listMessages(conversationId);
       const data = response?.data?.messages || response?.messages || response?.data || [];
-      setMessages(Array.isArray(data) ? data : []);
+      setMessages(Array.isArray(data) ? data.reverse() : []); // Reverse for inverted FlatList
       await conversationsAPI.markRead(conversationId);
     } catch (error) {
       console.error('Failed to load messages:', error);
       setMessages([]);
+    }
+  };
+
+  const loadConversation = async (conv: any) => {
+    // Add otherUser field if not present
+    const convWithOther = {
+      ...conv,
+      otherUser: conv.otherUser || (conv.studentId === user?.id ? conv.landlord : conv.student),
+    };
+    setSelectedConversation(convWithOther);
+    await loadMessages(conv.id);
+  };
+
+  const handleNewConversation = async (recipientId: string, recipientName: string) => {
+    try {
+      // Check if conversation already exists with this user
+      const existingConv = conversations.find((c: any) => 
+        c.otherUser?.id === recipientId
+      );
+      
+      if (existingConv) {
+        // Load existing conversation
+        await loadConversation(existingConv);
+      } else {
+        // Create new conversation
+        const response = await conversationsAPI.create({
+          studentId: user?.role === 'student' ? user?.id : recipientId,
+          landlordId: user?.role === 'landlord' ? user?.id : recipientId,
+          propertyId: route.params?.itemId || null,
+        });
+        const newConv = response?.data || response;
+        
+        // Set up the conversation with recipient info
+        const convWithOther = {
+          ...newConv,
+          otherUser: {
+            id: recipientId,
+            firstName: recipientName?.split(' ')[0] || 'User',
+            lastName: recipientName?.split(' ').slice(1).join(' ') || '',
+          },
+        };
+        
+        setSelectedConversation(convWithOther);
+        setMessages([]);
+        
+        // Reload conversations list to include the new one
+        await loadConversations();
+      }
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
     }
   };
 
@@ -75,7 +162,7 @@ export default function MessagesScreen({ route, navigation }: any) {
         attachmentsJson: null,
       });
       setNewMessage('');
-      loadConversation(selectedConversation.id);
+      await loadMessages(selectedConversation.id);
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -130,7 +217,9 @@ export default function MessagesScreen({ route, navigation }: any) {
       flex: 1,
     },
     messagesHeader: {
-      padding: 15,
+      paddingTop: insets.top + 10,
+      paddingBottom: 15,
+      paddingHorizontal: 15,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       backgroundColor: colors.card,
@@ -178,7 +267,9 @@ export default function MessagesScreen({ route, navigation }: any) {
     },
     inputContainer: {
       flexDirection: 'row',
-      padding: 10,
+      paddingTop: 10,
+      paddingHorizontal: 10,
+      paddingBottom: Math.max(insets.bottom, 10),
       borderTopWidth: 1,
       borderTopColor: colors.border,
       backgroundColor: colors.card,
@@ -221,10 +312,15 @@ export default function MessagesScreen({ route, navigation }: any) {
       marginTop: 8,
     },
     header: {
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       paddingBottom: 16,
       paddingHorizontal: 20,
       backgroundColor: colors.primary,
+    },
+    avatarImage: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
     },
     headerTitle: {
       fontSize: 28,
@@ -321,13 +417,20 @@ export default function MessagesScreen({ route, navigation }: any) {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.conversationItem}
-            onPress={() => loadConversation(item.id)}
+            onPress={() => loadConversation(item)}
           >
-            <View style={styles.conversationAvatar}>
-              <Text style={styles.conversationAvatarText}>
-                {item.otherUser?.firstName?.[0]}
-              </Text>
-            </View>
+            {item.otherUser?.avatarUrl || item.otherUser?.profilePictureUrl ? (
+              <Image
+                source={{ uri: item.otherUser?.avatarUrl || item.otherUser?.profilePictureUrl }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <View style={styles.conversationAvatar}>
+                <Text style={styles.conversationAvatarText}>
+                  {item.otherUser?.firstName?.[0]}{item.otherUser?.lastName?.[0]}
+                </Text>
+              </View>
+            )}
             <View style={styles.conversationInfo}>
               <Text style={styles.conversationName}>
                 {item.otherUser?.firstName} {item.otherUser?.lastName}

@@ -157,16 +157,26 @@ export default function PostDetailsScreen({ route, navigation }: any) {
     },
     postCard: {
       backgroundColor: colors.card,
+      padding: 20,
+      marginHorizontal: 20,
+      marginTop: 16,
+      marginBottom: 8,
       borderRadius: 12,
-      padding: 16,
-      marginBottom: 20,
       borderWidth: 1,
       borderColor: colors.border,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     postHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 12,
+      marginBottom: 16,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
     authorInfo: {
       flex: 1,
@@ -182,15 +192,16 @@ export default function PostDetailsScreen({ route, navigation }: any) {
       marginTop: 2,
     },
     postTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
+      fontSize: 24,
+      fontWeight: '700',
       color: colors.text,
       marginBottom: 12,
+      lineHeight: 32,
     },
     postContent: {
-      fontSize: 15,
+      fontSize: 16,
       color: colors.text,
-      lineHeight: 22,
+      lineHeight: 24,
       marginBottom: 16,
     },
     postActions: {
@@ -232,7 +243,9 @@ export default function PostDetailsScreen({ route, navigation }: any) {
       gap: 10,
     },
     commentsSection: {
-      marginTop: 8,
+      marginTop: 24,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
     },
     sectionTitle: {
       fontSize: 18,
@@ -243,15 +256,21 @@ export default function PostDetailsScreen({ route, navigation }: any) {
     commentCard: {
       backgroundColor: colors.card,
       borderRadius: 12,
-      padding: 14,
+      padding: 16,
       marginBottom: 12,
       borderWidth: 1,
       borderColor: colors.border,
     },
     commentHeader: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 8,
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    commentAuthorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      gap: 8,
     },
     commentAuthor: {
       fontSize: 14,
@@ -261,11 +280,12 @@ export default function PostDetailsScreen({ route, navigation }: any) {
     commentTime: {
       fontSize: 12,
       color: colors.secondary,
+      marginLeft: 8,
     },
     commentContent: {
-      fontSize: 14,
+      fontSize: 15,
       color: colors.text,
-      lineHeight: 20,
+      lineHeight: 22,
     },
     commentInputContainer: {
       flexDirection: 'row',
@@ -335,9 +355,9 @@ export default function PostDetailsScreen({ route, navigation }: any) {
     emptyComments: {
       textAlign: 'center',
       color: colors.secondary,
-      fontSize: 14,
-      marginTop: 20,
-      fontStyle: 'italic',
+      fontSize: 15,
+      marginTop: 12,
+      lineHeight: 22,
     },
   });
 
@@ -447,19 +467,25 @@ export default function PostDetailsScreen({ route, navigation }: any) {
         </View>
 
         <View style={styles.commentsSection}>
-          <Text style={styles.sectionTitle}>Comments</Text>
+          <Text style={styles.sectionTitle}>Comments ({comments.length})</Text>
           {comments.length === 0 ? (
-            <Text style={styles.emptyComments}>No comments yet. Be the first to comment!</Text>
+            <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+              <ChatBubbleLeftIcon size={48} color={colors.secondary} />
+              <Text style={styles.emptyComments}>No comments yet. Be the first to comment!</Text>
+            </View>
           ) : (
             comments.map((comment) => (
               <View key={comment.id} style={styles.commentCard}>
                 <View style={styles.commentHeader}>
-                  <Text style={styles.commentAuthor}>
-                    {comment.author?.firstName} {comment.author?.lastName}
-                  </Text>
-                  <Text style={styles.commentTime}>
-                    {format(new Date(comment.createdAt), 'MMM d')}
-                  </Text>
+                  <View style={styles.commentAuthorContainer}>
+                    <UserCircleIcon size={20} color={colors.secondary} />
+                    <Text style={styles.commentAuthor}>
+                      {comment.author?.firstName} {comment.author?.lastName}
+                    </Text>
+                    <Text style={styles.commentTime}>
+                      • {format(new Date(comment.createdAt), 'MMM d, h:mm a')}
+                    </Text>
+                  </View>
                 </View>
                 <Text style={styles.commentContent}>{comment.content}</Text>
               </View>

@@ -39,7 +39,7 @@ export default function NotificationsScreen({ navigation }: any) {
   const fetchNotifications = useCallback(async () => {
     try {
       const response = await notificationsAPI.list();
-      const data = response?.data?.notifications || response?.data || [];
+      const data = response?.data?.items || response?.items || response?.data?.notifications || response?.data || [];
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);

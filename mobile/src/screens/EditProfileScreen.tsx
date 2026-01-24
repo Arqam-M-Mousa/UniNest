@@ -12,20 +12,24 @@ import {
 } from 'react-native';
 import { ChevronLeftIcon, CameraIcon, UserCircleIcon } from 'react-native-heroicons/outline';
 import * as ImagePicker from 'expo-image-picker';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, uploadsAPI } from '../services/api';
 
 export default function EditProfileScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user, refreshUser } = useAuth();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     phoneNumber: (user as any)?.phoneNumber || '',
   });
-  const [profileImage, setProfileImage] = useState<string | null>(user?.profilePictureUrl || null);
+  const [profileImage, setProfileImage] = useState<string | null>(user?.profilePictureUrl || (user as any)?.avatarUrl || null);
+  const [newImageUri, setNewImageUri] = useState<string | null>(null);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -42,7 +46,24 @@ export default function EditProfileScreen({ navigation }: any) {
     });
 
     if (!result.canceled && result.assets[0]) {
+      setNewImageUri(result.assets[0].uri);
       setProfileImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadProfileImage = async (): Promise<boolean> => {
+    if (!newImageUri) return true;
+    
+    setUploadingImage(true);
+    try {
+      await uploadsAPI.uploadProfilePicture(newImageUri);
+      return true;
+    } catch (error: any) {
+      console.error('Failed to upload profile picture:', error);
+      Alert.alert('Error', error.message || 'Failed to upload profile picture.');
+      return false;
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -54,6 +75,16 @@ export default function EditProfileScreen({ navigation }: any) {
 
     setLoading(true);
     try {
+      // Upload profile image first if changed
+      if (newImageUri) {
+        const uploadSuccess = await uploadProfileImage();
+        if (!uploadSuccess) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Update profile data
       await userAPI.updateProfile({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
@@ -79,7 +110,7 @@ export default function EditProfileScreen({ navigation }: any) {
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 16,
-      paddingTop: 60,
+      paddingTop: insets.top + 10,
       paddingBottom: 16,
       backgroundColor: colors.card,
       borderBottomWidth: 1,
@@ -176,10 +207,10 @@ export default function EditProfileScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.saveButton}
           onPress={handleSave}
-          disabled={loading}
+          disabled={loading || uploadingImage}
           activeOpacity={0.7}
         >
-          {loading ? (
+          {loading || uploadingImage ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
             <Text style={styles.saveButtonText}>Save</Text>

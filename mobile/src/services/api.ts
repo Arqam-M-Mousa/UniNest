@@ -430,4 +430,18 @@ export const reviewsAPI = {
     apiRequest(`/api/reviews/${reviewId}/helpful`, { method: 'POST' }),
 };
 
+export const aiChatAPI = {
+  sendMessage: async (message: string, conversationId?: string) =>
+    apiRequest('/api/ai-chat/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, conversationId }),
+    }),
+  getHistory: async (conversationId: string) =>
+    apiRequest(`/api/ai-chat/history/${conversationId}`),
+  getConversations: async () =>
+    apiRequest('/api/ai-chat/conversations'),
+  deleteConversation: async (conversationId: string) =>
+    apiRequest(`/api/ai-chat/conversation/${conversationId}`, { method: 'DELETE' }),
+};
+
 export default apiRequest;

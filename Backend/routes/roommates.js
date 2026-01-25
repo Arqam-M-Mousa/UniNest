@@ -531,7 +531,7 @@ router.get(
                 smokingAllowed,
                 petsAllowed,
                 major,
-                limit = 20,
+                limit = 10,
                 offset = 0,
             } = req.query;
 
@@ -539,7 +539,19 @@ router.get(
                 where: { userId: req.user.id },
             });
 
-            if (myProfile && !myProfile.isActive) {
+            // If user doesn't have a profile, return empty results with flag
+            if (!myProfile) {
+                return sendSuccess(res, {
+                    profiles: [],
+                    total: 0,
+                    hasProfile: false,
+                    isProfileActive: false,
+                    message: "Create your profile to start matching with roommates",
+                });
+            }
+
+            // If profile is inactive, return empty results with flag
+            if (!myProfile.isActive) {
                 return sendSuccess(res, {
                     profiles: [],
                     total: 0,
@@ -549,14 +561,22 @@ router.get(
                 });
             }
 
+            // Get current user info for filtering
+            const currentUser = await User.findByPk(req.user.id);
+            const currentUserGender = currentUser?.gender;
+            const currentUserUniversityId = myProfile.universityId || currentUser?.universityId;
+
             const where = {
                 userId: { [Op.ne]: req.user.id },
                 isActive: true,
             };
 
-            if (universityId) {
-                where.universityId = universityId;
+            // REQUIRED: Filter by same university - this cannot be overridden
+            if (currentUserUniversityId) {
+                where.universityId = currentUserUniversityId;
             }
+
+            // Optional filters from query params (universityId removed - must match user's university)
             if (minBudget) {
                 where.maxBudget = { [Op.gte]: parseFloat(minBudget) };
             }
@@ -579,9 +599,14 @@ router.get(
                 where.major = major;
             }
 
-            const currentUser = await User.findByPk(req.user.id);
-            const currentUserGender = currentUser?.gender;
+            // Build user where clause for gender filtering
+            const userWhere = {};
+            // REQUIRED: Filter by same gender
+            if (currentUserGender) {
+                userWhere.gender = currentUserGender;
+            }
 
+            // Fetch more profiles to ensure we have enough after filtering
             const profiles = await RoommateProfile.findAll({
                 where,
                 include: [
@@ -589,7 +614,8 @@ router.get(
                         model: User,
                         as: "user",
                         attributes: ["id", "firstName", "lastName", "avatarUrl", "profilePictureUrl", "gender"],
-                        where: currentUserGender ? { gender: currentUserGender } : {},
+                        where: userWhere,
+                        required: true, // Inner join to ensure user exists and matches gender
                     },
                     {
                         model: University,
@@ -597,17 +623,15 @@ router.get(
                         attributes: ["id", "name", "city"],
                     },
                 ],
-                limit: Math.min(parseInt(limit), 50),
+                limit: Math.min(parseInt(limit) * 5, 100), // Fetch more for better sorting
                 offset: parseInt(offset),
                 order: [["createdAt", "DESC"]],
             });
 
-            const userWeights = myProfile ? getUserWeights(myProfile.matchingPriorities) : null;
+            const userWeights = getUserWeights(myProfile.matchingPriorities);
 
             const results = profiles.map((profile) => {
-                const compatibilityResult = myProfile
-                    ? calculateCompatibilityScore(myProfile, profile, userWeights)
-                    : null;
+                const compatibilityResult = calculateCompatibilityScore(myProfile, profile, userWeights);
 
                 return {
                     id: profile.id,
@@ -628,19 +652,22 @@ router.get(
                     interests: profile.interests,
                     moveInDate: profile.moveInDate,
                     preferredAreas: profile.preferredAreas,
-                    compatibilityScore: compatibilityResult?.score || null,
+                    compatibilityScore: compatibilityResult?.score || 0,
                     sameMajor: compatibilityResult?.sameMajor || 0,
                 };
             });
 
-            if (myProfile) {
-                results.sort((a, b) => (b.compatibilityScore || 0) - (a.compatibilityScore || 0));
-            }
+            // Sort by compatibility score (highest first) and return top matches
+            results.sort((a, b) => (b.compatibilityScore || 0) - (a.compatibilityScore || 0));
+            
+            // Return only the top matches based on limit
+            const topMatches = results.slice(0, parseInt(limit));
 
             return sendSuccess(res, {
-                profiles: results,
-                total: results.length,
-                hasProfile: !!myProfile,
+                profiles: topMatches,
+                total: topMatches.length,
+                hasProfile: true,
+                isProfileActive: true,
             });
         } catch (error) {
             console.error("Failed to search roommates:", error);
@@ -769,8 +796,18 @@ router.post(
             }
 
             const currentUser = await User.findByPk(req.user.id);
+            
+            // Check gender matching
             if (currentUser.gender && targetUser.gender && currentUser.gender !== targetUser.gender) {
                 return sendError(res, "You can only connect with roommates of the same gender", HTTP_STATUS.BAD_REQUEST);
+            }
+
+            // Check university matching
+            const senderUniversityId = senderProfile.universityId || currentUser.universityId;
+            const targetUniversityId = targetProfile.universityId || targetUser.universityId;
+            
+            if (senderUniversityId && targetUniversityId && senderUniversityId !== targetUniversityId) {
+                return sendError(res, "You can only connect with roommates from the same university", HTTP_STATUS.BAD_REQUEST);
             }
 
             const existingMatch = await RoommateMatch.findOne({

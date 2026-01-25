@@ -15,6 +15,7 @@ import {
   ChartBarIcon,
   MegaphoneIcon,
   FlagIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -419,6 +420,16 @@ const Header = () => {
                       <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                       <span className="font-medium">
                         {t("myProfile")}
+                      </span>
+                    </Link>
+                    <Link
+                      to="/ai-chat"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                    >
+                      <SparklesIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                      <span className="font-medium">
+                        {user?.role === 'Student' ? 'AI Assistant ' : 'AI Property Expert'}
                       </span>
                     </Link>
                     {user?.role === "Student" && (

@@ -63,7 +63,7 @@ function RoommateSearch() {
 
             if (searchRes.data) {
                 setProfiles(searchRes.data.profiles || []);
-                setHasProfile(searchRes.data.hasProfile);
+                setHasProfile(searchRes.data.hasProfile !== false);
                 setIsProfileActive(searchRes.data.isProfileActive !== false);
             }
             if (matchesRes.data) {
@@ -188,22 +188,6 @@ function RoommateSearch() {
                     <p className="text-[var(--color-text-soft)] text-lg">
                         {t("findRoommatesSubtitle")}
                     </p>
-
-                    {/* Profile CTA if no profile */}
-                    {!hasProfile && (
-                        <div className="mt-6 p-4 bg-[var(--color-accent)]/10 backdrop-blur rounded-xl flex items-center justify-between border border-[var(--color-accent)]/20">
-                            <div>
-                                <p className="font-medium text-[var(--color-text)]">{t("createProfileToMatch")}</p>
-                                <p className="text-sm text-[var(--color-text-soft)]">{t("createProfileHint")}</p>
-                            </div>
-                            <button
-                                onClick={() => navigate("/roommates/profile")}
-                                className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:opacity-90 transition-all"
-                            >
-                                {t("createProfile")}
-                            </button>
-                        </div>
-                    )}
 
                     {/* Inactive Profile Warning */}
                     {hasProfile && !isProfileActive && (
@@ -333,7 +317,26 @@ function RoommateSearch() {
                         </div>
 
                         {/* Results Grid */}
-                        {profiles.length > 0 ? (
+                        {!hasProfile ? (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
+                                    <UserPlusIcon className="w-10 h-10 text-[var(--color-accent)]" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+                                    {t("createProfileToMatch")}
+                                </h3>
+                                <p className="text-[var(--color-text-muted)] mb-4">
+                                    {t("createProfileHint")}
+                                </p>
+                                <button
+                                    onClick={() => navigate("/roommates/profile")}
+                                    className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-medium hover:opacity-90 transition-all inline-flex items-center gap-2"
+                                >
+                                    <UserPlusIcon className="w-5 h-5" />
+                                    {t("createProfile")}
+                                </button>
+                            </div>
+                        ) : profiles.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {profiles.map((profile) => (
                                     <RoommateCard
@@ -363,6 +366,28 @@ function RoommateSearch() {
 
                 {activeTab === "matches" && (
                     <div className="space-y-8">
+                        {/* No Profile Message */}
+                        {!hasProfile ? (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
+                                    <UserPlusIcon className="w-10 h-10 text-[var(--color-accent)]" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+                                    {t("createProfileToMatch")}
+                                </h3>
+                                <p className="text-[var(--color-text-muted)] mb-4">
+                                    {t("createProfileHint")}
+                                </p>
+                                <button
+                                    onClick={() => navigate("/roommates/profile")}
+                                    className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-medium hover:opacity-90 transition-all inline-flex items-center gap-2"
+                                >
+                                    <UserPlusIcon className="w-5 h-5" />
+                                    {t("createProfile")}
+                                </button>
+                            </div>
+                        ) : (
+                            <>
                         {/* Pending Received */}
                         {pendingReceived.length > 0 && (
                             <div>
@@ -528,6 +553,8 @@ function RoommateSearch() {
                                     {t("startConnecting")}
                                 </p>
                             </div>
+                        )}
+                            </>
                         )}
                     </div>
                 )}

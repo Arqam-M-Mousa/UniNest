@@ -40,6 +40,7 @@ import LandlordDashboard from "./pages/landlord/LandlordDashboard";
 import AvailabilityManager from "./pages/landlord/AvailabilityManager";
 import PropertyPriceHistory from "./pages/properties/PropertyPriceHistory";
 import PropertyAllReviews from "./pages/properties/PropertyAllReviews";
+import AIChatPage from "./pages/general/AIChatPage";
 
 // Scroll to top on route change to avoid preserving scroll between pages
 function ScrollToTop() {
@@ -93,6 +94,7 @@ function ThemedLayout() {
           <Route path="/landlord/availability" element={<AvailabilityManager />} />
           <Route path="/apartments/:id/price-history" element={<PropertyPriceHistory />} />
           <Route path="/apartments/:id/reviews" element={<PropertyAllReviews />} />
+          <Route path="/ai-chat" element={<AIChatPage />} />
         </Routes>
       </main>
       <Footer />

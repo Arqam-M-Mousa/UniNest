@@ -42,8 +42,12 @@ export default function MyListingsScreen({ navigation }: any) {
   const [listings, setListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const isStudent = user?.role === 'Student';
+  const isLandlord = user?.role === 'Landlord';
+  const isAdmin = user?.role === 'Admin';
+  
   const [activeTab, setActiveTab] = useState<'properties' | 'marketplace' | 'posts'>(
-    user?.role === 'landlord' ? 'properties' : 'marketplace'
+    isLandlord ? 'properties' : isStudent ? 'posts' : 'properties'
   );
 
   const fetchListings = async () => {
@@ -427,7 +431,7 @@ export default function MyListingsScreen({ navigation }: any) {
           style={styles.addButton} 
           onPress={() => {
             if (activeTab === 'properties') navigation.navigate('AddListing');
-            else if (activeTab === 'marketplace') navigation.navigate('AddMarketplaceListing');
+            else if (activeTab === 'marketplace') navigation.navigate('AddMarketplaceItem');
             else if (activeTab === 'posts') navigation.navigate('CreatePost');
           }} 
           activeOpacity={0.7}
@@ -436,27 +440,31 @@ export default function MyListingsScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {user?.role === 'student' ? (
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'marketplace' && styles.activeTab]}
-            onPress={() => setActiveTab('marketplace')}
-          >
-            <Text style={[styles.tabText, activeTab === 'marketplace' && styles.activeTabText]}>
-              Marketplace
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
-            onPress={() => setActiveTab('posts')}
-          >
-            <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
-              Posts
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.tabContainer}>
+      <View style={styles.tabContainer}>
+        {/* Students: Posts and Marketplace */}
+        {isStudent && (
+          <>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
+              onPress={() => setActiveTab('posts')}
+            >
+              <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
+                Posts
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'marketplace' && styles.activeTab]}
+              onPress={() => setActiveTab('marketplace')}
+            >
+              <Text style={[styles.tabText, activeTab === 'marketplace' && styles.activeTabText]}>
+                Marketplace
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+        
+        {/* Landlords: Properties only */}
+        {isLandlord && (
           <TouchableOpacity
             style={[styles.tab, activeTab === 'properties' && styles.activeTab]}
             onPress={() => setActiveTab('properties')}
@@ -465,8 +473,38 @@ export default function MyListingsScreen({ navigation }: any) {
               Properties
             </Text>
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+        
+        {/* Admins: All tabs */}
+        {isAdmin && (
+          <>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'properties' && styles.activeTab]}
+              onPress={() => setActiveTab('properties')}
+            >
+              <Text style={[styles.tabText, activeTab === 'properties' && styles.activeTabText]}>
+                Properties
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
+              onPress={() => setActiveTab('posts')}
+            >
+              <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
+                Posts
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'marketplace' && styles.activeTab]}
+              onPress={() => setActiveTab('marketplace')}
+            >
+              <Text style={[styles.tabText, activeTab === 'marketplace' && styles.activeTabText]}>
+                Marketplace
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
 
       {listings.length === 0 ? (
         <View style={styles.emptyContainer}>

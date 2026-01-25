@@ -20,20 +20,24 @@ import {
   ChevronLeftIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { propertyListingsAPI } from '../services/api';
 
 export default function PropertiesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAllUniversities, setShowAllUniversities] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     minPrice: '',
     maxPrice: '',
     bedrooms: '',
+    universityId: user?.universityId || '',
   });
 
   useEffect(() => {
@@ -48,7 +52,14 @@ export default function PropertiesScreen({ navigation }: any) {
         setLoading(true);
       }
       setError(null);
-      const response = await propertyListingsAPI.list(filters);
+      
+      // Apply university filter unless user wants to see all
+      const searchFilters = {
+        ...filters,
+        universityId: showAllUniversities ? '' : (user?.universityId || ''),
+      };
+      
+      const response = await propertyListingsAPI.list(searchFilters);
       const data = response?.data?.listings || response?.listings || response?.data || [];
       const transformed = (Array.isArray(data) ? data : []).map((item: any) => ({
         ...item,
@@ -236,6 +247,19 @@ export default function PropertiesScreen({ navigation }: any) {
       fontSize: 14,
       fontWeight: '600',
     },
+    universityToggle: {
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      marginTop: 12,
+      alignItems: 'center',
+    },
+    universityToggleText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '600',
+    },
   });
 
   return (
@@ -259,6 +283,20 @@ export default function PropertiesScreen({ navigation }: any) {
             returnKeyType="search"
           />
         </View>
+        {user?.universityId && (
+          <TouchableOpacity
+            style={styles.universityToggle}
+            onPress={() => {
+              setShowAllUniversities(!showAllUniversities);
+              setTimeout(() => loadProperties(), 100);
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.universityToggleText}>
+              {showAllUniversities ? 'Show My University Only' : 'Show All Universities'}
+            </Text>
+          </TouchableOpacity>
+        )}
         <View style={styles.filterContainer}>
           <View style={styles.filterRow}>
             <TextInput

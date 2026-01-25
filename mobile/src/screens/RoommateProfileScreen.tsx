@@ -8,13 +8,25 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
 import {
   ChevronLeftIcon,
   UserGroupIcon,
-  MapPinIcon,
   CurrencyDollarIcon,
   TrashIcon,
+  SparklesIcon,
+  MoonIcon,
+  BookOpenIcon,
+  HomeIcon,
+  AcademicCapIcon,
+  TagIcon,
+  FireIcon,
+  HeartIcon,
+  SpeakerWaveIcon,
+  AdjustmentsHorizontalIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { roommatesAPI } from '../services/api';
@@ -26,14 +38,30 @@ export default function RoommateProfileScreen({ navigation }: any) {
   const [hasProfile, setHasProfile] = useState(false);
   const [profile, setProfile] = useState({
     bio: '',
-    preferredLocation: '',
-    budgetMin: '',
-    budgetMax: '',
-    cleanliness: 'Moderate',
-    sleepSchedule: 'Flexible',
-    smokingPreference: 'No Preference',
-    petsPreference: 'No Preference',
-    guestPolicy: 'Occasional',
+    minBudget: '',
+    maxBudget: '',
+    cleanlinessLevel: 3,
+    noiseLevel: 3,
+    sleepSchedule: 'normal',
+    studyHabits: 'mixed',
+    smokingAllowed: false,
+    petsAllowed: false,
+    guestsAllowed: 'sometimes',
+    major: '',
+    interests: [] as string[],
+    isActive: true,
+    matchingPriorities: {
+      budget: 3,
+      cleanliness: 3,
+      noise: 3,
+      sleepSchedule: 3,
+      studyHabits: 3,
+      interests: 3,
+      major: 3,
+      smoking: 3,
+      pets: 3,
+      guests: 3,
+    },
   });
 
   useEffect(() => {
@@ -43,18 +71,35 @@ export default function RoommateProfileScreen({ navigation }: any) {
   const loadProfile = async () => {
     try {
       const response = await roommatesAPI.getProfile();
-      if (response.profile) {
+      if (response.data?.profile) {
+        const p = response.data.profile;
         setHasProfile(true);
         setProfile({
-          bio: response.profile.bio || '',
-          preferredLocation: response.profile.preferredLocation || '',
-          budgetMin: response.profile.budgetMin?.toString() || '',
-          budgetMax: response.profile.budgetMax?.toString() || '',
-          cleanliness: response.profile.cleanliness || 'Moderate',
-          sleepSchedule: response.profile.sleepSchedule || 'Flexible',
-          smokingPreference: response.profile.smokingPreference || 'No Preference',
-          petsPreference: response.profile.petsPreference || 'No Preference',
-          guestPolicy: response.profile.guestPolicy || 'Occasional',
+          bio: p.bio || '',
+          minBudget: p.minBudget?.toString() || '',
+          maxBudget: p.maxBudget?.toString() || '',
+          cleanlinessLevel: p.cleanlinessLevel || 3,
+          noiseLevel: p.noiseLevel || 3,
+          sleepSchedule: p.sleepSchedule || 'normal',
+          studyHabits: p.studyHabits || 'mixed',
+          smokingAllowed: p.smokingAllowed || false,
+          petsAllowed: p.petsAllowed || false,
+          guestsAllowed: p.guestsAllowed || 'sometimes',
+          major: p.major || '',
+          interests: p.interests || [],
+          isActive: p.isActive ?? true,
+          matchingPriorities: p.matchingPriorities || {
+            budget: 3,
+            cleanliness: 3,
+            noise: 3,
+            sleepSchedule: 3,
+            studyHabits: 3,
+            interests: 3,
+            major: 3,
+            smoking: 3,
+            pets: 3,
+            guests: 3,
+          },
         });
       }
     } catch (error: any) {
@@ -67,7 +112,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
   };
 
   const handleSave = async () => {
-    if (!profile.budgetMin || !profile.budgetMax) {
+    if (!profile.minBudget || !profile.maxBudget) {
       Alert.alert('Error', 'Please enter your budget range');
       return;
     }
@@ -76,11 +121,12 @@ export default function RoommateProfileScreen({ navigation }: any) {
     try {
       await roommatesAPI.saveProfile({
         ...profile,
-        budgetMin: parseInt(profile.budgetMin),
-        budgetMax: parseInt(profile.budgetMax),
+        minBudget: parseInt(profile.minBudget),
+        maxBudget: parseInt(profile.maxBudget),
       });
       setHasProfile(true);
       Alert.alert('Success', 'Roommate profile saved successfully');
+      loadProfile();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to save profile');
     } finally {
@@ -122,11 +168,28 @@ export default function RoommateProfileScreen({ navigation }: any) {
     );
   };
 
-  const cleanlinessOptions = ['Very Clean', 'Moderate', 'Relaxed'];
-  const sleepOptions = ['Early Bird', 'Night Owl', 'Flexible'];
-  const smokingOptions = ['No Smoking', 'Outside Only', 'No Preference'];
-  const petsOptions = ['Love Pets', 'No Pets', 'No Preference'];
-  const guestOptions = ['Rarely', 'Occasional', 'Frequently'];
+  const sleepOptions = ['early', 'normal', 'late'];
+  const studyOptions = ['home', 'mixed', 'library'];
+  const guestsOptions = ['never', 'rarely', 'sometimes', 'often'];
+  
+  const majorOptions = [
+    'majorEngineering', 'majorComputerScience', 'majorMedicine', 'majorBusiness',
+    'majorLaw', 'majorArts', 'majorScience', 'majorEducation',
+  ];
+  
+  const interestOptions = [
+    'interestSports', 'interestGaming', 'interestReading', 'interestMusic',
+    'interestCooking', 'interestFitness', 'interestMovies', 'interestTravel',
+  ];
+  
+  const toggleInterest = (interest: string) => {
+    setProfile(prev => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter(i => i !== interest)
+        : [...prev.interests, interest]
+    }));
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -160,6 +223,12 @@ export default function RoommateProfileScreen({ navigation }: any) {
       fontWeight: '600',
       color: colors.text,
       marginBottom: 12,
+    },
+    sectionSubtitle: {
+      fontSize: 13,
+      color: colors.secondary,
+      marginBottom: 16,
+      lineHeight: 18,
     },
     inputContainer: {
       marginBottom: 16,
@@ -212,6 +281,62 @@ export default function RoommateProfileScreen({ navigation }: any) {
       color: colors.text,
     },
     optionTextActive: {
+      color: '#FFFFFF',
+    },
+    sliderContainer: {
+      marginBottom: 16,
+    },
+    sliderLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    sliderValue: {
+      fontSize: 12,
+      color: colors.secondary,
+      marginBottom: 8,
+    },
+    slider: {
+      width: '100%',
+      height: 40,
+    },
+    switchRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    switchLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.text,
+    },
+    interestBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      marginRight: 8,
+      marginBottom: 8,
+    },
+    interestBadgeActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    interestText: {
+      fontSize: 13,
+      color: colors.text,
+    },
+    interestTextActive: {
       color: '#FFFFFF',
     },
     saveButton: {
@@ -274,10 +399,33 @@ export default function RoommateProfileScreen({ navigation }: any) {
               selectedValue === option && styles.optionTextActive,
             ]}
           >
-            {option}
+            {option.replace('major', '').replace('interest', '')}
           </Text>
         </TouchableOpacity>
       ))}
+    </View>
+  );
+  
+  const renderSlider = (label: string, value: number, onChange: (val: number) => void, min = 1, max = 5) => (
+    <View style={styles.sliderContainer}>
+      <Text style={styles.sliderLabel}>{label}</Text>
+      <Text style={styles.sliderValue}>Level: {value}</Text>
+      <View style={styles.optionsRow}>
+        {[1, 2, 3, 4, 5].map(num => (
+          <TouchableOpacity
+            key={num}
+            style={[
+              styles.optionButton,
+              value === num && styles.optionButtonActive,
+            ]}
+            onPress={() => onChange(num)}
+          >
+            <Text style={[styles.optionText, value === num && styles.optionTextActive]}>
+              {num}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 
@@ -307,6 +455,19 @@ export default function RoommateProfileScreen({ navigation }: any) {
       </View>
 
       <ScrollView style={styles.content}>
+        {/* Profile Status */}
+        <View style={styles.section}>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Profile Active</Text>
+            <Switch
+              value={profile.isActive}
+              onValueChange={(val) => setProfile({ ...profile, isActive: val })}
+              trackColor={{ false: colors.border, true: colors.primary }}
+            />
+          </View>
+        </View>
+
+        {/* About */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About You</Text>
           <View style={styles.inputContainer}>
@@ -322,30 +483,19 @@ export default function RoommateProfileScreen({ navigation }: any) {
           </View>
         </View>
 
+        {/* Budget */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          
+          <Text style={styles.sectionTitle}>Budget</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Preferred Location</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Near campus, Downtown"
-              placeholderTextColor={colors.secondary}
-              value={profile.preferredLocation}
-              onChangeText={(text) => setProfile({ ...profile, preferredLocation: text })}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Budget Range ($/month)</Text>
+            <Text style={styles.label}>Budget Range (NIS/month)</Text>
             <View style={styles.budgetRow}>
               <View style={styles.budgetInput}>
                 <TextInput
                   style={styles.input}
                   placeholder="Min"
                   placeholderTextColor={colors.secondary}
-                  value={profile.budgetMin}
-                  onChangeText={(text) => setProfile({ ...profile, budgetMin: text })}
+                  value={profile.minBudget}
+                  onChangeText={(text) => setProfile({ ...profile, minBudget: text })}
                   keyboardType="numeric"
                 />
               </View>
@@ -354,8 +504,8 @@ export default function RoommateProfileScreen({ navigation }: any) {
                   style={styles.input}
                   placeholder="Max"
                   placeholderTextColor={colors.secondary}
-                  value={profile.budgetMax}
-                  onChangeText={(text) => setProfile({ ...profile, budgetMax: text })}
+                  value={profile.maxBudget}
+                  onChangeText={(text) => setProfile({ ...profile, maxBudget: text })}
                   keyboardType="numeric"
                 />
               </View>
@@ -363,43 +513,127 @@ export default function RoommateProfileScreen({ navigation }: any) {
           </View>
         </View>
 
+        {/* Academic */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Lifestyle</Text>
-
+          <Text style={styles.sectionTitle}>Academic</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Cleanliness</Text>
-            {renderOptionButtons(cleanlinessOptions, profile.cleanliness, (value) =>
-              setProfile({ ...profile, cleanliness: value })
+            <Text style={styles.label}>Major</Text>
+            {renderOptionButtons(majorOptions, profile.major, (value) =>
+              setProfile({ ...profile, major: value })
             )}
           </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Study Habits</Text>
+            {renderOptionButtons(studyOptions, profile.studyHabits, (value) =>
+              setProfile({ ...profile, studyHabits: value })
+            )}
+          </View>
+        </View>
 
+        {/* Interests */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Interests</Text>
+          <View style={styles.optionsRow}>
+            {interestOptions.map(interest => (
+              <TouchableOpacity
+                key={interest}
+                style={[
+                  styles.interestBadge,
+                  profile.interests.includes(interest) && styles.interestBadgeActive,
+                ]}
+                onPress={() => toggleInterest(interest)}
+              >
+                <Text style={[
+                  styles.interestText,
+                  profile.interests.includes(interest) && styles.interestTextActive,
+                ]}>
+                  {interest.replace('interest', '')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Living Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Living Preferences</Text>
+          {renderSlider('Cleanliness Level', profile.cleanlinessLevel, (val) =>
+            setProfile({ ...profile, cleanlinessLevel: val })
+          )}
+          {renderSlider('Noise Tolerance', profile.noiseLevel, (val) =>
+            setProfile({ ...profile, noiseLevel: val })
+          )}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Sleep Schedule</Text>
             {renderOptionButtons(sleepOptions, profile.sleepSchedule, (value) =>
               setProfile({ ...profile, sleepSchedule: value })
             )}
           </View>
-
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Smoking</Text>
-            {renderOptionButtons(smokingOptions, profile.smokingPreference, (value) =>
-              setProfile({ ...profile, smokingPreference: value })
+            <Text style={styles.label}>Guests Policy</Text>
+            {renderOptionButtons(guestsOptions, profile.guestsAllowed, (value) =>
+              setProfile({ ...profile, guestsAllowed: value })
             )}
           </View>
+        </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Pets</Text>
-            {renderOptionButtons(petsOptions, profile.petsPreference, (value) =>
-              setProfile({ ...profile, petsPreference: value })
-            )}
+        {/* Lifestyle */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Lifestyle</Text>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Smoking Allowed</Text>
+            <Switch
+              value={profile.smokingAllowed}
+              onValueChange={(val) => setProfile({ ...profile, smokingAllowed: val })}
+              trackColor={{ false: colors.border, true: colors.primary }}
+            />
           </View>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Pets Allowed</Text>
+            <Switch
+              value={profile.petsAllowed}
+              onValueChange={(val) => setProfile({ ...profile, petsAllowed: val })}
+              trackColor={{ false: colors.border, true: colors.primary }}
+            />
+          </View>
+        </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Guests</Text>
-            {renderOptionButtons(guestOptions, profile.guestPolicy, (value) =>
-              setProfile({ ...profile, guestPolicy: value })
-            )}
-          </View>
+        {/* Matching Priorities */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Matching Priorities</Text>
+          <Text style={styles.sectionSubtitle}>
+            Set how important each factor is when matching (1 = Not Important, 5 = Very Important)
+          </Text>
+          {renderSlider('Budget Priority', profile.matchingPriorities.budget, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, budget: val } })
+          )}
+          {renderSlider('Cleanliness Priority', profile.matchingPriorities.cleanliness, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, cleanliness: val } })
+          )}
+          {renderSlider('Noise Priority', profile.matchingPriorities.noise, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, noise: val } })
+          )}
+          {renderSlider('Sleep Schedule Priority', profile.matchingPriorities.sleepSchedule, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, sleepSchedule: val } })
+          )}
+          {renderSlider('Study Habits Priority', profile.matchingPriorities.studyHabits, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, studyHabits: val } })
+          )}
+          {renderSlider('Interests Priority', profile.matchingPriorities.interests, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, interests: val } })
+          )}
+          {renderSlider('Major Priority', profile.matchingPriorities.major, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, major: val } })
+          )}
+          {renderSlider('Smoking Priority', profile.matchingPriorities.smoking, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, smoking: val } })
+          )}
+          {renderSlider('Pets Priority', profile.matchingPriorities.pets, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, pets: val } })
+          )}
+          {renderSlider('Guests Priority', profile.matchingPriorities.guests, (val) =>
+            setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, guests: val } })
+          )}
         </View>
 
         <TouchableOpacity

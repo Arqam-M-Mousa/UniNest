@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  Modal,
 } from 'react-native';
 import {
   ChevronLeftIcon,
@@ -19,11 +20,14 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { userAPI } from '../../services/api';
 
 export default function SettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { signout } = useAuth();
+  const { language, changeLanguage, t } = useLanguage();
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -129,6 +133,66 @@ export default function SettingsScreen({ navigation }: any) {
     dangerText: {
       color: colors.error,
     },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    modalContent: {
+      width: '100%',
+      maxWidth: 400,
+      borderRadius: 16,
+      padding: 24,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    languageOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      borderRadius: 12,
+      borderWidth: 2,
+      marginBottom: 12,
+    },
+    languageText: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    checkmark: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkmarkText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    cancelButton: {
+      paddingVertical: 14,
+      borderRadius: 12,
+      marginTop: 8,
+      alignItems: 'center',
+    },
+    cancelButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
   });
 
   return (
@@ -137,7 +201,7 @@ export default function SettingsScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerTitle}>{t('settings')}</Text>
       </View>
 
       <ScrollView>
@@ -170,13 +234,13 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Preferences</Text>
           <View style={styles.sectionContent}>
-            <TouchableOpacity style={styles.item}>
+            <TouchableOpacity style={styles.item} onPress={() => setLanguageModalVisible(true)}>
               <View style={styles.itemLeft}>
                 <GlobeAltIcon size={22} color={colors.text} style={styles.itemIcon} />
-                <Text style={styles.itemText}>Language</Text>
+                <Text style={styles.itemText}>{t('language')}</Text>
               </View>
               <View style={styles.itemRight}>
-                <Text style={styles.itemValue}>English</Text>
+                <Text style={styles.itemValue}>{language === 'en' ? t('english') : t('arabic')}</Text>
                 <ChevronRightIcon size={20} color={colors.secondary} />
               </View>
             </TouchableOpacity>
@@ -219,6 +283,87 @@ export default function SettingsScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Language Selection Modal */}
+      <Modal
+        visible={languageModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setLanguageModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setLanguageModalVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            style={[styles.modalContent, { backgroundColor: colors.card }]}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('selectLanguage')}</Text>
+            
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                { borderColor: colors.border },
+                language === 'en' && { backgroundColor: `${colors.primary}15`, borderColor: colors.primary },
+              ]}
+              onPress={() => {
+                changeLanguage('en');
+                setLanguageModalVisible(false);
+                Alert.alert(
+                  'Language Changed',
+                  'Please restart the app for the language change to take full effect.',
+                  [{ text: 'OK' }]
+                );
+              }}
+            >
+              <Text style={[styles.languageText, { color: language === 'en' ? colors.primary : colors.text }]}>
+                {t('english')}
+              </Text>
+              {language === 'en' && (
+                <View style={[styles.checkmark, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.checkmarkText}>✓</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                { borderColor: colors.border },
+                language === 'ar' && { backgroundColor: `${colors.primary}15`, borderColor: colors.primary },
+              ]}
+              onPress={() => {
+                changeLanguage('ar');
+                setLanguageModalVisible(false);
+                Alert.alert(
+                  'تم تغيير اللغة',
+                  'يرجى إعادة تشغيل التطبيق لتطبيق تغيير اللغة بالكامل.',
+                  [{ text: 'حسناً' }]
+                );
+              }}
+            >
+              <Text style={[styles.languageText, { color: language === 'ar' ? colors.primary : colors.text }]}>
+                {t('arabic')}
+              </Text>
+              {language === 'ar' && (
+                <View style={[styles.checkmark, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.checkmarkText}>✓</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.cancelButton, { backgroundColor: colors.border }]}
+              onPress={() => setLanguageModalVisible(false)}
+            >
+              <Text style={[styles.cancelButtonText, { color: colors.text }]}>{t('cancel')}</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }

@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { aiChatAPI } from '../../services/api';
 import { 
   PaperAirplaneIcon, 
@@ -46,6 +47,7 @@ interface Conversation {
 export default function AIChatScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,7 +57,7 @@ export default function AIChatScreen({ navigation }: any) {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  const assistantName = user?.role === 'Student' ? 'UniNest Assistant' : 'Property Expert';
+  const assistantName = user?.role === 'Student' ? t('aiChatUniNestAssistant') : t('aiChatPropertyExpert');
   const isStudent = user?.role === 'Student';
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function AIChatScreen({ navigation }: any) {
       setConversationId(convId);
     } catch (error) {
       console.error('Failed to load conversation:', error);
-      Alert.alert('Error', 'Failed to load conversation');
+      Alert.alert(t('error'), 'Failed to load conversation');
     } finally {
       setLoadingHistory(false);
     }
@@ -110,18 +112,18 @@ export default function AIChatScreen({ navigation }: any) {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
     
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t('aiChatJustNow');
+    if (diffMins < 60) return `${diffMins}${t('aiChatMinutesAgo')}`;
+    if (diffHours < 24) return `${diffHours}${t('aiChatHoursAgo')}`;
+    if (diffDays < 7) return `${diffDays}${t('aiChatDaysAgo')}`;
     return date.toLocaleDateString();
   };
 
   const getConversationTitle = (preview: string) => {
-    if (!preview) return 'New conversation';
+    if (!preview) return t('aiChatNewConversation');
     const cleaned = preview.replace(/[#*`_~]/g, '').trim();
     const title = cleaned.split('\n')[0].substring(0, 50);
-    return title || 'New conversation';
+    return title || t('aiChatNewConversation');
   };
 
   const sendMessage = async () => {
@@ -159,7 +161,7 @@ export default function AIChatScreen({ navigation }: any) {
       await loadConversations();
     } catch (error: any) {
       console.error('Failed to send message:', error);
-      Alert.alert('Error', error.message || 'Failed to send message');
+      Alert.alert(t('error'), error.message || 'Failed to send message');
       setMessages((prev) => prev.filter((msg) => msg.id !== tempUserMessage.id));
     } finally {
       setLoading(false);
@@ -168,12 +170,12 @@ export default function AIChatScreen({ navigation }: any) {
 
   const deleteConversation = (convId: string) => {
     Alert.alert(
-      'Delete Conversation',
-      'Are you sure you want to delete this conversation? This action cannot be undone.',
+      t('aiChatDeleteConversationTitle'),
+      t('aiChatDeleteConversationMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -184,7 +186,7 @@ export default function AIChatScreen({ navigation }: any) {
               }
             } catch (error) {
               console.error('Failed to delete conversation:', error);
-              Alert.alert('Error', 'Failed to delete conversation');
+              Alert.alert(t('error'), 'Failed to delete conversation');
             }
           },
         },
@@ -244,12 +246,12 @@ export default function AIChatScreen({ navigation }: any) {
     <View style={styles.emptyContainer}>
       <SparklesIcon size={64} color={colors.primary} />
       <Text style={[styles.emptyTitle, { color: colors.text }]}>
-        {user?.role === 'Student' ? 'Welcome! I\'m here to help!' : 'Property Expert at Your Service'}
+        {user?.role === 'Student' ? t('aiChatWelcomeStudent') : t('aiChatWelcomeProperty')}
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.secondary }]}>
         {user?.role === 'Student'
-          ? 'Ask me about cooking, cleaning, budgeting, or any student life tips!'
-          : 'Get expert advice on property marketing, pricing, and tenant management!'}
+          ? t('aiChatStudentDescription')
+          : t('aiChatLandlordDescription')}
       </Text>
     </View>
   );
@@ -274,7 +276,7 @@ export default function AIChatScreen({ navigation }: any) {
             style={[styles.sidebar, { backgroundColor: colors.card }]}
           >
             <View style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.sidebarTitle, { color: colors.text }]}>Conversations</Text>
+              <Text style={[styles.sidebarTitle, { color: colors.text }]}>{t('aiChatConversations')}</Text>
               <TouchableOpacity onPress={() => setSidebarVisible(false)}>
                 <XMarkIcon size={24} color={colors.text} />
               </TouchableOpacity>
@@ -295,7 +297,7 @@ export default function AIChatScreen({ navigation }: any) {
                 styles.newChatText,
                 { color: !conversationId ? '#FFFFFF' : colors.text }
               ]}>
-                New Chat
+                {t('aiChatNewChat')}
               </Text>
             </TouchableOpacity>
 
@@ -304,10 +306,10 @@ export default function AIChatScreen({ navigation }: any) {
                 <View style={styles.emptyConversations}>
                   <ChatBubbleLeftIcon size={48} color={colors.secondary} />
                   <Text style={[styles.emptyConversationsText, { color: colors.secondary }]}>
-                    No conversations yet
+                    {t('aiChatNoConversationsYet')}
                   </Text>
                   <Text style={[styles.emptyConversationsSubtext, { color: colors.secondary }]}>
-                    Start chatting to create one!
+                    {t('aiChatStartChatting')}
                   </Text>
                 </View>
               ) : (
@@ -354,7 +356,7 @@ export default function AIChatScreen({ navigation }: any) {
                         </Text>
                         <Text style={[styles.conversationDot, { color: colors.secondary }]}>•</Text>
                         <Text style={[styles.conversationCount, { color: colors.secondary }]}>
-                          {conv.messageCount} msg
+                          {conv.messageCount} {t('aiChatMessages')}
                         </Text>
                       </View>
                     </View>
@@ -383,7 +385,7 @@ export default function AIChatScreen({ navigation }: any) {
             </Text>
           </View>
           <Text style={[styles.headerSubtitle, { color: colors.secondary }]}>
-            {user?.role === 'Student' ? 'Your caring assistant' : 'Property marketing expert'}
+            {user?.role === 'Student' ? t('aiChatYourCaringAssistant') : t('aiChatPropertyMarketingExpert')}
           </Text>
         </View>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -418,7 +420,7 @@ export default function AIChatScreen({ navigation }: any) {
         <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-            placeholder={user?.role === 'Student' ? 'Ask me anything...' : 'How can I help with your property?'}
+            placeholder={user?.role === 'Student' ? t('aiChatAskMeAnything') : t('aiChatHowCanIHelpPropertyInput')}
             placeholderTextColor={colors.secondary}
             value={inputText}
             onChangeText={setInputText}

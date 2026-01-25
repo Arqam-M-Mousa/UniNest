@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateToken } = require("../middleware/auth");
+const { authenticate } = require("../middleware/auth");
 const { ChatMessage, User } = require("../models");
 const { OpenAI } = require("openai");
 
@@ -32,7 +32,7 @@ const LANDLORD_SYSTEM_PROMPT = process.env.LANDLORD_AI_PROMPT || `You are an exp
 
 Be professional, data-driven, and strategic. Provide actionable advice that can increase their property's visibility and rental success. Focus on ROI and practical improvements.`;
 
-router.post("/chat", authenticateToken, async (req, res) => {
+router.post("/chat", authenticate, async (req, res) => {
   try {
     const { message, conversationId } = req.body;
     const userId = req.user.id;
@@ -105,7 +105,7 @@ router.post("/chat", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/history/:conversationId", authenticateToken, async (req, res) => {
+router.get("/history/:conversationId", authenticate, async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user.id;
@@ -125,7 +125,7 @@ router.get("/history/:conversationId", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/conversations", authenticateToken, async (req, res) => {
+router.get("/conversations", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -166,7 +166,7 @@ router.get("/conversations", authenticateToken, async (req, res) => {
   }
 });
 
-router.delete("/conversation/:conversationId", authenticateToken, async (req, res) => {
+router.delete("/conversation/:conversationId", authenticate, async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user.id;

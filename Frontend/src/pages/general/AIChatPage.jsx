@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { aiChatAPI } from '../../services/api';
-import { Sparkles, Send, Trash2, ArrowLeft } from 'lucide-react';
+import { SparklesIcon, PaperAirplaneIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
 export default function AIChatPage() {
@@ -90,7 +90,7 @@ export default function AIChatPage() {
                 onClick={() => navigate(-1)}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
-                <ArrowLeft size={24} />
+                <ArrowLeftIcon className="w-6 h-6" />
               </button>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -106,7 +106,7 @@ export default function AIChatPage() {
                 className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
                 title="Clear chat"
               >
-                <Trash2 size={20} />
+                <TrashIcon className="w-5 h-5" />
               </button>
             )}
           </div>
@@ -116,7 +116,7 @@ export default function AIChatPage() {
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
-              <Sparkles size={64} className="text-blue-600 dark:text-blue-400 mb-4" />
+              <SparklesIcon className="w-16 h-16 text-blue-600 dark:text-blue-400 mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 {user?.role === 'Student' ? "Welcome! I'm here to help!" : 'Property Expert at Your Service'}
               </h2>
@@ -193,7 +193,7 @@ export default function AIChatPage() {
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Send size={20} />
+                <PaperAirplaneIcon className="w-5 h-5" />
               )}
             </button>
           </form>

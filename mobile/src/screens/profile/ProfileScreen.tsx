@@ -26,20 +26,22 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ProfileScreen({ navigation }: any) {
   const { colors, theme, toggleTheme } = useTheme();
   const { user, signout } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const handleSignOut = () => {
     Alert.alert(
-      'Sign Out',
+      t('logout'),
       'Are you sure you want to sign out?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'Sign Out', 
+          text: t('logout'), 
           style: 'destructive', 
           onPress: async () => {
             try {
@@ -165,7 +167,7 @@ export default function ProfileScreen({ navigation }: any) {
         >
           <View style={styles.sectionItemLeft}>
             <PencilSquareIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Edit Profile</Text>
+            <Text style={styles.sectionText}>{t('editProfile')}</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>
@@ -178,7 +180,7 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={styles.sectionItemLeft}>
             <SparklesIcon size={22} color={colors.primary} style={styles.sectionIcon} />
             <Text style={[styles.sectionText, { color: colors.primary, fontWeight: '600' }]}>
-              {user?.role === 'Student' ? 'AI Assistant' : 'AI Property Expert'}
+              {user?.role === 'Student' ? t('aiChatUniNestAssistant') : t('aiChatPropertyExpert')}
             </Text>
           </View>
           <ChevronRightIcon size={20} color={colors.primary} />
@@ -193,7 +195,7 @@ export default function ProfileScreen({ navigation }: any) {
           >
             <View style={styles.sectionItemLeft}>
               <HomeModernIcon size={22} color={colors.text} style={styles.sectionIcon} />
-              <Text style={styles.sectionText}>My Listings</Text>
+              <Text style={styles.sectionText}>{t('myListings')}</Text>
             </View>
             <ChevronRightIcon size={20} color={colors.secondary} />
           </TouchableOpacity>
@@ -208,7 +210,7 @@ export default function ProfileScreen({ navigation }: any) {
           >
             <View style={styles.sectionItemLeft}>
               <UserGroupIcon size={22} color={colors.text} style={styles.sectionIcon} />
-              <Text style={styles.sectionText}>Roommate Profile</Text>
+              <Text style={styles.sectionText}>{t('roommateProfile')}</Text>
             </View>
             <ChevronRightIcon size={20} color={colors.secondary} />
           </TouchableOpacity>
@@ -221,7 +223,7 @@ export default function ProfileScreen({ navigation }: any) {
         >
           <View style={styles.sectionItemLeft}>
             <HeartIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Favorites</Text>
+            <Text style={styles.sectionText}>{t('favorites')}</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>
@@ -247,7 +249,7 @@ export default function ProfileScreen({ navigation }: any) {
         >
           <View style={styles.sectionItemLeft}>
             <BellIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Notifications</Text>
+            <Text style={styles.sectionText}>{t('notifications')}</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>
@@ -259,7 +261,7 @@ export default function ProfileScreen({ navigation }: any) {
         >
           <View style={styles.sectionItemLeft}>
             <Cog6ToothIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Settings</Text>
+            <Text style={styles.sectionText}>{t('settings')}</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>
@@ -294,7 +296,7 @@ export default function ProfileScreen({ navigation }: any) {
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <ArrowRightOnRectangleIcon size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={styles.signOutText}>{t('logout')}</Text>
         </View>
       </TouchableOpacity>
     </ScrollView>

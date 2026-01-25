@@ -14,6 +14,7 @@ const seedNotifications = require("./notifications");
 const seedFavorites = require("./favorites");
 const seedReports = require("./reports");
 const seedVerificationRequests = require("./verificationRequests");
+const seedChatMessages = require("./chatMessages");
 
 /**
  * Run all seeds in the correct order
@@ -76,6 +77,9 @@ const runSeeds = async () => {
 
     console.log("\n--- Seeding Verification Requests ---");
     await seedVerificationRequests();
+
+    console.log("\n--- Seeding Chat Messages Table ---");
+    await seedChatMessages();
 
     console.log("\n========== ALL SEEDS COMPLETED SUCCESSFULLY ==========\n");
     process.exit(0);

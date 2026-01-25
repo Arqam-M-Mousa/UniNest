@@ -12,17 +12,19 @@ import {
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SignInScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { signin } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('error'), t('requiredField'));
       return;
     }
 
@@ -30,7 +32,7 @@ export default function SignInScreen({ navigation }: any) {
     try {
       await signin(email, password);
     } catch (error: any) {
-      Alert.alert('Sign In Failed', error.message || 'Invalid credentials');
+      Alert.alert(t('error'), error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -115,12 +117,12 @@ export default function SignInScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue to UniNest</Text>
+        <Text style={styles.title}>{t('welcomeBack')}</Text>
+        <Text style={styles.subtitle}>{t('welcomeBack')}</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder={t('email')}
           placeholderTextColor={colors.secondary}
           value={email}
           onChangeText={setEmail}
@@ -131,7 +133,7 @@ export default function SignInScreen({ navigation }: any) {
 
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder={t('password')}
           placeholderTextColor={colors.secondary}
           value={password}
           onChangeText={setPassword}
@@ -146,7 +148,7 @@ export default function SignInScreen({ navigation }: any) {
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? `${t('signIn')}...` : t('signIn')}
           </Text>
         </TouchableOpacity>
 
@@ -155,13 +157,13 @@ export default function SignInScreen({ navigation }: any) {
           onPress={() => navigation.navigate('ForgotPassword')}
           activeOpacity={0.7}
         >
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          <Text style={styles.forgotPasswordText}>{t('forgotPassword')}</Text>
         </TouchableOpacity>
 
         <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Don't have an account?</Text>
+          <Text style={styles.signUpText}>{t('noAccount')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')} activeOpacity={0.7}>
-            <Text style={styles.signUpLink}>Sign Up</Text>
+            <Text style={styles.signUpLink}>{t('signUp')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

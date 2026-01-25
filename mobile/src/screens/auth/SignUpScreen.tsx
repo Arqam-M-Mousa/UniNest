@@ -12,10 +12,12 @@ import {
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SignUpScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { signup } = useAuth();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,17 +30,17 @@ export default function SignUpScreen({ navigation }: any) {
 
   const handleSignUp = async () => {
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('error'), t('requiredField'));
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(t('error'), t('passwordsDoNotMatch'));
       return;
     }
 
     if (formData.password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert(t('error'), t('passwordTooShort'));
       return;
     }
 
@@ -52,7 +54,7 @@ export default function SignUpScreen({ navigation }: any) {
         role: formData.role,
       });
     } catch (error: any) {
-      Alert.alert('Sign Up Failed', error.message || 'Unable to create account');
+      Alert.alert(t('error'), error.message || 'Unable to create account');
     } finally {
       setLoading(false);
     }
@@ -154,12 +156,12 @@ export default function SignUpScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Sign up to get started with UniNest</Text>
+        <Text style={styles.title}>{t('createYourAccount')}</Text>
+        <Text style={styles.subtitle}>{t('createYourAccount')}</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="First Name"
+          placeholder={t('firstName')}
           placeholderTextColor={colors.secondary}
           value={formData.firstName}
           onChangeText={(text) => setFormData({ ...formData, firstName: text })}
@@ -168,7 +170,7 @@ export default function SignUpScreen({ navigation }: any) {
 
         <TextInput
           style={styles.input}
-          placeholder="Last Name"
+          placeholder={t('lastName')}
           placeholderTextColor={colors.secondary}
           value={formData.lastName}
           onChangeText={(text) => setFormData({ ...formData, lastName: text })}
@@ -177,7 +179,7 @@ export default function SignUpScreen({ navigation }: any) {
 
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder={t('email')}
           placeholderTextColor={colors.secondary}
           value={formData.email}
           onChangeText={(text) => setFormData({ ...formData, email: text })}
@@ -188,7 +190,7 @@ export default function SignUpScreen({ navigation }: any) {
 
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder={t('password')}
           placeholderTextColor={colors.secondary}
           value={formData.password}
           onChangeText={(text) => setFormData({ ...formData, password: text })}
@@ -198,7 +200,7 @@ export default function SignUpScreen({ navigation }: any) {
 
         <TextInput
           style={styles.input}
-          placeholder="Confirm Password"
+          placeholder={`${t('confirm')} ${t('password')}`}
           placeholderTextColor={colors.secondary}
           value={formData.confirmPassword}
           onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
@@ -220,7 +222,7 @@ export default function SignUpScreen({ navigation }: any) {
                 formData.role === 'student' && styles.roleTextActive,
               ]}
             >
-              Student
+              {t('student')}
             </Text>
           </TouchableOpacity>
 
@@ -237,7 +239,7 @@ export default function SignUpScreen({ navigation }: any) {
                 formData.role === 'landlord' && styles.roleTextActive,
               ]}
             >
-              Landlord
+              {t('landlord')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -249,14 +251,14 @@ export default function SignUpScreen({ navigation }: any) {
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? `${t('signUp')}...` : t('signUp')}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.signInContainer}>
-          <Text style={styles.signInText}>Already have an account?</Text>
+          <Text style={styles.signInText}>{t('haveAccount')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')} activeOpacity={0.7}>
-            <Text style={styles.signInLink}>Sign In</Text>
+            <Text style={styles.signInLink}>{t('signIn')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

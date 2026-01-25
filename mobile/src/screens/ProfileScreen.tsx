@@ -22,6 +22,7 @@ import {
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
   UserGroupIcon,
+  SparklesIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -167,6 +168,20 @@ export default function ProfileScreen({ navigation }: any) {
             <Text style={styles.sectionText}>Edit Profile</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.sectionItem}
+          onPress={() => navigation.navigate('AIChat')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.sectionItemLeft}>
+            <SparklesIcon size={22} color={colors.primary} style={styles.sectionIcon} />
+            <Text style={[styles.sectionText, { color: colors.primary, fontWeight: '600' }]}>
+              {user?.role === 'Student' ? 'AI Assistant (Mom Mode)' : 'AI Property Expert'}
+            </Text>
+          </View>
+          <ChevronRightIcon size={20} color={colors.primary} />
         </TouchableOpacity>
 
         {/* My Listings - Only for Landlord and SuperAdmin */}

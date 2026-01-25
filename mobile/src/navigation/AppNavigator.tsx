@@ -47,6 +47,7 @@ import PropertyReviewsScreen from '../screens/PropertyReviewsScreen';
 import MarketplaceItemDetailsScreen from '../screens/MarketplaceItemDetailsScreen';
 import PostDetailsScreen from '../screens/PostDetailsScreen';
 import EditListingScreen from '../screens/EditListingScreen';
+import AIChatScreen from '../screens/AIChatScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -173,6 +174,7 @@ export default function AppNavigator() {
             <Stack.Screen name="MarketplaceItemDetails" component={MarketplaceItemDetailsScreen} />
             <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
             <Stack.Screen name="EditListing" component={EditListingScreen} />
+            <Stack.Screen name="AIChat" component={AIChatScreen} />
           </>
         )}
       </Stack.Navigator>

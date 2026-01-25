@@ -23,6 +23,7 @@ const LandlordAvailability = require("./LandlordAvailability");
 const PriceHistory = require("./PriceHistory");
 const PropertyAnalytics = require("./PropertyAnalytics");
 const MessageReport = require("./MessageReport");
+const ChatMessage = require("./ChatMessage");
 
 
 // User - University relationship
@@ -315,6 +316,14 @@ User.hasMany(MessageReport, {
 });
 MessageReport.belongsTo(User, { foreignKey: "reviewedBy", as: "reviewer" });
 
+// ChatMessage relationships
+User.hasMany(ChatMessage, {
+  foreignKey: "userId",
+  as: "chatMessages",
+  onDelete: "CASCADE",
+});
+ChatMessage.belongsTo(User, { foreignKey: "userId", as: "user" });
+
 const db = {
   sequelize,
   User,
@@ -341,6 +350,7 @@ const db = {
   PriceHistory,
   PropertyAnalytics,
   MessageReport,
+  ChatMessage,
 };
 
 

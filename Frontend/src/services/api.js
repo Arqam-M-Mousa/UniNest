@@ -591,4 +591,21 @@ export const reportsAPI = {
     apiRequest(`/api/reports/user/${userId}/unsuspend`, { method: "POST" }),
 };
 
+/**
+ * AI Chat API
+ */
+export const aiChatAPI = {
+  sendMessage: async (message, conversationId) =>
+    apiRequest("/api/ai-chat/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, conversationId }),
+    }),
+  getHistory: async (conversationId) =>
+    apiRequest(`/api/ai-chat/history/${conversationId}`),
+  getConversations: async () =>
+    apiRequest("/api/ai-chat/conversations"),
+  deleteConversation: async (conversationId) =>
+    apiRequest(`/api/ai-chat/conversation/${conversationId}`, { method: "DELETE" }),
+};
+
 export default apiRequest;

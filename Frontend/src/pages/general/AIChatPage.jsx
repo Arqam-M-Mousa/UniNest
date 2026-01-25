@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { aiChatAPI } from '../../services/api';
 import {
   PaperAirplaneIcon,
@@ -17,6 +18,7 @@ import Alert from '../../components/common/Alert';
 
 export default function AIChatPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,7 @@ export default function AIChatPage() {
   const textareaRef = useRef(null);
 
   const isStudent = user?.role === 'Student';
-  const assistantName = isStudent ? 'UniNest Assistant' : 'Property Expert';
+  const assistantName = isStudent ? t('aiChatUniNestAssistant') : t('aiChatPropertyExpert');
 
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -39,10 +41,10 @@ export default function AIChatPage() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
     
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t('aiChatJustNow');
+    if (diffMins < 60) return `${diffMins}${t('aiChatMinutesAgo')}`;
+    if (diffHours < 24) return `${diffHours}${t('aiChatHoursAgo')}`;
+    if (diffDays < 7) return `${diffDays}${t('aiChatDaysAgo')}`;
     return date.toLocaleDateString();
   };
 
@@ -159,10 +161,10 @@ export default function AIChatPage() {
   };
 
   const getConversationTitle = (preview) => {
-    if (!preview) return 'New conversation';
+    if (!preview) return t('aiChatNewConversation');
     const cleaned = preview.replace(/[#*`_~]/g, '').trim();
     const title = cleaned.split('\n')[0].substring(0, 50);
-    return title || 'New conversation';
+    return title || t('aiChatNewConversation');
   };
 
   return (
@@ -170,10 +172,10 @@ export default function AIChatPage() {
       <Alert
         isOpen={deleteAlert.isOpen}
         onClose={() => setDeleteAlert({ isOpen: false, conversationId: null })}
-        title="Delete Conversation?"
-        message="Are you sure you want to delete this conversation? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('aiChatDeleteConversationTitle')}
+        message={t('aiChatDeleteConversationMessage')}
+        confirmText={t('delete')}
+        cancelText={t('cancel')}
         onConfirm={confirmDelete}
         type="warning"
       />
@@ -192,7 +194,7 @@ export default function AIChatPage() {
               }`}
             >
               <PlusIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">New chat</span>
+              <span className="text-sm font-medium">{t('aiChatNewChat')}</span>
             </button>
           </div>
 
@@ -201,12 +203,12 @@ export default function AIChatPage() {
             {conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
                 <ChatBubbleLeftIcon className="w-12 h-12 themed-text-soft mb-3 opacity-50" />
-                <p className="text-sm themed-text-soft text-center">No conversations yet</p>
-                <p className="text-xs themed-text-soft text-center mt-1">Start chatting to create one!</p>
+                <p className="text-sm themed-text-soft text-center">{t('aiChatNoConversationsYet')}</p>
+                <p className="text-xs themed-text-soft text-center mt-1">{t('aiChatStartChatting')}</p>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-xs font-medium themed-text-soft px-2 py-2 uppercase tracking-wider">Recent Chats</p>
+                <p className="text-xs font-medium themed-text-soft px-2 py-2 uppercase tracking-wider">{t('aiChatRecentChats')}</p>
                 {conversations.map((conv) => (
                   <button
                     key={conv.conversationId}
@@ -242,14 +244,14 @@ export default function AIChatPage() {
                           </span>
                           <span className="text-xs themed-text-soft">•</span>
                           <span className="text-xs themed-text-soft">
-                            {conv.messageCount} msg
+                            {conv.messageCount} {t('aiChatMessages')}
                           </span>
                         </div>
                       </div>
                       <button
                         onClick={(e) => deleteConversation(conv.conversationId, e)}
                         className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/20 rounded-lg transition-all duration-200 self-center"
-                        title="Delete conversation"
+                        title={t('aiChatDeleteConversation')}
                       >
                         <TrashIcon className="w-4 h-4 text-red-500" />
                       </button>
@@ -283,7 +285,7 @@ export default function AIChatPage() {
             <div>
               <h1 className="text-sm font-semibold text-[var(--color-text)]">{assistantName}</h1>
               <p className="text-xs themed-text-soft">
-                {isStudent ? 'Your caring assistant' : 'Property marketing expert'}
+                {isStudent ? t('aiChatYourCaringAssistant') : t('aiChatPropertyMarketingExpert')}
               </p>
             </div>
           </div>
@@ -305,12 +307,12 @@ export default function AIChatPage() {
                 <SparklesIcon className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-2xl font-semibold text-[var(--color-text)] mb-2 text-center">
-                {isStudent ? 'What can I help with?' : 'How can I help your property?'}
+                {isStudent ? t('aiChatWhatCanIHelp') : t('aiChatHowCanIHelpProperty')}
               </h1>
               <p className="themed-text-soft text-center max-w-md">
                 {isStudent
-                  ? 'Ask me about cooking, cleaning, budgeting, or any student life tips!'
-                  : 'Get expert advice on marketing, pricing, and tenant management.'}
+                  ? t('aiChatStudentDescription')
+                  : t('aiChatLandlordDescription')}
               </p>
             </div>
           ) : (
@@ -375,7 +377,7 @@ export default function AIChatPage() {
                       sendMessage(e);
                     }
                   }}
-                  placeholder={isStudent ? 'Ask me anything...' : 'How can I help with your property?'}
+                  placeholder={isStudent ? t('aiChatAskMeAnything') : t('aiChatHowCanIHelpPropertyInput')}
                   className="flex-1 bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-soft)] py-2 px-3 resize-none focus:outline-none text-[15px] max-h-[200px]"
                   rows={1}
                   disabled={loading}
@@ -398,7 +400,7 @@ export default function AIChatPage() {
               </div>
             </form>
             <p className="text-xs themed-text-soft text-center mt-2">
-              {assistantName} can make mistakes. Consider checking important info.
+              {assistantName} {t('aiChatCanMakeMistakes')}
             </p>
           </div>
         </div>

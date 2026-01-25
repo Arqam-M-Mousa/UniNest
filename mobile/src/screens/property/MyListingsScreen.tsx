@@ -22,6 +22,7 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { propertyListingsAPI, marketplaceAPI, forumAPI } from '../../services/api';
 
 interface Property {
@@ -38,6 +39,7 @@ interface Property {
 export default function MyListingsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [listings, setListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,18 +117,18 @@ export default function MyListingsScreen({ navigation }: any) {
         listings.map((l) => (l.id === id ? { ...l, isVisible: !l.isVisible } : l))
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update visibility.');
+      Alert.alert(t('error'), error.message || 'Failed to update visibility.');
     }
   };
 
   const handleDelete = (id: string, type: string) => {
     Alert.alert(
-      `Delete ${type === 'post' ? 'Post' : 'Listing'}`,
+      t('delete'),
       `Are you sure you want to delete this ${type === 'post' ? 'post' : 'listing'}?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -139,7 +141,7 @@ export default function MyListingsScreen({ navigation }: any) {
               }
               setListings(listings.filter((l) => l.id !== id));
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete.');
+              Alert.alert(t('error'), error.message || 'Failed to delete.');
             }
           },
         },

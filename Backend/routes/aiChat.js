@@ -137,7 +137,7 @@ router.get("/conversations", authenticate, async (req, res) => {
         [require("sequelize").fn("COUNT", require("sequelize").col("id")), "messageCount"],
       ],
       group: ["conversationId"],
-      order: [[require("sequelize").literal("lastMessageAt"), "DESC"]],
+      order: [[require("sequelize").fn("MAX", require("sequelize").col("created_at")), "DESC"]],
     });
 
     const conversationsWithPreview = await Promise.all(

@@ -38,7 +38,10 @@ import AboutScreen from '../screens/AboutScreen';
 import HelpScreen from '../screens/HelpScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import RoommateProfileScreen from '../screens/RoommateProfileScreen';
+import RoommateDetailScreen from '../screens/RoommateDetailScreen';
+import RoommateMatchesScreen from '../screens/RoommateMatchesScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
+import AddMarketplaceItemScreen from '../screens/AddMarketplaceItemScreen';
 import AddListingScreen from '../screens/AddListingScreen';
 import PropertyReviewsScreen from '../screens/PropertyReviewsScreen';
 import MarketplaceItemDetailsScreen from '../screens/MarketplaceItemDetailsScreen';
@@ -161,8 +164,11 @@ export default function AppNavigator() {
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
             <Stack.Screen name="RoommateProfile" component={RoommateProfileScreen} />
+            <Stack.Screen name="RoommateDetail" component={RoommateDetailScreen} />
+            <Stack.Screen name="RoommateMatches" component={RoommateMatchesScreen} />
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
             <Stack.Screen name="AddListing" component={AddListingScreen} />
+            <Stack.Screen name="AddMarketplaceItem" component={AddMarketplaceItemScreen} />
             <Stack.Screen name="PropertyReviews" component={PropertyReviewsScreen} />
             <Stack.Screen name="MarketplaceItemDetails" component={MarketplaceItemDetailsScreen} />
             <Stack.Screen name="PostDetails" component={PostDetailsScreen} />

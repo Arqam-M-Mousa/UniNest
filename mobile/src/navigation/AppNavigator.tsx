@@ -19,35 +19,48 @@ import {
   UserIcon as UserIconSolid,
 } from 'react-native-heroicons/solid';
 
-import SignInScreen from '../screens/SignInScreen';
-import SignUpScreen from '../screens/SignUpScreen';
-import HomeScreen from '../screens/HomeScreen';
-import PropertiesScreen from '../screens/PropertiesScreen';
-import PropertyDetailsScreen from '../screens/PropertyDetailsScreen';
-import MessagesScreen from '../screens/MessagesScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import MarketplaceScreen from '../screens/MarketplaceScreen';
-import CommunityScreen from '../screens/CommunityScreen';
-import RoommatesScreen from '../screens/RoommatesScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import FavoritesScreen from '../screens/FavoritesScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
-import MyListingsScreen from '../screens/MyListingsScreen';
-import AboutScreen from '../screens/AboutScreen';
-import HelpScreen from '../screens/HelpScreen';
-import ChangePasswordScreen from '../screens/ChangePasswordScreen';
-import RoommateProfileScreen from '../screens/RoommateProfileScreen';
-import RoommateDetailScreen from '../screens/RoommateDetailScreen';
-import RoommateMatchesScreen from '../screens/RoommateMatchesScreen';
-import CreatePostScreen from '../screens/CreatePostScreen';
-import AddMarketplaceItemScreen from '../screens/AddMarketplaceItemScreen';
-import AddListingScreen from '../screens/AddListingScreen';
-import PropertyReviewsScreen from '../screens/PropertyReviewsScreen';
-import MarketplaceItemDetailsScreen from '../screens/MarketplaceItemDetailsScreen';
-import PostDetailsScreen from '../screens/PostDetailsScreen';
-import EditListingScreen from '../screens/EditListingScreen';
-import AIChatScreen from '../screens/AIChatScreen';
+// Auth Screens
+import SignInScreen from '../screens/auth/SignInScreen';
+import SignUpScreen from '../screens/auth/SignUpScreen';
+
+// General Screens
+import HomeScreen from '../screens/general/HomeScreen';
+import MessagesScreen from '../screens/general/MessagesScreen';
+import AboutScreen from '../screens/general/AboutScreen';
+import HelpScreen from '../screens/general/HelpScreen';
+import AIChatScreen from '../screens/general/AIChatScreen';
+
+// Property Screens
+import PropertiesScreen from '../screens/property/PropertiesScreen';
+import PropertyDetailsScreen from '../screens/property/PropertyDetailsScreen';
+import PropertyReviewsScreen from '../screens/property/PropertyReviewsScreen';
+import AddListingScreen from '../screens/property/AddListingScreen';
+import EditListingScreen from '../screens/property/EditListingScreen';
+import MyListingsScreen from '../screens/property/MyListingsScreen';
+
+// Marketplace Screens
+import MarketplaceScreen from '../screens/marketplace/MarketplaceScreen';
+import MarketplaceItemDetailsScreen from '../screens/marketplace/MarketplaceItemDetailsScreen';
+import AddMarketplaceItemScreen from '../screens/marketplace/AddMarketplaceItemScreen';
+
+// Community Screens
+import CommunityScreen from '../screens/community/CommunityScreen';
+import CreatePostScreen from '../screens/community/CreatePostScreen';
+import PostDetailsScreen from '../screens/community/PostDetailsScreen';
+
+// Roommate Screens
+import RoommatesScreen from '../screens/roommate/RoommatesScreen';
+import RoommateProfileScreen from '../screens/roommate/RoommateProfileScreen';
+import RoommateDetailScreen from '../screens/roommate/RoommateDetailScreen';
+import RoommateMatchesScreen from '../screens/roommate/RoommateMatchesScreen';
+
+// Profile Screens
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import SettingsScreen from '../screens/profile/SettingsScreen';
+import ChangePasswordScreen from '../screens/profile/ChangePasswordScreen';
+import FavoritesScreen from '../screens/profile/FavoritesScreen';
+import NotificationsScreen from '../screens/profile/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();

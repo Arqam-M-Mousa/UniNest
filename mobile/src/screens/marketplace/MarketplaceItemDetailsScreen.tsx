@@ -19,6 +19,7 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { marketplaceAPI, conversationsAPI } from '../../services/api';
 
 const { width } = Dimensions.get('window');
@@ -27,6 +28,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
   const { id } = route.params;
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -66,12 +68,12 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
     }
     
     if (!item?.seller?.id) {
-      Alert.alert('Error', 'Seller information is not available.');
+      Alert.alert(t('error'), t('sellerNotAvailable'));
       return;
     }
     
     if (user.id === item.seller.id) {
-      Alert.alert('Info', 'This is your own listing.');
+      Alert.alert(t('error'), t('ownListing'));
       return;
     }
     
@@ -104,7 +106,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
       console.error('API Request Error:', error.message);
       console.error('API Error Response:', error.response);
       console.error('Failed to create conversation:', error);
-      Alert.alert('Error', 'Unable to open messages. Please try again.');
+      Alert.alert(t('error'), t('unableToOpenMessages'));
     }
   };
 
@@ -311,7 +313,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Item Details</Text>
+          <Text style={styles.headerTitle}>{t('itemDetails')}</Text>
         </View>
         <View style={styles.loader}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -327,14 +329,14 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Item Details</Text>
+          <Text style={styles.headerTitle}>{t('itemDetails')}</Text>
         </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            {error || 'Item not found'}
+            {error || t('itemNotFound')}
           </Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadItem}>
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={styles.retryButtonText}>{t('tryAgain')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -347,7 +349,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Item Details</Text>
+        <Text style={styles.headerTitle}>{t('itemDetails')}</Text>
       </View>
 
       <ScrollView>
@@ -360,7 +362,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
             />
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Text style={{ color: colors.secondary }}>No Image Available</Text>
+              <Text style={{ color: colors.secondary }}>{t('noImageAvailable')}</Text>
             </View>
           )}
         </View>
@@ -384,14 +386,14 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
 
           {item.description && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionTitle}>{t('description')}</Text>
               <Text style={styles.description}>{item.description}</Text>
             </View>
           )}
 
           {item.seller && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Seller Information</Text>
+              <Text style={styles.sectionTitle}>{t('sellerInformation')}</Text>
               <View style={styles.sellerCard}>
                 <View style={styles.sellerAvatar}>
                   <Text style={styles.sellerAvatarText}>
@@ -421,7 +423,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
             <View style={styles.detailRow}>
               <ClockIcon size={18} color={colors.secondary} />
               <Text style={styles.detailText}>
-                Listed {new Date(item.createdAt).toLocaleDateString()}
+                {t('listed')} {new Date(item.createdAt).toLocaleDateString()}
               </Text>
             </View>
           )}
@@ -431,7 +433,7 @@ export default function MarketplaceItemDetailsScreen({ route, navigation }: any)
             onPress={handleContactSeller}
             activeOpacity={0.7}
           >
-            <Text style={styles.contactButtonText}>Contact Seller</Text>
+            <Text style={styles.contactButtonText}>{t('contactSeller')}</Text>
           </TouchableOpacity>
 
           <View style={styles.bottomPadding} />

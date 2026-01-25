@@ -31,12 +31,12 @@ export default function SettingsScreen({ navigation }: any) {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone.',
+      t('deleteAccountConfirm'),
+      t('deleteAccountMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -45,7 +45,7 @@ export default function SettingsScreen({ navigation }: any) {
               await signout();
             } catch (error: any) {
               console.error('Delete account error:', error);
-              Alert.alert('Error', error.message || 'Failed to delete account.');
+              Alert.alert(t('error'), error.message || 'Failed to delete account.');
             }
           },
         },
@@ -206,12 +206,12 @@ export default function SettingsScreen({ navigation }: any) {
 
       <ScrollView>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Text style={styles.sectionTitle}>{t('notifications')}</Text>
           <View style={styles.sectionContent}>
             <View style={styles.item}>
               <View style={styles.itemLeft}>
                 <BellIcon size={22} color={colors.text} style={styles.itemIcon} />
-                <Text style={styles.itemText}>Push Notifications</Text>
+                <Text style={styles.itemText}>{t('pushNotifications')}</Text>
               </View>
               <Switch
                 value={true}
@@ -221,7 +221,7 @@ export default function SettingsScreen({ navigation }: any) {
             <View style={[styles.item, styles.itemLast]}>
               <View style={styles.itemLeft}>
                 <BellIcon size={22} color={colors.text} style={styles.itemIcon} />
-                <Text style={styles.itemText}>Email Notifications</Text>
+                <Text style={styles.itemText}>{t('emailNotifications')}</Text>
               </View>
               <Switch
                 value={true}
@@ -232,7 +232,7 @@ export default function SettingsScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>{t('preferences')}</Text>
           <View style={styles.sectionContent}>
             <TouchableOpacity style={styles.item} onPress={() => setLanguageModalVisible(true)}>
               <View style={styles.itemLeft}>
@@ -247,7 +247,7 @@ export default function SettingsScreen({ navigation }: any) {
             <TouchableOpacity style={[styles.item, styles.itemLast]}>
               <View style={styles.itemLeft}>
                 <ShieldCheckIcon size={22} color={colors.text} style={styles.itemIcon} />
-                <Text style={styles.itemText}>Privacy</Text>
+                <Text style={styles.itemText}>{t('privacy')}</Text>
               </View>
               <ChevronRightIcon size={20} color={colors.secondary} />
             </TouchableOpacity>
@@ -255,7 +255,7 @@ export default function SettingsScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security</Text>
+          <Text style={styles.sectionTitle}>{t('security')}</Text>
           <View style={styles.sectionContent}>
             <TouchableOpacity 
               style={[styles.item, styles.itemLast]}
@@ -263,7 +263,7 @@ export default function SettingsScreen({ navigation }: any) {
             >
               <View style={styles.itemLeft}>
                 <LockClosedIcon size={22} color={colors.text} style={styles.itemIcon} />
-                <Text style={styles.itemText}>Change Password</Text>
+                <Text style={styles.itemText}>{t('changePassword')}</Text>
               </View>
               <ChevronRightIcon size={20} color={colors.secondary} />
             </TouchableOpacity>
@@ -278,7 +278,7 @@ export default function SettingsScreen({ navigation }: any) {
           >
             <View style={styles.itemLeft}>
               <TrashIcon size={22} color={colors.error} style={styles.itemIcon} />
-              <Text style={[styles.itemText, styles.dangerText]}>Delete Account</Text>
+              <Text style={[styles.itemText, styles.dangerText]}>{t('deleteAccount')}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -313,9 +313,9 @@ export default function SettingsScreen({ navigation }: any) {
                 changeLanguage('en');
                 setLanguageModalVisible(false);
                 Alert.alert(
-                  'Language Changed',
-                  'Please restart the app for the language change to take full effect.',
-                  [{ text: 'OK' }]
+                  t('languageChanged'),
+                  t('languageChangeHint'),
+                  [{ text: t('ok') }]
                 );
               }}
             >
@@ -339,9 +339,9 @@ export default function SettingsScreen({ navigation }: any) {
                 changeLanguage('ar');
                 setLanguageModalVisible(false);
                 Alert.alert(
-                  'تم تغيير اللغة',
-                  'يرجى إعادة تشغيل التطبيق لتطبيق تغيير اللغة بالكامل.',
-                  [{ text: 'حسناً' }]
+                  t('languageChanged'),
+                  t('languageChangeHint'),
+                  [{ text: t('ok') }]
                 );
               }}
             >

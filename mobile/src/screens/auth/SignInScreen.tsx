@@ -32,7 +32,7 @@ export default function SignInScreen({ navigation }: any) {
     try {
       await signin(email, password);
     } catch (error: any) {
-      Alert.alert(t('error'), error.message || 'Invalid credentials');
+      Alert.alert(t('error'), error.message || t('invalidCredentials'));
     } finally {
       setLoading(false);
     }

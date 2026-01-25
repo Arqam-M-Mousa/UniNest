@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -67,6 +68,7 @@ const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   return (
@@ -93,6 +95,7 @@ function TabNavigator() {
         name="Home"
         component={HomeScreen}
         options={{
+          tabBarLabel: t('home'),
           tabBarIcon: ({ color, focused }) =>
             focused ? (
               <HomeIconSolid size={24} color={color} />
@@ -105,6 +108,7 @@ function TabNavigator() {
         name="Properties"
         component={PropertiesScreen}
         options={{
+          tabBarLabel: t('properties'),
           tabBarIcon: ({ color, focused }) =>
             focused ? (
               <MagnifyingGlassIconSolid size={24} color={color} />
@@ -117,6 +121,7 @@ function TabNavigator() {
         name="Messages"
         component={MessagesScreen}
         options={{
+          tabBarLabel: t('messages'),
           tabBarIcon: ({ color, focused }) =>
             focused ? (
               <ChatBubbleLeftRightIconSolid size={24} color={color} />
@@ -129,6 +134,7 @@ function TabNavigator() {
         name="Profile"
         component={ProfileScreen}
         options={{
+          tabBarLabel: t('profile'),
           tabBarIcon: ({ color, focused }) =>
             focused ? (
               <UserIconSolid size={24} color={color} />

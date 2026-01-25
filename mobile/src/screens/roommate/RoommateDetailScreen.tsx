@@ -28,10 +28,12 @@ import {
   UserGroupIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { roommatesAPI } from '../../services/api';
 
 export default function RoommateDetailScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const { profile } = route.params || {};
   
@@ -53,12 +55,12 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
       await roommatesAPI.sendMatch(profile.userId.toString(), matchMessage);
       setShowMatchModal(false);
       setSuccess(true);
-      Alert.alert('Success', 'Match request sent successfully!');
+      Alert.alert(t('success'), t('matchRequestSentSuccess'));
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to send match request');
+      Alert.alert(t('error'), error.message || t('failedToSendMatchRequest'));
     } finally {
       setSending(false);
     }
@@ -70,44 +72,44 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
     if (profile.minBudget && profile.maxBudget) {
       return `${profile.minBudget} - ${profile.maxBudget} NIS`;
     }
-    return 'Not specified';
+    return t('notSpecified');
   };
 
   const getSleepLabel = (schedule: string) => {
     const labels: any = {
-      early: 'Early Bird',
-      normal: 'Normal',
-      late: 'Night Owl',
+      early: t('earlyBird'),
+      normal: t('normal'),
+      late: t('nightOwl'),
     };
     return labels[schedule] || schedule;
   };
 
   const getCleanlinessLabel = (level: number) => {
     const labels: any = {
-      1: 'Relaxed',
-      2: 'Flexible',
-      3: 'Moderate',
-      4: 'Clean',
-      5: 'Very Clean',
+      1: t('relaxed'),
+      2: t('flexible'),
+      3: t('moderate'),
+      4: t('clean'),
+      5: t('veryClean'),
     };
-    return labels[level] || `Level ${level}`;
+    return labels[level] || `${t('level')} ${level}`;
   };
 
   const getStudyLabel = (habits: string) => {
     const labels: any = {
-      home: 'At Home',
-      mixed: 'Mixed',
-      library: 'Library',
+      home: t('atHome'),
+      mixed: t('mixed'),
+      library: t('library'),
     };
     return labels[habits] || habits;
   };
 
   const getGuestsLabel = (policy: string) => {
     const labels: any = {
-      never: 'Never',
-      rarely: 'Rarely',
-      sometimes: 'Sometimes',
-      often: 'Often',
+      never: t('never'),
+      rarely: t('rarely'),
+      sometimes: t('sometimes'),
+      often: t('often'),
     };
     return labels[policy] || policy;
   };
@@ -437,7 +439,7 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
               {profile.compatibilityScore != null && (
                 <View style={styles.compatibilityBadge}>
                   <Text style={styles.compatibilityText}>
-                    {profile.compatibilityScore}% Compatible
+                    {profile.compatibilityScore}% {t('compatible')}
                   </Text>
                 </View>
               )}
@@ -457,7 +459,7 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
               {profile.sameMajor === 1 && (
                 <View style={[styles.headerBadge, { backgroundColor: '#22c55e' }]}>
                   <CheckIcon size={12} color="#FFFFFF" />
-                  <Text style={styles.headerBadgeText}>Same Major</Text>
+                  <Text style={styles.headerBadgeText}>{t('sameMajor')}</Text>
                 </View>
               )}
               <View style={styles.headerBadge}>
@@ -474,13 +476,13 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <BookOpenIcon size={16} color={colors.primary} />
-            <Text style={styles.sectionTitle}>About Me</Text>
+            <Text style={styles.sectionTitle}>{t('aboutMe')}</Text>
           </View>
           <View style={styles.card}>
             {profile.bio ? (
               <Text style={styles.bioText}>{profile.bio}</Text>
             ) : (
-              <Text style={styles.noBioText}>No bio provided</Text>
+              <Text style={styles.noBioText}>{t('noBioProvided')}</Text>
             )}
           </View>
         </View>
@@ -490,7 +492,7 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <TagIcon size={16} color={colors.primary} />
-              <Text style={styles.sectionTitle}>Interests</Text>
+              <Text style={styles.sectionTitle}>{t('interests')}</Text>
             </View>
             <View style={styles.interestsContainer}>
               {profile.interests.map((interest: string) => (
@@ -506,33 +508,33 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <HomeIcon size={16} color={colors.primary} />
-            <Text style={styles.sectionTitle}>Living Preferences</Text>
+            <Text style={styles.sectionTitle}>{t('livingPreferences')}</Text>
           </View>
           <View style={styles.preferencesGrid}>
             <View style={styles.preferenceItem}>
               <SparklesIcon size={24} color="#22c55e" />
-              <Text style={styles.preferenceLabel}>Cleanliness</Text>
+              <Text style={styles.preferenceLabel}>{t('cleanliness')}</Text>
               <Text style={styles.preferenceValue}>
                 {profile.cleanlinessLevel ? getCleanlinessLabel(profile.cleanlinessLevel) : '-'}
               </Text>
             </View>
             <View style={styles.preferenceItem}>
               <MoonIcon size={24} color="#6366f1" />
-              <Text style={styles.preferenceLabel}>Sleep</Text>
+              <Text style={styles.preferenceLabel}>{t('sleep')}</Text>
               <Text style={styles.preferenceValue}>
                 {profile.sleepSchedule ? getSleepLabel(profile.sleepSchedule) : '-'}
               </Text>
             </View>
             <View style={styles.preferenceItem}>
               <AcademicCapIcon size={24} color="#a855f7" />
-              <Text style={styles.preferenceLabel}>Study</Text>
+              <Text style={styles.preferenceLabel}>{t('study')}</Text>
               <Text style={styles.preferenceValue}>
                 {profile.studyHabits ? getStudyLabel(profile.studyHabits) : '-'}
               </Text>
             </View>
             <View style={styles.preferenceItem}>
               <UserGroupIcon size={24} color="#f59e0b" />
-              <Text style={styles.preferenceLabel}>Guests</Text>
+              <Text style={styles.preferenceLabel}>{t('guests')}</Text>
               <Text style={styles.preferenceValue}>
                 {profile.guestsAllowed ? getGuestsLabel(profile.guestsAllowed) : '-'}
               </Text>
@@ -544,12 +546,12 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <HomeIcon size={16} color={colors.primary} />
-            <Text style={styles.sectionTitle}>Lifestyle</Text>
+            <Text style={styles.sectionTitle}>{t('lifestyle')}</Text>
           </View>
           <View style={styles.lifestyleRow}>
             <View style={styles.lifestyleLabel}>
               <FireIcon size={20} color="#f97316" />
-              <Text style={styles.lifestyleLabelText}>Smoking Allowed</Text>
+              <Text style={styles.lifestyleLabelText}>{t('smokingAllowed')}</Text>
             </View>
             <View
               style={[
@@ -565,14 +567,14 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
                   { color: profile.smokingAllowed ? '#22c55e' : '#ef4444' },
                 ]}
               >
-                {profile.smokingAllowed ? 'Yes' : 'No'}
+                {profile.smokingAllowed ? t('yes') : t('no')}
               </Text>
             </View>
           </View>
           <View style={styles.lifestyleRow}>
             <View style={styles.lifestyleLabel}>
               <HeartIcon size={20} color="#ec4899" />
-              <Text style={styles.lifestyleLabelText}>Pets Allowed</Text>
+              <Text style={styles.lifestyleLabelText}>{t('petsAllowed')}</Text>
             </View>
             <View
               style={[
@@ -588,7 +590,7 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
                   { color: profile.petsAllowed ? '#22c55e' : '#ef4444' },
                 ]}
               >
-                {profile.petsAllowed ? 'Yes' : 'No'}
+                {profile.petsAllowed ? t('yes') : t('no')}
               </Text>
             </View>
           </View>
@@ -602,12 +604,12 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
             onPress={() => setShowMatchModal(true)}
           >
             <UserPlusIcon size={20} color="#FFFFFF" />
-            <Text style={styles.connectButtonText}>Connect as Roommate</Text>
+            <Text style={styles.connectButtonText}>{t('connectAsRoommate')}</Text>
           </TouchableOpacity>
         ) : (
           <View style={[styles.connectButton, styles.successButton]}>
             <CheckIcon size={20} color="#FFFFFF" />
-            <Text style={styles.connectButtonText}>Request Sent!</Text>
+            <Text style={styles.connectButtonText}>{t('requestSent')}</Text>
           </View>
         )}
       </ScrollView>
@@ -621,13 +623,13 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Send Match Request</Text>
+            <Text style={styles.modalTitle}>{t('sendMatchRequest')}</Text>
             <Text style={styles.modalSubtitle}>
-              Send a message to {userData.firstName} to introduce yourself
+              {t('sendMessageTo')} {userData.firstName} {t('toIntroduceYourself')}
             </Text>
             <TextInput
               style={styles.textInput}
-              placeholder="Write a message... (optional)"
+              placeholder={t('writeMessage')}
               placeholderTextColor={colors.secondary}
               value={matchMessage}
               onChangeText={setMatchMessage}
@@ -641,7 +643,7 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
                 activeOpacity={0.7}
               >
                 <Text style={[styles.modalButtonText, styles.cancelButtonText]}>
-                  Cancel
+                  {t('cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -654,7 +656,7 @@ export default function RoommateDetailScreen({ navigation, route }: any) {
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <Text style={[styles.modalButtonText, styles.sendButtonText]}>
-                    Send Request
+                    {t('sendRequest')}
                   </Text>
                 )}
               </TouchableOpacity>

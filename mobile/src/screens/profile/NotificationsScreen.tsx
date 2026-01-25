@@ -19,6 +19,7 @@ import {
 } from 'react-native-heroicons/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { notificationsAPI } from '../../services/api';
 
 interface Notification {
@@ -32,6 +33,7 @@ interface Notification {
 
 export default function NotificationsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -228,7 +230,7 @@ export default function NotificationsScreen({ navigation }: any) {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ChevronLeftIcon size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Notifications</Text>
+            <Text style={styles.headerTitle}>{t('notifications')}</Text>
           </View>
         </View>
         <View style={styles.loader}>
@@ -245,11 +247,11 @@ export default function NotificationsScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Notifications</Text>
+          <Text style={styles.headerTitle}>{t('notifications')}</Text>
         </View>
         {notifications.some((n) => !n.isRead) && (
           <TouchableOpacity style={styles.markAllButton} onPress={handleMarkAllAsRead} activeOpacity={0.7}>
-            <Text style={styles.markAllText}>Mark all read</Text>
+            <Text style={styles.markAllText}>{t('markAllRead')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -257,9 +259,9 @@ export default function NotificationsScreen({ navigation }: any) {
       {notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
           <BellIcon size={64} color={colors.secondary} />
-          <Text style={styles.emptyText}>No notifications</Text>
+          <Text style={styles.emptyText}>{t('noNotificationsYet')}</Text>
           <Text style={styles.emptySubtext}>
-            You'll see notifications about your activity here
+            {t('notificationsHint')}
           </Text>
         </View>
       ) : (

@@ -29,12 +29,13 @@ import {
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from 'react-native-heroicons/solid';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { propertyListingsAPI, favoritesAPI, reviewsAPI, conversationsAPI } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
 // Video component using expo-video
-function PropertyVideo({ videoUrl, colors, styles }: { videoUrl: string; colors: any; styles: any }) {
+function PropertyVideo({ videoUrl, colors, styles, t }: { videoUrl: string; colors: any; styles: any; t: (key: string) => string }) {
   const player = useVideoPlayer(videoUrl, player => {
     player.loop = false;
   });
@@ -43,7 +44,7 @@ function PropertyVideo({ videoUrl, colors, styles }: { videoUrl: string; colors:
     <View style={styles.videoSection}>
       <View style={styles.videoHeader}>
         <PlayIcon size={20} color={colors.text} />
-        <Text style={styles.videoTitle}>Property Video</Text>
+        <Text style={styles.videoTitle}>{t('propertyVideo')}</Text>
       </View>
       <VideoView
         player={player}
@@ -104,6 +105,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
   const { id } = route.params;
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -610,7 +612,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
     return (
       <View style={styles.container}>
         <Text style={{ textAlign: 'center', marginTop: 40, color: colors.text }}>
-          Property not found
+          {t('propertyNotFound')}
         </Text>
       </View>
     );
@@ -630,7 +632,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
           ) : (
             <View style={styles.imagePlaceholder}>
               <HomeModernIcon size={64} color={colors.secondary} />
-              <Text style={{ color: colors.secondary, marginTop: 12 }}>No Image Available</Text>
+              <Text style={{ color: colors.secondary, marginTop: 12 }}>{t('noImageAvailable')}</Text>
             </View>
           )}
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
@@ -684,7 +686,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
           {/* 360 Image Section */}
           {property.images?.some((img: any) => img.is360) && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>360° Panorama</Text>
+              <Text style={styles.sectionTitle}>{t('panorama360')}</Text>
               {property.images
                 .filter((img: any) => img.is360)
                 .map((img: any, index: number) => (
@@ -695,13 +697,13 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
 
           {/* Video Section */}
           {property.video?.url && (
-            <PropertyVideo videoUrl={property.video.url} colors={colors} styles={styles} />
+            <PropertyVideo videoUrl={property.video.url} colors={colors} styles={styles} t={t} />
           )}
 
           {/* Description */}
           {property.description && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionTitle}>{t('description')}</Text>
               <Text style={styles.description}>{property.description}</Text>
             </View>
           )}
@@ -709,7 +711,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
           {/* Amenities */}
           {property.amenities && property.amenities.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Amenities</Text>
+              <Text style={styles.sectionTitle}>{t('amenities')}</Text>
               <View style={styles.amenitiesList}>
                 {property.amenities.map((amenity: string, index: number) => (
                   <View key={index} style={styles.amenityChip}>
@@ -723,7 +725,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
           {/* Reviews Section */}
           <View style={styles.reviewsSection}>
             <View style={styles.reviewsHeader}>
-              <Text style={styles.sectionTitle}>Reviews</Text>
+              <Text style={styles.sectionTitle}>{t('reviews')}</Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate('PropertyReviews', { 
                   propertyId: property.id,
@@ -769,8 +771,8 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
               ))
             ) : (
               <View style={styles.noReviewsContainer}>
-                <Text style={styles.noReviewsText}>No reviews yet</Text>
-                <Text style={styles.noReviewsSubtext}>Be the first to review this property</Text>
+                <Text style={styles.noReviewsText}>{t('noReviewsYet')}</Text>
+                <Text style={styles.noReviewsSubtext}>{t('beFirstToReview')}</Text>
               </View>
             )}
           </View>
@@ -781,7 +783,7 @@ export default function PropertyDetailsScreen({ route, navigation }: any) {
             onPress={handleContactLandlord}
             activeOpacity={0.7}
           >
-            <Text style={styles.contactButtonText}>Contact Landlord</Text>
+            <Text style={styles.contactButtonText}>{t('contactLandlord')}</Text>
           </TouchableOpacity>
 
           <View style={styles.bottomPadding} />

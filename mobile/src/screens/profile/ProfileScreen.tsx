@@ -37,7 +37,7 @@ export default function ProfileScreen({ navigation }: any) {
   const handleSignOut = () => {
     Alert.alert(
       t('logout'),
-      'Are you sure you want to sign out?',
+      t('signOutConfirm'),
       [
         { text: t('cancel'), style: 'cancel' },
         { 
@@ -233,7 +233,7 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={styles.sectionItem}>
           <View style={styles.sectionItemLeft}>
             <MoonIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Dark Mode</Text>
+            <Text style={styles.sectionText}>{t('darkMode')}</Text>
           </View>
           <Switch
             value={theme === 'dark'}
@@ -275,7 +275,7 @@ export default function ProfileScreen({ navigation }: any) {
         >
           <View style={styles.sectionItemLeft}>
             <InformationCircleIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>About</Text>
+            <Text style={styles.sectionText}>{t('about')}</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>
@@ -287,7 +287,7 @@ export default function ProfileScreen({ navigation }: any) {
         >
           <View style={styles.sectionItemLeft}>
             <QuestionMarkCircleIcon size={22} color={colors.text} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Help & Support</Text>
+            <Text style={styles.sectionText}>{t('helpSupport')}</Text>
           </View>
           <ChevronRightIcon size={20} color={colors.secondary} />
         </TouchableOpacity>

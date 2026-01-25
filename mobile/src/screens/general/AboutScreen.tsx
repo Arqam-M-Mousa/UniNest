@@ -16,9 +16,11 @@ import {
   ShieldCheckIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function AboutScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
 
   const styles = StyleSheet.create({
     container: {
@@ -113,7 +115,7 @@ export default function AboutScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>About</Text>
+        <Text style={styles.headerTitle}>{t('aboutTitle')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
@@ -122,13 +124,11 @@ export default function AboutScreen({ navigation }: any) {
             <BuildingOffice2Icon size={48} color="#FFFFFF" />
           </View>
           <Text style={styles.appName}>UniNest</Text>
-          <Text style={styles.version}>Version 1.0.0</Text>
+          <Text style={styles.version}>{t('version')} 1.0.0</Text>
         </View>
 
         <Text style={styles.description}>
-          UniNest is your trusted platform for finding student housing. We connect
-          students with verified landlords to make finding your perfect home easier
-          and safer.
+          {t('aboutDescription')}
         </Text>
 
         <View style={styles.section}>
@@ -137,26 +137,26 @@ export default function AboutScreen({ navigation }: any) {
             onPress={() => Linking.openURL('mailto:support@uninest.com')}
           >
             <EnvelopeIcon size={22} color={colors.primary} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Contact Us</Text>
+            <Text style={styles.sectionText}>{t('contactUs')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.sectionItem}
             onPress={() => Linking.openURL('https://uninest.com')}
           >
             <GlobeAltIcon size={22} color={colors.primary} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Visit Website</Text>
+            <Text style={styles.sectionText}>{t('visitWebsite')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.sectionItem}>
             <DocumentTextIcon size={22} color={colors.primary} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Terms of Service</Text>
+            <Text style={styles.sectionText}>{t('termsOfService')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.sectionItem, styles.sectionItemLast]}>
             <ShieldCheckIcon size={22} color={colors.primary} style={styles.sectionIcon} />
-            <Text style={styles.sectionText}>Privacy Policy</Text>
+            <Text style={styles.sectionText}>{t('privacyPolicy')}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.copyright}>© 2024 UniNest. All rights reserved.</Text>
+        <Text style={styles.copyright}>© 2024 UniNest. {t('allRightsReserved')}</Text>
       </ScrollView>
     </View>
   );

@@ -54,7 +54,7 @@ export default function SignUpScreen({ navigation }: any) {
         role: formData.role,
       });
     } catch (error: any) {
-      Alert.alert(t('error'), error.message || 'Unable to create account');
+      Alert.alert(t('error'), error.message || t('failedToCreateAccount'));
     } finally {
       setLoading(false);
     }

@@ -20,11 +20,13 @@ import {
   ClockIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { forumAPI } from '../../services/api';
 import { format } from 'date-fns';
 
 export default function CommunityScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [posts, setPosts] = useState<any[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
@@ -63,7 +65,7 @@ export default function CommunityScreen({ navigation }: any) {
       filterPosts(sortedPosts, selectedCategory);
     } catch (err) {
       console.error('Failed to load posts:', err);
-      setError('Unable to load posts. Please try again.');
+      setError(t('unableToLoadPosts'));
       setPosts([]);
     } finally {
       setLoading(false);
@@ -331,7 +333,7 @@ export default function CommunityScreen({ navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.title}>Community</Text>
+          <Text style={styles.title}>{t('communityTitle')}</Text>
         </View>
         <TouchableOpacity
           style={styles.createButton}
@@ -339,7 +341,7 @@ export default function CommunityScreen({ navigation }: any) {
           activeOpacity={0.7}
         >
           <PlusIcon size={16} color={colors.primary} />
-          <Text style={styles.createButtonText}>New Post</Text>
+          <Text style={styles.createButtonText}>{t('newPost')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -398,7 +400,7 @@ export default function CommunityScreen({ navigation }: any) {
             </View>
             {item.isPinned && (
               <View style={styles.pinnedBadge}>
-                <Text style={styles.pinnedText}>📌 Pinned</Text>
+                <Text style={styles.pinnedText}>📌 {t('pinned')}</Text>
               </View>
             )}
             <Text style={styles.postTitle}>{item.title}</Text>
@@ -453,12 +455,12 @@ export default function CommunityScreen({ navigation }: any) {
             <View style={styles.emptyContainer}>
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={() => loadPosts()}>
-                <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.retryButtonText}>{t('tryAgain')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No posts yet</Text>
+              <Text style={styles.emptyText}>{t('noPostsYet')}</Text>
             </View>
           )
         }

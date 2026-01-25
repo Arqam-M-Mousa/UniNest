@@ -29,10 +29,12 @@ import {
   XCircleIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { roommatesAPI } from '../../services/api';
 
 export default function RoommateProfileScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
@@ -113,7 +115,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
   const handleSave = async () => {
     if (!profile.minBudget || !profile.maxBudget) {
-      Alert.alert('Error', 'Please enter your budget range');
+      Alert.alert(t('error'), t('enterBudgetRange'));
       return;
     }
 
@@ -125,10 +127,10 @@ export default function RoommateProfileScreen({ navigation }: any) {
         maxBudget: parseInt(profile.maxBudget),
       });
       setHasProfile(true);
-      Alert.alert('Success', 'Roommate profile saved successfully');
+      Alert.alert(t('success'), t('profileSavedSuccess'));
       loadProfile();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to save profile');
+      Alert.alert(t('error'), error.message || t('failedToSaveProfile'));
     } finally {
       setSaving(false);
     }
@@ -136,12 +138,12 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Profile',
-      'Are you sure you want to delete your roommate profile?',
+      t('deleteProfile'),
+      t('deleteRoommateProfileConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -149,18 +151,34 @@ export default function RoommateProfileScreen({ navigation }: any) {
               setHasProfile(false);
               setProfile({
                 bio: '',
-                preferredLocation: '',
-                budgetMin: '',
-                budgetMax: '',
-                cleanliness: 'Moderate',
-                sleepSchedule: 'Flexible',
-                smokingPreference: 'No Preference',
-                petsPreference: 'No Preference',
-                guestPolicy: 'Occasional',
+                minBudget: '',
+                maxBudget: '',
+                cleanlinessLevel: 3,
+                noiseLevel: 3,
+                sleepSchedule: 'normal',
+                studyHabits: 'mixed',
+                smokingAllowed: false,
+                petsAllowed: false,
+                guestsAllowed: 'sometimes',
+                major: '',
+                interests: [],
+                isActive: true,
+                matchingPriorities: {
+                  budget: 3,
+                  cleanliness: 3,
+                  noise: 3,
+                  sleepSchedule: 3,
+                  studyHabits: 3,
+                  interests: 3,
+                  major: 3,
+                  smoking: 3,
+                  pets: 3,
+                  guests: 3,
+                },
               });
-              Alert.alert('Success', 'Roommate profile deleted');
+              Alert.alert(t('success'), t('profileDeletedSuccess'));
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete profile');
+              Alert.alert(t('error'), error.message || t('failedToDeleteProfile'));
             }
           },
         },
@@ -409,7 +427,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
   const renderSlider = (label: string, value: number, onChange: (val: number) => void, min = 1, max = 5) => (
     <View style={styles.sliderContainer}>
       <Text style={styles.sliderLabel}>{label}</Text>
-      <Text style={styles.sliderValue}>Level: {value}</Text>
+      <Text style={styles.sliderValue}>{t('level')}: {value}</Text>
       <View style={styles.optionsRow}>
         {[1, 2, 3, 4, 5].map(num => (
           <TouchableOpacity
@@ -436,7 +454,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Roommate Profile</Text>
+          <Text style={styles.headerTitle}>{t('roommateProfileTitle')}</Text>
         </View>
         <View style={styles.loader}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -451,14 +469,14 @@ export default function RoommateProfileScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Roommate Profile</Text>
+        <Text style={styles.headerTitle}>{t('roommateProfileTitle')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
         {/* Profile Status */}
         <View style={styles.section}>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Profile Active</Text>
+            <Text style={styles.switchLabel}>{t('profileActive')}</Text>
             <Switch
               value={profile.isActive}
               onValueChange={(val) => setProfile({ ...profile, isActive: val })}
@@ -469,12 +487,12 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* About */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About You</Text>
+          <Text style={styles.sectionTitle}>{t('aboutYou')}</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Bio</Text>
+            <Text style={styles.label}>{t('bio')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Tell potential roommates about yourself..."
+              placeholder={t('bioPlaceholder')}
               placeholderTextColor={colors.secondary}
               value={profile.bio}
               onChangeText={(text) => setProfile({ ...profile, bio: text })}
@@ -485,14 +503,14 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* Budget */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Budget</Text>
+          <Text style={styles.sectionTitle}>{t('budget')}</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Budget Range (NIS/month)</Text>
+            <Text style={styles.label}>{t('budgetRange')}</Text>
             <View style={styles.budgetRow}>
               <View style={styles.budgetInput}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Min"
+                  placeholder={t('min')}
                   placeholderTextColor={colors.secondary}
                   value={profile.minBudget}
                   onChangeText={(text) => setProfile({ ...profile, minBudget: text })}
@@ -502,7 +520,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
               <View style={styles.budgetInput}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Max"
+                  placeholder={t('max')}
                   placeholderTextColor={colors.secondary}
                   value={profile.maxBudget}
                   onChangeText={(text) => setProfile({ ...profile, maxBudget: text })}
@@ -515,15 +533,15 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* Academic */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Academic</Text>
+          <Text style={styles.sectionTitle}>{t('academic')}</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Major</Text>
+            <Text style={styles.label}>{t('major')}</Text>
             {renderOptionButtons(majorOptions, profile.major, (value) =>
               setProfile({ ...profile, major: value })
             )}
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Study Habits</Text>
+            <Text style={styles.label}>{t('studyHabits')}</Text>
             {renderOptionButtons(studyOptions, profile.studyHabits, (value) =>
               setProfile({ ...profile, studyHabits: value })
             )}
@@ -532,7 +550,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* Interests */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Interests</Text>
+          <Text style={styles.sectionTitle}>{t('interests')}</Text>
           <View style={styles.optionsRow}>
             {interestOptions.map(interest => (
               <TouchableOpacity
@@ -556,21 +574,21 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* Living Preferences */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Living Preferences</Text>
-          {renderSlider('Cleanliness Level', profile.cleanlinessLevel, (val) =>
+          <Text style={styles.sectionTitle}>{t('livingPreferences')}</Text>
+          {renderSlider(t('cleanlinessLevel'), profile.cleanlinessLevel, (val) =>
             setProfile({ ...profile, cleanlinessLevel: val })
           )}
-          {renderSlider('Noise Tolerance', profile.noiseLevel, (val) =>
+          {renderSlider(t('noiseTolerance'), profile.noiseLevel, (val) =>
             setProfile({ ...profile, noiseLevel: val })
           )}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Sleep Schedule</Text>
+            <Text style={styles.label}>{t('sleepSchedule')}</Text>
             {renderOptionButtons(sleepOptions, profile.sleepSchedule, (value) =>
               setProfile({ ...profile, sleepSchedule: value })
             )}
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Guests Policy</Text>
+            <Text style={styles.label}>{t('guestsPolicy')}</Text>
             {renderOptionButtons(guestsOptions, profile.guestsAllowed, (value) =>
               setProfile({ ...profile, guestsAllowed: value })
             )}
@@ -579,9 +597,9 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* Lifestyle */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Lifestyle</Text>
+          <Text style={styles.sectionTitle}>{t('lifestyle')}</Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Smoking Allowed</Text>
+            <Text style={styles.switchLabel}>{t('smokingAllowed')}</Text>
             <Switch
               value={profile.smokingAllowed}
               onValueChange={(val) => setProfile({ ...profile, smokingAllowed: val })}
@@ -589,7 +607,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Pets Allowed</Text>
+            <Text style={styles.switchLabel}>{t('petsAllowed')}</Text>
             <Switch
               value={profile.petsAllowed}
               onValueChange={(val) => setProfile({ ...profile, petsAllowed: val })}
@@ -600,38 +618,38 @@ export default function RoommateProfileScreen({ navigation }: any) {
 
         {/* Matching Priorities */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Matching Priorities</Text>
+          <Text style={styles.sectionTitle}>{t('matchingPriorities')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Set how important each factor is when matching (1 = Not Important, 5 = Very Important)
+            {t('matchingPrioritiesHint')}
           </Text>
-          {renderSlider('Budget Priority', profile.matchingPriorities.budget, (val) =>
+          {renderSlider(t('budgetPriority'), profile.matchingPriorities.budget, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, budget: val } })
           )}
-          {renderSlider('Cleanliness Priority', profile.matchingPriorities.cleanliness, (val) =>
+          {renderSlider(t('cleanlinessPriority'), profile.matchingPriorities.cleanliness, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, cleanliness: val } })
           )}
-          {renderSlider('Noise Priority', profile.matchingPriorities.noise, (val) =>
+          {renderSlider(t('noisePriority'), profile.matchingPriorities.noise, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, noise: val } })
           )}
-          {renderSlider('Sleep Schedule Priority', profile.matchingPriorities.sleepSchedule, (val) =>
+          {renderSlider(t('sleepSchedulePriority'), profile.matchingPriorities.sleepSchedule, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, sleepSchedule: val } })
           )}
-          {renderSlider('Study Habits Priority', profile.matchingPriorities.studyHabits, (val) =>
+          {renderSlider(t('studyHabitsPriority'), profile.matchingPriorities.studyHabits, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, studyHabits: val } })
           )}
-          {renderSlider('Interests Priority', profile.matchingPriorities.interests, (val) =>
+          {renderSlider(t('interestsPriority'), profile.matchingPriorities.interests, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, interests: val } })
           )}
-          {renderSlider('Major Priority', profile.matchingPriorities.major, (val) =>
+          {renderSlider(t('majorPriority'), profile.matchingPriorities.major, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, major: val } })
           )}
-          {renderSlider('Smoking Priority', profile.matchingPriorities.smoking, (val) =>
+          {renderSlider(t('smokingPriority'), profile.matchingPriorities.smoking, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, smoking: val } })
           )}
-          {renderSlider('Pets Priority', profile.matchingPriorities.pets, (val) =>
+          {renderSlider(t('petsPriority'), profile.matchingPriorities.pets, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, pets: val } })
           )}
-          {renderSlider('Guests Priority', profile.matchingPriorities.guests, (val) =>
+          {renderSlider(t('guestsPriority'), profile.matchingPriorities.guests, (val) =>
             setProfile({ ...profile, matchingPriorities: { ...profile.matchingPriorities, guests: val } })
           )}
         </View>
@@ -646,7 +664,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
             <ActivityIndicator color="#FFFFFF" />
           ) : (
             <Text style={styles.saveButtonText}>
-              {hasProfile ? 'Update Profile' : 'Create Profile'}
+              {hasProfile ? t('updateProfile') : t('createProfile')}
             </Text>
           )}
         </TouchableOpacity>
@@ -654,7 +672,7 @@ export default function RoommateProfileScreen({ navigation }: any) {
         {hasProfile && (
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} activeOpacity={0.7}>
             <TrashIcon size={20} color={colors.error} />
-            <Text style={styles.deleteButtonText}>Delete Profile</Text>
+            <Text style={styles.deleteButtonText}>{t('deleteProfileButton')}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>

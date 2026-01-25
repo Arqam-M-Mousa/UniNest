@@ -17,11 +17,13 @@ import {
   XMarkIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { marketplaceAPI } from '../../services/api';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function AddMarketplaceItemScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
@@ -56,7 +58,7 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.price) {
-      Alert.alert('Error', 'Please fill in title and price');
+      Alert.alert(t('error'), t('pleaseFillTitlePrice'));
       return;
     }
 
@@ -67,11 +69,11 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
         price: parseFloat(formData.price),
         images: images,
       });
-      Alert.alert('Success', 'Item listed successfully!', [
+      Alert.alert(t('success'), t('itemListedSuccess'), [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create listing');
+      Alert.alert(t('error'), error.message || t('failedToCreateItem'));
     } finally {
       setLoading(false);
     }
@@ -221,32 +223,32 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add Marketplace Item</Text>
+          <Text style={styles.headerTitle}>{t('addMarketplaceItem')}</Text>
         </View>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.label}>Title *</Text>
+          <Text style={styles.label}>{t('titleRequired')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Item title"
+            placeholder={t('itemTitlePlaceholder')}
             placeholderTextColor={colors.secondary}
             value={formData.title}
             onChangeText={(text) => setFormData({ ...formData, title: text })}
           />
 
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('description')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Describe your item..."
+            placeholder={t('describeYourItem')}
             placeholderTextColor={colors.secondary}
             value={formData.description}
             onChangeText={(text) => setFormData({ ...formData, description: text })}
             multiline
           />
 
-          <Text style={styles.label}>Price (NIS) *</Text>
+          <Text style={styles.label}>{t('priceNIS')}</Text>
           <TextInput
             style={styles.input}
             placeholder="0.00"
@@ -256,10 +258,10 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
             keyboardType="numeric"
           />
 
-          <Text style={styles.label}>Location</Text>
+          <Text style={styles.label}>{t('location')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g., Nablus, Near campus"
+            placeholder={t('locationPlaceholder')}
             placeholderTextColor={colors.secondary}
             value={formData.location}
             onChangeText={(text) => setFormData({ ...formData, location: text })}
@@ -267,7 +269,7 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Condition</Text>
+          <Text style={styles.sectionTitle}>{t('condition')}</Text>
           <View style={styles.optionsRow}>
             {conditionOptions.map((option) => (
               <TouchableOpacity
@@ -292,7 +294,7 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Category</Text>
+          <Text style={styles.sectionTitle}>{t('category')}</Text>
           <View style={styles.optionsRow}>
             {categoryOptions.map((option) => (
               <TouchableOpacity
@@ -317,7 +319,7 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Images (Max 5)</Text>
+          <Text style={styles.sectionTitle}>{t('imagesMax')}</Text>
           <View style={styles.imageGrid}>
             {images.map((uri, index) => (
               <View key={index} style={styles.imageContainer}>
@@ -346,7 +348,7 @@ export default function AddMarketplaceItemScreen({ navigation }: any) {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.submitButtonText}>List Item</Text>
+            <Text style={styles.submitButtonText}>{t('listItem')}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

@@ -18,10 +18,12 @@ import {
   UserGroupIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { roommatesAPI } from '../../services/api';
 
 export default function RoommateMatchesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,12 +50,12 @@ export default function RoommateMatchesScreen({ navigation }: any) {
       setResponding(matchId);
       await roommatesAPI.respondMatch(matchId, status);
       Alert.alert(
-        'Success',
-        status === 'accepted' ? 'Match request accepted!' : 'Match request rejected'
+        t('success'),
+        status === 'accepted' ? t('matchRequestAccepted') : t('matchRequestRejected')
       );
       loadMatches();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to respond to match request');
+      Alert.alert(t('error'), error.message || t('failedToRespondMatch'));
     } finally {
       setResponding(null);
     }
@@ -61,20 +63,20 @@ export default function RoommateMatchesScreen({ navigation }: any) {
 
   const handleDelete = async (matchId: string) => {
     Alert.alert(
-      'Delete Match',
-      'Are you sure you want to delete this match?',
+      t('deleteMatch'),
+      t('deleteMatchConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await roommatesAPI.deleteMatch(matchId);
-              Alert.alert('Success', 'Match deleted');
+              Alert.alert(t('success'), t('matchDeleted'));
               loadMatches();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete match');
+              Alert.alert(t('error'), error.message || t('failedToDeleteMatch'));
             }
           },
         },
@@ -96,11 +98,11 @@ export default function RoommateMatchesScreen({ navigation }: any) {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'accepted':
-        return 'Accepted';
+        return t('accepted');
       case 'rejected':
-        return 'Rejected';
+        return t('rejected');
       default:
-        return 'Pending';
+        return t('pending');
     }
   };
 
@@ -306,7 +308,7 @@ export default function RoommateMatchesScreen({ navigation }: any) {
             {match.compatibilityScore != null && (
               <View style={styles.compatibilityBadge}>
                 <Text style={styles.compatibilityText}>
-                  {match.compatibilityScore}% Compatible
+                  {match.compatibilityScore}% {t('compatible')}
                 </Text>
               </View>
             )}
@@ -319,7 +321,7 @@ export default function RoommateMatchesScreen({ navigation }: any) {
         {match.message && (
           <>
             <Text style={styles.senderLabel}>
-              {match.isSender ? 'Your message:' : 'Their message:'}
+              {match.isSender ? t('yourMessage') : t('theirMessage')}
             </Text>
             <Text style={styles.message}>"{match.message}"</Text>
           </>
@@ -339,7 +341,7 @@ export default function RoommateMatchesScreen({ navigation }: any) {
                 ) : (
                   <>
                     <CheckIcon size={18} color="#FFFFFF" />
-                    <Text style={styles.actionButtonText}>Accept</Text>
+                    <Text style={styles.actionButtonText}>{t('accept')}</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -350,7 +352,7 @@ export default function RoommateMatchesScreen({ navigation }: any) {
                 activeOpacity={0.7}
               >
                 <XMarkIcon size={18} color="#FFFFFF" />
-                <Text style={styles.actionButtonText}>Reject</Text>
+                <Text style={styles.actionButtonText}>{t('reject')}</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -360,7 +362,7 @@ export default function RoommateMatchesScreen({ navigation }: any) {
               activeOpacity={0.7}
             >
               <XMarkIcon size={18} color={colors.text} />
-              <Text style={styles.deleteButtonText}>Delete</Text>
+              <Text style={styles.deleteButtonText}>{t('delete')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -375,9 +377,9 @@ export default function RoommateMatchesScreen({ navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.title}>Match Requests</Text>
+          <Text style={styles.title}>{t('matchRequests')}</Text>
         </View>
-        <Text style={styles.subtitle}>Manage your roommate match requests</Text>
+        <Text style={styles.subtitle}>{t('manageMatchRequests')}</Text>
       </View>
 
       {loading ? (
@@ -387,9 +389,9 @@ export default function RoommateMatchesScreen({ navigation }: any) {
           <View style={styles.emptyIconContainer}>
             <UserGroupIcon size={40} color={colors.primary} />
           </View>
-          <Text style={styles.emptyTitle}>No Match Requests</Text>
+          <Text style={styles.emptyTitle}>{t('noMatchRequests')}</Text>
           <Text style={styles.emptySubtitle}>
-            You don't have any match requests yet. Start connecting with potential roommates!
+            {t('noMatchRequestsHint')}
           </Text>
         </View>
       ) : (

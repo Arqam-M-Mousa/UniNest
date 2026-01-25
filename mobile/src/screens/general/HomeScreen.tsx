@@ -20,11 +20,13 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { propertyListingsAPI, forumAPI } from '../../services/api';
 
 export default function HomeScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [properties, setProperties] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
@@ -218,13 +220,13 @@ export default function HomeScreen({ navigation }: any) {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.greeting}>
-          Welcome back, {user?.firstName || 'Student'}!
+          {t('welcomeBackShort')}, {user?.firstName || 'Student'}!
         </Text>
         <View style={styles.searchContainer}>
           <MagnifyingGlassIcon size={20} color={colors.secondary} style={{ marginRight: 10 }} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search properties..."
+            placeholder={t('searchProperties')}
             placeholderTextColor={colors.secondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -233,7 +235,7 @@ export default function HomeScreen({ navigation }: any) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <Text style={styles.sectionTitle}>{t('properties')}</Text>
         <View style={styles.quickActions}>
           <TouchableOpacity
             style={styles.actionCard}
@@ -241,7 +243,7 @@ export default function HomeScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <HomeModernIcon size={32} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Browse Properties</Text>
+            <Text style={styles.actionText}>{t('browseProperties')}</Text>
           </TouchableOpacity>
 
           {/* Find Roommates - Only for Students */}
@@ -252,7 +254,7 @@ export default function HomeScreen({ navigation }: any) {
               activeOpacity={0.7}
             >
               <UserGroupIcon size={32} color={colors.primary} style={styles.actionIcon} />
-              <Text style={styles.actionText}>Find Roommates</Text>
+              <Text style={styles.actionText}>{t('findRoommate')}</Text>
             </TouchableOpacity>
           )}
 
@@ -263,7 +265,7 @@ export default function HomeScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <HomeModernIcon size={32} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>My Listings</Text>
+            <Text style={styles.actionText}>{t('myListings')}</Text>
           </TouchableOpacity>
 
           {/* Marketplace - Only for Students and Admins */}
@@ -274,7 +276,7 @@ export default function HomeScreen({ navigation }: any) {
               activeOpacity={0.7}
             >
               <ShoppingBagIcon size={32} color={colors.primary} style={styles.actionIcon} />
-              <Text style={styles.actionText}>Marketplace</Text>
+              <Text style={styles.actionText}>{t('marketplace')}</Text>
             </TouchableOpacity>
           )}
 
@@ -284,7 +286,7 @@ export default function HomeScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <ChatBubbleLeftRightIcon size={32} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Community</Text>
+            <Text style={styles.actionText}>{t('community')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -292,7 +294,7 @@ export default function HomeScreen({ navigation }: any) {
       {/* Community Posts for Students and Admins */}
       {(isStudent || isAdmin) && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Community Posts</Text>
+          <Text style={styles.sectionTitle}>{t('communityPosts')}</Text>
           {loading ? (
             <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
           ) : posts.length > 0 ? (
@@ -309,14 +311,14 @@ export default function HomeScreen({ navigation }: any) {
                 </Text>
                 <View style={styles.postMeta}>
                   <Text style={styles.postAuthor}>
-                    by {post.author?.firstName} {post.author?.lastName}
+                    {t('by')} {post.author?.firstName} {post.author?.lastName}
                   </Text>
                   <Text style={styles.postCategory}>{post.category}</Text>
                 </View>
               </TouchableOpacity>
             ))
           ) : (
-            <Text style={styles.emptyText}>No community posts yet</Text>
+            <Text style={styles.emptyText}>{t('noCommunityPosts')}</Text>
           )}
         </View>
       )}
@@ -324,7 +326,7 @@ export default function HomeScreen({ navigation }: any) {
       {/* Properties for Landlords and Admins */}
       {(isLandlord || isAdmin) && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Properties</Text>
+          <Text style={styles.sectionTitle}>{t('featuredProperties')}</Text>
           {loading ? (
             <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
           ) : properties.length > 0 ? (
@@ -344,7 +346,7 @@ export default function HomeScreen({ navigation }: any) {
                 ) : (
                   <View style={styles.imagePlaceholder}>
                     <HomeModernIcon size={48} color={colors.secondary} />
-                    <Text style={{ color: colors.secondary, marginTop: 8 }}>No Image</Text>
+                    <Text style={{ color: colors.secondary, marginTop: 8 }}>{t('noImage')}</Text>
                   </View>
                 )}
                 <View style={styles.propertyInfo}>
@@ -356,16 +358,16 @@ export default function HomeScreen({ navigation }: any) {
                     </Text>
                   </View>
                   <Text style={styles.propertyDetails}>
-                    {property.bedrooms} Bedrooms • {property.bathrooms} Bathrooms
+                    {property.bedrooms} {t('bedrooms')} • {property.bathrooms} {t('bathrooms')}
                   </Text>
                   <Text style={styles.propertyPrice}>
-                    ${property.price}/month
+                    ${property.price}/{t('month')}
                   </Text>
                 </View>
               </TouchableOpacity>
             ))
           ) : (
-            <Text style={styles.emptyText}>No properties available</Text>
+            <Text style={styles.emptyText}>{t('noPropertiesAvailable')}</Text>
           )}
         </View>
       )}

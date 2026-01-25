@@ -19,12 +19,14 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { conversationsAPI } from '../../services/api';
 import { format } from 'date-fns';
 
 export default function MessagesScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
@@ -386,7 +388,7 @@ export default function MessagesScreen({ route, navigation }: any) {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Type a message..."
+            placeholder={t('typeMessage')}
             placeholderTextColor={colors.secondary}
             value={newMessage}
             onChangeText={setNewMessage}
@@ -403,7 +405,7 @@ export default function MessagesScreen({ route, navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>{t('messages')}</Text>
       </View>
       {loading ? (
         <View style={styles.emptyContainer}>
@@ -436,7 +438,7 @@ export default function MessagesScreen({ route, navigation }: any) {
                 {item.otherUser?.firstName} {item.otherUser?.lastName}
               </Text>
               <Text style={styles.conversationPreview} numberOfLines={1}>
-                {item.lastMessage?.content || 'No messages yet'}
+                {item.lastMessage?.content || t('noMessages')}
               </Text>
             </View>
             {item.lastMessage && (
@@ -449,9 +451,9 @@ export default function MessagesScreen({ route, navigation }: any) {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <ChatBubbleLeftRightIcon size={64} color={colors.secondary} />
-            <Text style={styles.emptyText}>No conversations yet</Text>
+            <Text style={styles.emptyText}>{t('noConversationsYet')}</Text>
             <Text style={styles.emptySubtext}>
-              Start a conversation by contacting a landlord on a property listing
+              {t('startConversationHint')}
             </Text>
           </View>
         }

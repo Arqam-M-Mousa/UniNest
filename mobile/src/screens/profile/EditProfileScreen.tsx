@@ -15,11 +15,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { userAPI, uploadsAPI } from '../../services/api';
 
 export default function EditProfileScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user, refreshUser } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -60,7 +62,7 @@ export default function EditProfileScreen({ navigation }: any) {
       return true;
     } catch (error: any) {
       console.error('Failed to upload profile picture:', error);
-      Alert.alert('Error', error.message || 'Failed to upload profile picture.');
+      Alert.alert(t('error'), error.message || 'Failed to upload profile picture.');
       return false;
     } finally {
       setUploadingImage(false);
@@ -69,7 +71,7 @@ export default function EditProfileScreen({ navigation }: any) {
 
   const handleSave = async () => {
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      Alert.alert('Error', 'First name and last name are required.');
+      Alert.alert(t('error'), t('requiredField'));
       return;
     }
 
@@ -91,10 +93,10 @@ export default function EditProfileScreen({ navigation }: any) {
         phoneNumber: formData.phoneNumber.trim() || null,
       });
       await refreshUser();
-      Alert.alert('Success', 'Profile updated successfully.');
+      Alert.alert(t('success'), t('updatedSuccessfully'));
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update profile.');
+      Alert.alert(t('error'), error.message || 'Failed to update profile.');
     } finally {
       setLoading(false);
     }
@@ -203,7 +205,7 @@ export default function EditProfileScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <Text style={styles.headerTitle}>{t('editProfileTitle')}</Text>
         <TouchableOpacity
           style={styles.saveButton}
           onPress={handleSave}
@@ -213,7 +215,7 @@ export default function EditProfileScreen({ navigation }: any) {
           {loading || uploadingImage ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.saveButtonText}>Save</Text>
+            <Text style={styles.saveButtonText}>{t('save')}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -235,39 +237,39 @@ export default function EditProfileScreen({ navigation }: any) {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t('email')}</Text>
           <Text style={styles.emailText}>{user?.email}</Text>
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>First Name</Text>
+          <Text style={styles.label}>{t('firstName')}</Text>
           <TextInput
             style={styles.input}
             value={formData.firstName}
             onChangeText={(text) => setFormData({ ...formData, firstName: text })}
-            placeholder="Enter first name"
+            placeholder={t('enterFirstName')}
             placeholderTextColor={colors.secondary}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Last Name</Text>
+          <Text style={styles.label}>{t('lastName')}</Text>
           <TextInput
             style={styles.input}
             value={formData.lastName}
             onChangeText={(text) => setFormData({ ...formData, lastName: text })}
-            placeholder="Enter last name"
+            placeholder={t('enterLastName')}
             placeholderTextColor={colors.secondary}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Phone Number</Text>
+          <Text style={styles.label}>{t('phoneNumber')}</Text>
           <TextInput
             style={styles.input}
             value={formData.phoneNumber}
             onChangeText={(text) => setFormData({ ...formData, phoneNumber: text })}
-            placeholder="Enter phone number"
+            placeholder={t('enterPhoneNumber')}
             placeholderTextColor={colors.secondary}
             keyboardType="phone-pad"
           />

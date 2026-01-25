@@ -22,11 +22,13 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { roommatesAPI } from '../../services/api';
 
 export default function RoommatesScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -252,9 +254,9 @@ export default function RoommatesScreen({ navigation }: any) {
           <View style={styles.emptyIconContainer}>
             <UserPlusIcon size={40} color={colors.primary} />
           </View>
-          <Text style={styles.emptyTitle}>Create Your Profile First</Text>
+          <Text style={styles.emptyTitle}>{t('createProfileFirst')}</Text>
           <Text style={styles.emptySubtitle}>
-            Set up your roommate profile to start matching with potential roommates
+            {t('createProfileHint')}
           </Text>
           <TouchableOpacity
             style={styles.createProfileButton}
@@ -262,7 +264,7 @@ export default function RoommatesScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <UserPlusIcon size={20} color="#FFFFFF" />
-            <Text style={styles.createProfileButtonText}>Create Profile</Text>
+            <Text style={styles.createProfileButtonText}>{t('createProfile')}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -273,9 +275,9 @@ export default function RoommatesScreen({ navigation }: any) {
         <View style={styles.emptyIconContainer}>
           <MagnifyingGlassIcon size={40} color={colors.primary} />
         </View>
-        <Text style={styles.emptyTitle}>No Roommates Found</Text>
+        <Text style={styles.emptyTitle}>{t('noRoommatesFound')}</Text>
         <Text style={styles.emptySubtitle}>
-          Try adjusting your preferences or check back later
+          {t('noRoommatesHint')}
         </Text>
       </View>
     );
@@ -285,14 +287,14 @@ export default function RoommatesScreen({ navigation }: any) {
     if (item.minBudget && item.maxBudget) {
       return `${item.minBudget} - ${item.maxBudget} NIS`;
     }
-    return 'Not specified';
+    return t('notSpecified');
   };
 
   const getSleepLabel = (schedule: string) => {
     const labels: any = {
-      early: 'Early Bird',
-      normal: 'Normal',
-      late: 'Night Owl',
+      early: t('earlyBird'),
+      normal: t('normal'),
+      late: t('nightOwl'),
     };
     return labels[schedule] || schedule;
   };
@@ -304,7 +306,7 @@ export default function RoommatesScreen({ navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.title}>Find Roommates</Text>
+          <Text style={styles.title}>{t('findRoommatesTitle')}</Text>
           <TouchableOpacity
             style={styles.matchesButton}
             onPress={() => navigation.navigate('RoommateMatches')}
@@ -312,7 +314,7 @@ export default function RoommatesScreen({ navigation }: any) {
             <UserGroupIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.subtitle}>Top 10 compatible matches for you</Text>
+        <Text style={styles.subtitle}>{t('topCompatibleMatches')}</Text>
       </View>
 
       {loading ? (
@@ -370,13 +372,13 @@ export default function RoommatesScreen({ navigation }: any) {
                   {item.cleanlinessLevel && (
                     <View style={styles.badge}>
                       <SparklesIcon size={12} color={colors.primary} />
-                      <Text style={styles.badgeText}>Level {item.cleanlinessLevel}</Text>
+                      <Text style={styles.badgeText}>{t('level')} {item.cleanlinessLevel}</Text>
                     </View>
                   )}
                   {item.sameMajor === 1 && (
                     <View style={[styles.badge, { backgroundColor: '#22c55e20' }]}>
                       <CheckIcon size={12} color="#22c55e" />
-                      <Text style={[styles.badgeText, { color: '#22c55e' }]}>Same Major</Text>
+                      <Text style={[styles.badgeText, { color: '#22c55e' }]}>{t('sameMajor')}</Text>
                     </View>
                   )}
                 </View>

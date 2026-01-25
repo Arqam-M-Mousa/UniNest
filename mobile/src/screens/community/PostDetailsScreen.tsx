@@ -22,6 +22,7 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { forumAPI } from '../../services/api';
 import { format } from 'date-fns';
 
@@ -29,6 +30,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
   const { id } = route.params;
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [post, setPost] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
@@ -56,7 +58,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
       });
     } catch (err: any) {
       console.error('Failed to load post:', err);
-      setError('Unable to load post details. Please try again.');
+      setError(t('unableToLoadPost'));
     } finally {
       setLoading(false);
     }
@@ -99,7 +101,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
       });
     } catch (err) {
       console.error('Failed to vote:', err);
-      Alert.alert('Error', 'Unable to update vote. Please try again.');
+      Alert.alert(t('error'), t('unableToUpdateVote'));
     }
   };
 
@@ -123,7 +125,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
       }));
     } catch (err) {
       console.error('Failed to add comment:', err);
-      Alert.alert('Error', 'Unable to post comment. Please try again.');
+      Alert.alert(t('error'), t('unableToPostComment'));
     } finally {
       setSubmitting(false);
     }
@@ -368,7 +370,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Post Details</Text>
+          <Text style={styles.headerTitle}>{t('postDetails')}</Text>
         </View>
         <View style={styles.loader}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -384,14 +386,14 @@ export default function PostDetailsScreen({ route, navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Post Details</Text>
+          <Text style={styles.headerTitle}>{t('postDetails')}</Text>
         </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            {error || 'Post not found'}
+            {error || t('postNotFound')}
           </Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadPost}>
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={styles.retryButtonText}>{t('tryAgain')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -408,7 +410,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Post Details</Text>
+        <Text style={styles.headerTitle}>{t('postDetails')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
@@ -461,17 +463,17 @@ export default function PostDetailsScreen({ route, navigation }: any) {
             </View>
             <View style={styles.actionButton}>
               <ChatBubbleLeftIcon size={20} color={colors.secondary} />
-              <Text style={styles.actionText}>{post.commentCount || 0} comments</Text>
+              <Text style={styles.actionText}>{post.commentCount || 0} {t('comments')}</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.commentsSection}>
-          <Text style={styles.sectionTitle}>Comments ({comments.length})</Text>
+          <Text style={styles.sectionTitle}>{t('commentsCount')} ({comments.length})</Text>
           {comments.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 32 }}>
               <ChatBubbleLeftIcon size={48} color={colors.secondary} />
-              <Text style={styles.emptyComments}>No comments yet. Be the first to comment!</Text>
+              <Text style={styles.emptyComments}>{t('noCommentsYet')}</Text>
             </View>
           ) : (
             comments.map((comment) => (
@@ -497,7 +499,7 @@ export default function PostDetailsScreen({ route, navigation }: any) {
       <View style={styles.commentInputContainer}>
         <TextInput
           style={styles.commentInput}
-          placeholder="Write a comment..."
+          placeholder={t('writeComment')}
           placeholderTextColor={colors.secondary}
           value={commentText}
           onChangeText={setCommentText}

@@ -117,14 +117,14 @@ export default function MyListingsScreen({ navigation }: any) {
         listings.map((l) => (l.id === id ? { ...l, isVisible: !l.isVisible } : l))
       );
     } catch (error: any) {
-      Alert.alert(t('error'), error.message || 'Failed to update visibility.');
+      Alert.alert(t('error'), error.message || t('failedToUpdateVisibility'));
     }
   };
 
   const handleDelete = (id: string, type: string) => {
     Alert.alert(
       t('delete'),
-      `Are you sure you want to delete this ${type === 'post' ? 'post' : 'listing'}?`,
+      type === 'post' ? t('deletePostConfirm') : t('deleteListingConfirm'),
       [
         { text: t('cancel'), style: 'cancel' },
         {
@@ -141,7 +141,7 @@ export default function MyListingsScreen({ navigation }: any) {
               }
               setListings(listings.filter((l) => l.id !== id));
             } catch (error: any) {
-              Alert.alert(t('error'), error.message || 'Failed to delete.');
+              Alert.alert(t('error'), error.message || t('failedToDelete'));
             }
           },
         },
@@ -328,7 +328,7 @@ export default function MyListingsScreen({ navigation }: any) {
             {!item.isVisible && (
               <View style={styles.hiddenOverlay}>
                 <EyeSlashIcon size={24} color="#FFFFFF" />
-                <Text style={styles.hiddenText}>Hidden</Text>
+                <Text style={styles.hiddenText}>{t('hidden')}</Text>
               </View>
             )}
           </View>
@@ -369,12 +369,12 @@ export default function MyListingsScreen({ navigation }: any) {
             {item.isVisible ? (
               <>
                 <EyeSlashIcon size={18} color={colors.text} />
-                <Text style={styles.actionText}>Hide</Text>
+                <Text style={styles.actionText}>{t('hide')}</Text>
               </>
             ) : (
               <>
                 <EyeIcon size={18} color={colors.text} />
-                <Text style={styles.actionText}>Show</Text>
+                <Text style={styles.actionText}>{t('show')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -388,7 +388,7 @@ export default function MyListingsScreen({ navigation }: any) {
           activeOpacity={0.7}
         >
           <PencilIcon size={18} color={colors.text} />
-          <Text style={styles.actionText}>Edit</Text>
+          <Text style={styles.actionText}>{t('edit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.actionButtonLast]}
@@ -396,7 +396,7 @@ export default function MyListingsScreen({ navigation }: any) {
           activeOpacity={0.7}
         >
           <TrashIcon size={18} color={colors.error} />
-          <Text style={[styles.actionText, { color: colors.error }]}>Delete</Text>
+          <Text style={[styles.actionText, { color: colors.error }]}>{t('delete')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -410,7 +410,7 @@ export default function MyListingsScreen({ navigation }: any) {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ChevronLeftIcon size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>My Listings</Text>
+            <Text style={styles.headerTitle}>{t('myListingsTitle')}</Text>
           </View>
         </View>
         <View style={styles.loader}>
@@ -427,7 +427,7 @@ export default function MyListingsScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>My Listings</Text>
+          <Text style={styles.headerTitle}>{t('myListingsTitle')}</Text>
         </View>
         <TouchableOpacity 
           style={styles.addButton} 
@@ -451,7 +451,7 @@ export default function MyListingsScreen({ navigation }: any) {
               onPress={() => setActiveTab('posts')}
             >
               <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
-                Posts
+                {t('postsTab')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -459,7 +459,7 @@ export default function MyListingsScreen({ navigation }: any) {
               onPress={() => setActiveTab('marketplace')}
             >
               <Text style={[styles.tabText, activeTab === 'marketplace' && styles.activeTabText]}>
-                Marketplace
+                {t('marketplaceTab')}
               </Text>
             </TouchableOpacity>
           </>
@@ -472,7 +472,7 @@ export default function MyListingsScreen({ navigation }: any) {
             onPress={() => setActiveTab('properties')}
           >
             <Text style={[styles.tabText, activeTab === 'properties' && styles.activeTabText]}>
-              Properties
+              {t('propertiesTab')}
             </Text>
           </TouchableOpacity>
         )}
@@ -485,7 +485,7 @@ export default function MyListingsScreen({ navigation }: any) {
               onPress={() => setActiveTab('properties')}
             >
               <Text style={[styles.tabText, activeTab === 'properties' && styles.activeTabText]}>
-                Properties
+                {t('propertiesTab')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -493,7 +493,7 @@ export default function MyListingsScreen({ navigation }: any) {
               onPress={() => setActiveTab('posts')}
             >
               <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
-                Posts
+                {t('postsTab')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -501,7 +501,7 @@ export default function MyListingsScreen({ navigation }: any) {
               onPress={() => setActiveTab('marketplace')}
             >
               <Text style={[styles.tabText, activeTab === 'marketplace' && styles.activeTabText]}>
-                Marketplace
+                {t('marketplaceTab')}
               </Text>
             </TouchableOpacity>
           </>
@@ -512,14 +512,14 @@ export default function MyListingsScreen({ navigation }: any) {
         <View style={styles.emptyContainer}>
           <MapPinIcon size={64} color={colors.secondary} />
           <Text style={styles.emptyText}>
-            {activeTab === 'posts' ? 'No posts yet' : 'No listings yet'}
+            {activeTab === 'posts' ? t('noPostsYet') : t('noListingsYet')}
           </Text>
           <Text style={styles.emptySubtext}>
             {activeTab === 'posts' 
-              ? 'Create your first post to start sharing'
+              ? t('createFirstPost')
               : activeTab === 'marketplace'
-              ? 'Create your first marketplace listing'
-              : 'Create your first property listing to start renting'}
+              ? t('createFirstMarketplace')
+              : t('createFirstProperty')}
           </Text>
         </View>
       ) : (

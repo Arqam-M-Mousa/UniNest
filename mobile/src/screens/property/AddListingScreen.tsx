@@ -18,6 +18,7 @@ import * as Location from 'expo-location';
 import MapView, { Marker, PROVIDER_GOOGLE } from '../../components/MapView';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { propertyListingsAPI, universitiesAPI } from '../../services/api';
 
 const propertyTypes = ['Apartment', 'House', 'Studio', 'Room'];
@@ -41,6 +42,7 @@ interface University {
 export default function AddListingScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(true);
@@ -94,7 +96,7 @@ export default function AddListingScreen({ navigation }: any) {
   const pickImages = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow access to your photo library.');
+      Alert.alert(t('permissionRequired'), t('photoLibraryPermission'));
       return;
     }
 
@@ -120,7 +122,7 @@ export default function AddListingScreen({ navigation }: any) {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Please allow location access to use this feature.');
+        Alert.alert(t('permissionDenied'), t('locationPermission'));
         return;
       }
 
@@ -138,7 +140,7 @@ export default function AddListingScreen({ navigation }: any) {
       });
     } catch (error) {
       console.error('Error getting location:', error);
-      Alert.alert('Error', 'Failed to get current location. Please try again.');
+      Alert.alert(t('error'), t('failedToGetLocation'));
     } finally {
       setLocationLoading(false);
     }
@@ -153,38 +155,38 @@ export default function AddListingScreen({ navigation }: any) {
     if (formData.latitude && formData.longitude) {
       setShowMapModal(false);
     } else {
-      Alert.alert('No Location Selected', 'Please tap on the map to select a location.');
+      Alert.alert(t('noLocationSelected'), t('tapMapToSelect'));
     }
   };
 
   const handleSubmit = async () => {
     // Validation
     if (!formData.title.trim()) {
-      Alert.alert('Error', 'Please enter a title');
+      Alert.alert(t('error'), t('pleaseEnterTitle'));
       return;
     }
     if (!formData.description.trim()) {
-      Alert.alert('Error', 'Please enter a description');
+      Alert.alert(t('error'), t('pleaseEnterDescription'));
       return;
     }
     if (!formData.pricePerMonth.trim()) {
-      Alert.alert('Error', 'Please enter a price');
+      Alert.alert(t('error'), t('pleaseEnterPrice'));
       return;
     }
     if (!formData.squareFeet.trim()) {
-      Alert.alert('Error', 'Please enter the size');
+      Alert.alert(t('error'), t('pleaseEnterSize'));
       return;
     }
     if (!formData.leaseDuration.trim()) {
-      Alert.alert('Error', 'Please enter lease duration');
+      Alert.alert(t('error'), t('pleaseEnterLeaseDuration'));
       return;
     }
     if (!formData.universityId) {
-      Alert.alert('Error', 'Please select a university');
+      Alert.alert(t('error'), t('pleaseSelectUniversity'));
       return;
     }
     if (selectedImages.length === 0) {
-      Alert.alert('Error', 'Please add at least one image');
+      Alert.alert(t('error'), t('pleaseAddImage'));
       return;
     }
 
@@ -212,11 +214,11 @@ export default function AddListingScreen({ navigation }: any) {
       };
 
       await propertyListingsAPI.create(payload);
-      Alert.alert('Success', 'Listing created successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+      Alert.alert(t('success'), t('listingCreatedSuccess'), [
+        { text: t('ok'), onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create listing');
+      Alert.alert(t('error'), error.message || t('failedToCreateListing'));
     } finally {
       setLoading(false);
     }
@@ -520,7 +522,7 @@ export default function AddListingScreen({ navigation }: any) {
             <Text style={styles.label}>Title <Text style={styles.required}>*</Text></Text>
             <TextInput
               style={styles.input}
-              placeholder="e.g., Cozy 2BR near campus"
+              placeholder={t('titlePlaceholder')}
               placeholderTextColor={colors.secondary}
               value={formData.title}
               onChangeText={(text) => setFormData({ ...formData, title: text })}
@@ -531,7 +533,7 @@ export default function AddListingScreen({ navigation }: any) {
             <Text style={styles.label}>Description <Text style={styles.required}>*</Text></Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Describe the place, amenities, nearby spots..."
+              placeholder={t('descriptionPlaceholder')}
               placeholderTextColor={colors.secondary}
               value={formData.description}
               onChangeText={(text) => setFormData({ ...formData, description: text })}
@@ -604,7 +606,7 @@ export default function AddListingScreen({ navigation }: any) {
               <Text style={styles.label}>Monthly Price <Text style={styles.required}>*</Text></Text>
               <TextInput
                 style={styles.input}
-                placeholder="1500"
+                placeholder={t('pricePlaceholder')}
                 placeholderTextColor={colors.secondary}
                 value={formData.pricePerMonth}
                 onChangeText={(text) => setFormData({ ...formData, pricePerMonth: text })}
@@ -665,7 +667,7 @@ export default function AddListingScreen({ navigation }: any) {
               <Text style={styles.label}>Size (m²) <Text style={styles.required}>*</Text></Text>
               <TextInput
                 style={styles.input}
-                placeholder="80"
+                placeholder={t('sizePlaceholder')}
                 placeholderTextColor={colors.secondary}
                 value={formData.squareFeet}
                 onChangeText={(text) => setFormData({ ...formData, squareFeet: text })}
@@ -679,7 +681,7 @@ export default function AddListingScreen({ navigation }: any) {
               <Text style={styles.label}>Lease Duration <Text style={styles.required}>*</Text></Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 12 months"
+                placeholder={t('leaseDurationPlaceholder')}
                 placeholderTextColor={colors.secondary}
                 value={formData.leaseDuration}
                 onChangeText={(text) => setFormData({ ...formData, leaseDuration: text })}

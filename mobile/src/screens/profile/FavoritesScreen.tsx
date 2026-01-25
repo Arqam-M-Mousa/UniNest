@@ -17,6 +17,7 @@ import {
 } from 'react-native-heroicons/outline';
 import { HeartIcon as HeartSolidIcon } from 'react-native-heroicons/solid';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { favoritesAPI } from '../../services/api';
 
 interface Property {
@@ -31,6 +32,7 @@ interface Property {
 
 export default function FavoritesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [favorites, setFavorites] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -203,7 +205,7 @@ export default function FavoritesScreen({ navigation }: any) {
       ) : (
         <View style={styles.imagePlaceholder}>
           <MapPinIcon size={48} color={colors.secondary} />
-          <Text style={{ color: colors.secondary, marginTop: 8 }}>No Image</Text>
+          <Text style={{ color: colors.secondary, marginTop: 8 }}>{t('noImageText')}</Text>
         </View>
       )}
       <View style={styles.cardContent}>
@@ -221,8 +223,8 @@ export default function FavoritesScreen({ navigation }: any) {
           <Text style={styles.cardLocationText}>{item.location}</Text>
         </View>
         <View style={styles.cardDetails}>
-          <Text style={styles.cardDetail}>{item.bedrooms} beds</Text>
-          <Text style={styles.cardDetail}>{item.bathrooms} baths</Text>
+          <Text style={styles.cardDetail}>{item.bedrooms} {t('beds')}</Text>
+          <Text style={styles.cardDetail}>{item.bathrooms} {t('baths')}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -235,7 +237,7 @@ export default function FavoritesScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Favorites</Text>
+          <Text style={styles.headerTitle}>{t('favoritesTitle')}</Text>
         </View>
         <View style={styles.loader}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -250,15 +252,15 @@ export default function FavoritesScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Favorites</Text>
+        <Text style={styles.headerTitle}>{t('favoritesTitle')}</Text>
       </View>
 
       {favorites.length === 0 ? (
         <View style={styles.emptyContainer}>
           <HeartIcon size={64} color={colors.secondary} />
-          <Text style={styles.emptyText}>No favorites yet</Text>
+          <Text style={styles.emptyText}>{t('noFavoritesYet')}</Text>
           <Text style={styles.emptySubtext}>
-            Start exploring properties and save your favorites here
+            {t('startExploringFavorites')}
           </Text>
         </View>
       ) : (

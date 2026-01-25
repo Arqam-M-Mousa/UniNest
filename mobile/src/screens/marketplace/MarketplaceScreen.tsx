@@ -14,10 +14,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShoppingBagIcon, MagnifyingGlassIcon, ChevronLeftIcon, PlusIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { marketplaceAPI } from '../../services/api';
 
 export default function MarketplaceScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,7 @@ export default function MarketplaceScreen({ navigation }: any) {
       setItems(transformed);
     } catch (err) {
       console.error('Failed to load marketplace items:', err);
-      setError('Unable to load marketplace items. Please try again.');
+      setError(t('somethingWentWrong'));
       setItems([]);
     } finally {
       setLoading(false);
@@ -208,7 +210,7 @@ export default function MarketplaceScreen({ navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.title}>Marketplace</Text>
+          <Text style={styles.title}>{t('marketplaceTitle')}</Text>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => navigation.navigate('AddMarketplaceItem')}
@@ -221,7 +223,7 @@ export default function MarketplaceScreen({ navigation }: any) {
           <MagnifyingGlassIcon size={20} color={colors.secondary} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search items..."
+            placeholder={t('searchItems')}
             placeholderTextColor={colors.secondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -248,15 +250,15 @@ export default function MarketplaceScreen({ navigation }: any) {
             <View style={styles.emptyContainer}>
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={() => loadItems()}>
-                <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.retryButtonText}>{t('tryAgain')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.emptyContainer}>
               <ShoppingBagIcon size={64} color={colors.secondary} />
-              <Text style={styles.emptyText}>No items found</Text>
+              <Text style={styles.emptyText}>{t('noItemsFound')}</Text>
               <Text style={styles.emptySubtext}>
-                Check back later for new marketplace listings
+                {t('checkBackLater')}
               </Text>
             </View>
           )

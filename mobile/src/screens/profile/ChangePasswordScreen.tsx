@@ -15,10 +15,12 @@ import {
   EnvelopeIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { passwordChangeAPI } from '../../services/api';
 
 export default function ChangePasswordScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const [step, setStep] = useState(1); // 1: send code, 2: enter code and new password
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -29,10 +31,10 @@ export default function ChangePasswordScreen({ navigation }: any) {
     setLoading(true);
     try {
       await passwordChangeAPI.sendCode();
-      Alert.alert('Success', 'Verification code sent to your email');
+      Alert.alert(t('success'), t('verificationCodeSent'));
       setStep(2);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to send verification code');
+      Alert.alert(t('error'), error.message || t('failedToSendCode'));
     } finally {
       setLoading(false);
     }
@@ -40,28 +42,28 @@ export default function ChangePasswordScreen({ navigation }: any) {
 
   const handleChangePassword = async () => {
     if (!code.trim()) {
-      Alert.alert('Error', 'Please enter the verification code');
+      Alert.alert(t('error'), t('pleaseEnterCode'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(t('error'), t('passwordsDoNotMatch'));
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert(t('error'), t('passwordTooShort'));
       return;
     }
 
     setLoading(true);
     try {
       await passwordChangeAPI.changePassword(code, newPassword);
-      Alert.alert('Success', 'Password changed successfully', [
+      Alert.alert(t('success'), t('passwordChangedSuccess'), [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to change password');
+      Alert.alert(t('error'), error.message || t('failedToChangePassword'));
     } finally {
       setLoading(false);
     }
@@ -187,7 +189,7 @@ export default function ChangePasswordScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Change Password</Text>
+        <Text style={styles.headerTitle}>{t('changePasswordTitle')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
@@ -208,9 +210,9 @@ export default function ChangePasswordScreen({ navigation }: any) {
 
         {step === 1 ? (
           <>
-            <Text style={styles.title}>Verify Your Email</Text>
+            <Text style={styles.title}>{t('verifyYourEmail')}</Text>
             <Text style={styles.subtitle}>
-              We'll send a verification code to your registered email address to confirm your identity.
+              {t('verifyEmailHint')}
             </Text>
 
             <TouchableOpacity
@@ -222,22 +224,22 @@ export default function ChangePasswordScreen({ navigation }: any) {
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.buttonText}>Send Verification Code</Text>
+                <Text style={styles.buttonText}>{t('sendVerificationCode')}</Text>
               )}
             </TouchableOpacity>
           </>
         ) : (
           <>
-            <Text style={styles.title}>Set New Password</Text>
+            <Text style={styles.title}>{t('setNewPassword')}</Text>
             <Text style={styles.subtitle}>
-              Enter the verification code sent to your email and create a new password.
+              {t('setNewPasswordHint')}
             </Text>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Verification Code</Text>
+              <Text style={styles.label}>{t('verificationCode')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter 6-digit code"
+                placeholder={t('enterVerificationCode')}
                 placeholderTextColor={colors.secondary}
                 value={code}
                 onChangeText={setCode}
@@ -247,10 +249,10 @@ export default function ChangePasswordScreen({ navigation }: any) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>New Password</Text>
+              <Text style={styles.label}>{t('newPassword')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter new password"
+                placeholder={t('enterNewPassword')}
                 placeholderTextColor={colors.secondary}
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -259,10 +261,10 @@ export default function ChangePasswordScreen({ navigation }: any) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>{t('confirmNewPassword')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Confirm new password"
+                placeholder={t('confirmNewPasswordPlaceholder')}
                 placeholderTextColor={colors.secondary}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -279,7 +281,7 @@ export default function ChangePasswordScreen({ navigation }: any) {
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.buttonText}>Change Password</Text>
+                <Text style={styles.buttonText}>{t('changePassword')}</Text>
               )}
             </TouchableOpacity>
 
@@ -289,7 +291,7 @@ export default function ChangePasswordScreen({ navigation }: any) {
               disabled={loading}
               activeOpacity={0.7}
             >
-              <Text style={styles.secondaryButtonText}>Resend Code</Text>
+              <Text style={styles.secondaryButtonText}>{t('resendCode')}</Text>
             </TouchableOpacity>
           </>
         )}

@@ -21,11 +21,13 @@ import {
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { propertyListingsAPI } from '../../services/api';
 
 export default function PropertiesScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export default function PropertiesScreen({ navigation }: any) {
       setProperties(transformed);
     } catch (err) {
       console.error('Failed to load properties:', err);
-      setError('Unable to load properties. Please try again.');
+      setError(t('somethingWentWrong'));
       setProperties([]);
     } finally {
       setLoading(false);
@@ -269,13 +271,13 @@ export default function PropertiesScreen({ navigation }: any) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeftIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.title}>Properties</Text>
+          <Text style={styles.title}>{t('properties')}</Text>
         </View>
         <View style={styles.searchContainer}>
           <MagnifyingGlassIcon size={20} color={colors.secondary} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by location, title..."
+            placeholder={t('search')}
             placeholderTextColor={colors.secondary}
             value={filters.search}
             onChangeText={(text) => setFilters({ ...filters, search: text })}
@@ -293,7 +295,7 @@ export default function PropertiesScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <Text style={styles.universityToggleText}>
-              {showAllUniversities ? 'Show My University Only' : 'Show All Universities'}
+              {showAllUniversities ? t('showMyUniversityOnly') : t('showAllUniversities')}
             </Text>
           </TouchableOpacity>
         )}
@@ -301,7 +303,7 @@ export default function PropertiesScreen({ navigation }: any) {
           <View style={styles.filterRow}>
             <TextInput
               style={styles.filterInput}
-              placeholder="Min"
+              placeholder={t('min')}
               placeholderTextColor={colors.secondary}
               keyboardType="numeric"
               value={filters.minPrice}
@@ -309,7 +311,7 @@ export default function PropertiesScreen({ navigation }: any) {
             />
             <TextInput
               style={styles.filterInput}
-              placeholder="Max"
+              placeholder={t('max')}
               placeholderTextColor={colors.secondary}
               keyboardType="numeric"
               value={filters.maxPrice}
@@ -317,7 +319,7 @@ export default function PropertiesScreen({ navigation }: any) {
             />
             <TextInput
               style={styles.filterInput}
-              placeholder="Beds"
+              placeholder={t('bedrooms')}
               placeholderTextColor={colors.secondary}
               keyboardType="numeric"
               value={filters.bedrooms}
@@ -325,7 +327,7 @@ export default function PropertiesScreen({ navigation }: any) {
             />
           </View>
           <TouchableOpacity style={styles.applyButton} onPress={() => loadProperties()} activeOpacity={0.7}>
-            <Text style={styles.applyButtonText}>Apply</Text>
+            <Text style={styles.applyButtonText}>{t('filter')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -345,15 +347,15 @@ export default function PropertiesScreen({ navigation }: any) {
             <View style={styles.emptyContainer}>
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={() => loadProperties()}>
-                <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.retryButtonText}>{t('tryAgain')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.emptyContainer}>
               <HomeModernIcon size={64} color={colors.secondary} />
-              <Text style={styles.emptyText}>No properties found</Text>
+              <Text style={styles.emptyText}>{t('noPropertiesFound')}</Text>
               <Text style={styles.emptySubtext}>
-                Try adjusting your filters or check back later for new listings
+                {t('adjustFiltersHint')}
               </Text>
             </View>
           )
@@ -373,7 +375,7 @@ export default function PropertiesScreen({ navigation }: any) {
             ) : (
               <View style={styles.imagePlaceholder}>
                 <HomeModernIcon size={48} color={colors.secondary} />
-                <Text style={{ color: colors.secondary, marginTop: 8 }}>No Image</Text>
+                <Text style={{ color: colors.secondary, marginTop: 8 }}>{t('noImageText')}</Text>
               </View>
             )}
             <View style={styles.propertyInfo}>
@@ -385,10 +387,10 @@ export default function PropertiesScreen({ navigation }: any) {
                 </Text>
               </View>
               <Text style={styles.propertyDetails}>
-                {property.bedrooms} Bed{property.bedrooms > 1 ? 's' : ''} • {property.bathrooms} Bath{property.bathrooms > 1 ? 's' : ''}
+                {property.bedrooms} {t('bedrooms')} • {property.bathrooms} {t('bathrooms')}
               </Text>
               <Text style={styles.propertyPrice}>
-                ${property.price}/month
+                ${property.price}/{t('month')}
               </Text>
             </View>
           </TouchableOpacity>

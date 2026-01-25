@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { forumAPI } from '../../services/api';
 
 const categories = [
@@ -24,6 +25,7 @@ const categories = [
 
 export default function CreatePostScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('General');
@@ -31,11 +33,11 @@ export default function CreatePostScreen({ navigation }: any) {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a title');
+      Alert.alert(t('error'), t('pleaseEnterTitlePost'));
       return;
     }
     if (!content.trim()) {
-      Alert.alert('Error', 'Please enter content');
+      Alert.alert(t('error'), t('pleaseEnterContent'));
       return;
     }
 
@@ -46,11 +48,11 @@ export default function CreatePostScreen({ navigation }: any) {
         content: content.trim(),
         category,
       });
-      Alert.alert('Success', 'Post created successfully', [
+      Alert.alert(t('success'), t('postCreatedSuccess'), [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create post');
+      Alert.alert(t('error'), error.message || t('failedToCreatePost'));
     } finally {
       setLoading(false);
     }
@@ -147,7 +149,7 @@ export default function CreatePostScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Post</Text>
+        <Text style={styles.headerTitle}>{t('createPostTitle')}</Text>
         <TouchableOpacity
           style={[styles.postButton, loading && styles.postButtonDisabled]}
           onPress={handleSubmit}
@@ -157,17 +159,17 @@ export default function CreatePostScreen({ navigation }: any) {
           {loading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.postButtonText}>Post</Text>
+            <Text style={styles.postButtonText}>{t('post')}</Text>
           )}
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Title</Text>
+          <Text style={styles.label}>{t('title')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter post title"
+            placeholder={t('enterPostTitle')}
             placeholderTextColor={colors.secondary}
             value={title}
             onChangeText={setTitle}
@@ -175,7 +177,7 @@ export default function CreatePostScreen({ navigation }: any) {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Category</Text>
+          <Text style={styles.label}>{t('category')}</Text>
           <View style={styles.categoryContainer}>
             {categories.map((cat) => (
               <TouchableOpacity
@@ -200,10 +202,10 @@ export default function CreatePostScreen({ navigation }: any) {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Content</Text>
+          <Text style={styles.label}>{t('content')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="What's on your mind?"
+            placeholder={t('whatsOnYourMind')}
             placeholderTextColor={colors.secondary}
             value={content}
             onChangeText={setContent}

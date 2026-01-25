@@ -17,48 +17,44 @@ import {
   PhoneIcon,
 } from 'react-native-heroicons/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface FAQItem {
   question: string;
   answer: string;
 }
 
-const faqs: FAQItem[] = [
-  {
-    question: 'How do I search for properties?',
-    answer:
-      'Use the Properties tab to browse available listings. You can filter by location, price, number of bedrooms, and more using the filter options at the top of the screen.',
-  },
-  {
-    question: 'How do I contact a landlord?',
-    answer:
-      'On any property listing, tap the "Contact" or "Message" button to start a conversation with the landlord directly through our messaging system.',
-  },
-  {
-    question: 'How do I save properties I like?',
-    answer:
-      'Tap the heart icon on any property listing to add it to your favorites. You can view all your saved properties in the Favorites section of your profile.',
-  },
-  {
-    question: 'How do I list my property?',
-    answer:
-      'Go to your Profile, then tap "My Listings" and use the + button to create a new listing. Fill in the property details, add photos, and publish.',
-  },
-  {
-    question: 'Is my information secure?',
-    answer:
-      'Yes, we use industry-standard encryption to protect your personal information. We never share your data with third parties without your consent.',
-  },
-  {
-    question: 'How do I report a problem?',
-    answer:
-      'You can report issues by contacting our support team via email at support@uninest.com or by using the contact options below.',
-  },
-];
-
 export default function HelpScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      question: t('faqSearchProperties'),
+      answer: t('faqSearchPropertiesAnswer'),
+    },
+    {
+      question: t('faqContactLandlord'),
+      answer: t('faqContactLandlordAnswer'),
+    },
+    {
+      question: t('faqSaveProperties'),
+      answer: t('faqSavePropertiesAnswer'),
+    },
+    {
+      question: t('faqListProperty'),
+      answer: t('faqListPropertyAnswer'),
+    },
+    {
+      question: t('faqSecure'),
+      answer: t('faqSecureAnswer'),
+    },
+    {
+      question: t('faqReport'),
+      answer: t('faqReportAnswer'),
+    },
+  ];
 
   const toggleExpand = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -173,11 +169,11 @@ export default function HelpScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeftIcon size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help & Support</Text>
+        <Text style={styles.headerTitle}>{t('helpTitle')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+        <Text style={styles.sectionTitle}>{t('faq')}</Text>
 
         {faqs.map((faq, index) => (
           <View key={index} style={styles.faqItem}>
@@ -201,7 +197,7 @@ export default function HelpScreen({ navigation }: any) {
         ))}
 
         <View style={styles.contactSection}>
-          <Text style={styles.sectionTitle}>Contact Support</Text>
+          <Text style={styles.sectionTitle}>{t('contactSupport')}</Text>
           <View style={styles.contactCard}>
             <TouchableOpacity
               style={styles.contactItem}
@@ -211,7 +207,7 @@ export default function HelpScreen({ navigation }: any) {
                 <EnvelopeIcon size={22} color={colors.primary} />
               </View>
               <View style={styles.contactInfo}>
-                <Text style={styles.contactTitle}>Email</Text>
+                <Text style={styles.contactTitle}>{t('email')}</Text>
                 <Text style={styles.contactSubtitle}>support@uninest.com</Text>
               </View>
             </TouchableOpacity>
@@ -220,8 +216,8 @@ export default function HelpScreen({ navigation }: any) {
                 <ChatBubbleLeftRightIcon size={22} color={colors.primary} />
               </View>
               <View style={styles.contactInfo}>
-                <Text style={styles.contactTitle}>Live Chat</Text>
-                <Text style={styles.contactSubtitle}>Available 9am - 5pm</Text>
+                <Text style={styles.contactTitle}>{t('liveChat')}</Text>
+                <Text style={styles.contactSubtitle}>{t('availableHours')}</Text>
               </View>
             </TouchableOpacity>
           </View>

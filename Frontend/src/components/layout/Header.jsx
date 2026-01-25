@@ -429,7 +429,7 @@ const Header = () => {
                     >
                       <SparklesIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
                       <span className="font-medium">
-                        {user?.role === 'Student' ? 'AI Assistant (Mom)' : 'AI Property Expert'}
+                        {user?.role === 'Student' ? 'AI Assistant ' : 'AI Property Expert'}
                       </span>
                     </Link>
                     {user?.role === "Student" && (

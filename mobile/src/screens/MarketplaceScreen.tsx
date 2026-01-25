@@ -12,7 +12,7 @@ import {
   FlatList,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ShoppingBagIcon, MagnifyingGlassIcon, ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { ShoppingBagIcon, MagnifyingGlassIcon, ChevronLeftIcon, PlusIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../context/ThemeContext';
 import { marketplaceAPI } from '../services/api';
 
@@ -90,6 +90,15 @@ export default function MarketplaceScreen({ navigation }: any) {
       fontWeight: 'bold',
       color: '#FFFFFF',
       flex: 1,
+    },
+    addButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: '#FFFFFF',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 12,
     },
     searchContainer: {
       flexDirection: 'row',
@@ -200,6 +209,13 @@ export default function MarketplaceScreen({ navigation }: any) {
             <ChevronLeftIcon size={24} color="#FFFFFF" />
           </TouchableOpacity>
           <Text style={styles.title}>Marketplace</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AddMarketplaceItem')}
+            activeOpacity={0.7}
+          >
+            <PlusIcon size={20} color={colors.primary} />
+          </TouchableOpacity>
         </View>
         <View style={styles.searchContainer}>
           <MagnifyingGlassIcon size={20} color={colors.secondary} />

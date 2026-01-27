@@ -24,6 +24,7 @@ const PriceHistory = require("./PriceHistory");
 const PropertyAnalytics = require("./PropertyAnalytics");
 const MessageReport = require("./MessageReport");
 const ChatMessage = require("./ChatMessage");
+const AIReportAnalysis = require("./AIReportAnalysis");
 
 
 // User - University relationship
@@ -324,6 +325,14 @@ User.hasMany(ChatMessage, {
 });
 ChatMessage.belongsTo(User, { foreignKey: "userId", as: "user" });
 
+// AIReportAnalysis relationships
+User.hasMany(AIReportAnalysis, {
+  foreignKey: "analyzedBy",
+  as: "aiAnalyses",
+  onDelete: "CASCADE",
+});
+AIReportAnalysis.belongsTo(User, { foreignKey: "analyzedBy", as: "analyst" });
+
 const db = {
   sequelize,
   User,
@@ -351,6 +360,7 @@ const db = {
   PropertyAnalytics,
   MessageReport,
   ChatMessage,
+  AIReportAnalysis,
 };
 
 

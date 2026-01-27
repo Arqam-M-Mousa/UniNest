@@ -326,6 +326,37 @@ export const adminAPI = {
     apiRequest(`/api/admin/reports/recent?limit=${limit}`),
   getRecentVerifications: async (limit = 10) =>
     apiRequest(`/api/admin/verifications/recent?limit=${limit}`),
+  analyzeReportsWithAI: async (status = "pending", limit = 50, forceRefresh = false) =>
+    apiRequest("/api/admin/reports/ai-analyze", {
+      method: "POST",
+      body: JSON.stringify({ status, limit, forceRefresh }),
+    }),
+  applyRecommendation: async (reportId, action, reasoning, adminNotes) =>
+    apiRequest(`/api/admin/reports/${reportId}/apply-recommendation`, {
+      method: "POST",
+      body: JSON.stringify({ action, reasoning, adminNotes }),
+    }),
+  applyBulkAction: async (reportIds, action, reasoning) =>
+    apiRequest("/api/admin/reports/bulk-apply", {
+      method: "POST",
+      body: JSON.stringify({ reportIds, action, reasoning }),
+    }),
+  suspendUser: async (userId) =>
+    apiRequest(`/api/admin/users/${userId}/suspend`, {
+      method: "POST",
+    }),
+  unsuspendUser: async (userId) =>
+    apiRequest(`/api/admin/users/${userId}/unsuspend`, {
+      method: "POST",
+    }),
+  banUser: async (userId) =>
+    apiRequest(`/api/admin/users/${userId}/ban`, {
+      method: "POST",
+    }),
+  unbanUser: async (userId) =>
+    apiRequest(`/api/admin/users/${userId}/unban`, {
+      method: "POST",
+    }),
 };
 
 /**

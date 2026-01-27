@@ -32,6 +32,7 @@ import AdminManagement from "./pages/admin/AdminManagement";
 import AdminVerification from "./pages/admin/AdminVerification";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminAIReports from "./pages/admin/AdminAIReports";
 import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
 import RoommateView from "./pages/roommates/RoommateView";
@@ -90,6 +91,7 @@ function ThemedLayout() {
           <Route path="/admin/verification" element={<AdminVerification />} />
           <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/ai-reports" element={<AdminAIReports />} />
           <Route path="/roommates" element={<RoommateSearch />} />
           <Route path="/roommates/profile" element={<RoommateProfile />} />
           <Route path="/roommates/view/:userId" element={<RoommateView />} />

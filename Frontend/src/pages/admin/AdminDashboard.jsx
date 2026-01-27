@@ -172,6 +172,13 @@ const AdminDashboard = () => {
       link: "/admin/reports",
     },
     {
+      title: "AI Report Analysis",
+      description: "Get intelligent AI recommendations for report moderation",
+      icon: ChartBarIcon,
+      color: "text-cyan-500",
+      link: "/admin/ai-reports",
+    },
+    {
       title: t("verifications"),
       description: t("approveRejectRequests"),
       icon: ShieldCheckIcon,

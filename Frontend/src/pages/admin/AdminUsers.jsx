@@ -4,12 +4,16 @@ import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { adminAPI } from "../../services/api";
 import PageLoader from "../../components/common/PageLoader";
+import Alert from "../../components/common/Alert";
 import {
   UsersIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
   CheckBadgeIcon,
   XCircleIcon,
+  NoSymbolIcon,
+  ChatBubbleLeftRightIcon,
+  ShieldExclamationIcon,
 } from "@heroicons/react/24/outline";
 
 const AdminUsers = () => {
@@ -29,6 +33,9 @@ const AdminUsers = () => {
     search: "",
   });
   const [error, setError] = useState("");
+  const [processingUser, setProcessingUser] = useState(null);
+  const [actionModal, setActionModal] = useState({ isOpen: false, type: null, userId: null, userName: "" });
+  const [resultAlert, setResultAlert] = useState({ isOpen: false, type: "", message: "" });
 
   useEffect(() => {
     if (!user || !["admin", "superadmin"].includes(user.role?.toLowerCase())) {
@@ -79,6 +86,82 @@ const AdminUsers = () => {
         return "bg-blue-500/10 text-blue-500 border-blue-500/30";
       default:
         return "bg-gray-500/10 text-gray-500 border-gray-500/30";
+    }
+  };
+
+  const openActionModal = (type, userId, userName) => {
+    setActionModal({ isOpen: true, type, userId, userName });
+  };
+
+  const closeActionModal = () => {
+    setActionModal({ isOpen: false, type: null, userId: null, userName: "" });
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, userId } = actionModal;
+    closeActionModal();
+    setProcessingUser(userId);
+
+    try {
+      switch (type) {
+        case "suspend":
+          await adminAPI.suspendUser(userId);
+          setResultAlert({ isOpen: true, type: "success", message: t("userSuspended") || "User messaging suspended successfully" });
+          break;
+        case "unsuspend":
+          await adminAPI.unsuspendUser(userId);
+          setResultAlert({ isOpen: true, type: "success", message: t("userUnsuspended") || "User messaging unsuspended successfully" });
+          break;
+        case "ban":
+          await adminAPI.banUser(userId);
+          setResultAlert({ isOpen: true, type: "success", message: t("userBanned") || "User banned successfully" });
+          break;
+        case "unban":
+          await adminAPI.unbanUser(userId);
+          setResultAlert({ isOpen: true, type: "success", message: t("userUnbanned") || "User unbanned successfully" });
+          break;
+      }
+      await fetchUsers();
+    } catch (err) {
+      setResultAlert({ isOpen: true, type: "error", message: err.message || `Failed to ${type} user` });
+    } finally {
+      setProcessingUser(null);
+    }
+  };
+
+  const getActionModalContent = () => {
+    const { type, userName } = actionModal;
+    switch (type) {
+      case "suspend":
+        return {
+          title: t("suspendUserTitle") || "Suspend User",
+          message: `${t("confirmSuspendUser") || "Suspend messaging for"} ${userName}?`,
+          confirmText: t("suspend") || "Suspend",
+          alertType: "warning",
+        };
+      case "unsuspend":
+        return {
+          title: t("unsuspendUserTitle") || "Unsuspend User",
+          message: `${t("confirmUnsuspendUser") || "Restore messaging for"} ${userName}?`,
+          confirmText: t("unsuspend") || "Unsuspend",
+          alertType: "info",
+        };
+      case "ban":
+        return {
+          title: t("banUserTitle") || "Ban User",
+          message: `${t("confirmBanUser") || "Ban"} ${userName}? ${t("banUserWarning") || "This will completely disable their account."}`,
+          confirmText: t("ban") || "Ban",
+          alertType: "danger",
+        };
+      case "unban":
+        return {
+          title: t("unbanUserTitle") || "Unban User",
+          message: `${t("confirmUnbanUser") || "Unban"} ${userName}?`,
+          confirmText: t("unban") || "Unban",
+          alertType: "info",
+        };
+      default:
+        return { title: "", message: "", confirmText: "", alertType: "info" };
     }
   };
 
@@ -180,7 +263,13 @@ const AdminUsers = () => {
                         {t("status")}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
+                        Moderation
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
                         {t("joined")}
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--color-text)]">
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -237,8 +326,68 @@ const AdminUsers = () => {
                             </div>
                           )}
                         </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col gap-1">
+                            {!u.is_active ? (
+                              <div className="flex items-center gap-1 text-red-600">
+                                <NoSymbolIcon className="w-4 h-4" />
+                                <span className="text-xs font-semibold">BANNED</span>
+                              </div>
+                            ) : u.is_messaging_suspended ? (
+                              <div className="flex items-center gap-1 text-orange-600">
+                                <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                                <span className="text-xs font-semibold">SUSPENDED</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <CheckBadgeIcon className="w-4 h-4" />
+                                <span className="text-xs">Active</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="py-3 px-4 text-[var(--color-text-soft)] text-sm">
                           {new Date(u.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex gap-2">
+                            {!u.is_active ? (
+                              <button
+                                onClick={() => openActionModal("unban", u.id, `${u.first_name} ${u.last_name}`)}
+                                disabled={processingUser === u.id}
+                                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                {t("unban") || "Unban"}
+                              </button>
+                            ) : (
+                              <>
+                                {u.is_messaging_suspended ? (
+                                  <button
+                                    onClick={() => openActionModal("unsuspend", u.id, `${u.first_name} ${u.last_name}`)}
+                                    disabled={processingUser === u.id}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    {t("unsuspend") || "Unsuspend"}
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => openActionModal("suspend", u.id, `${u.first_name} ${u.last_name}`)}
+                                    disabled={processingUser === u.id || ["Admin", "SuperAdmin"].includes(u.role)}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    {t("suspend") || "Suspend"}
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => openActionModal("ban", u.id, `${u.first_name} ${u.last_name}`)}
+                                  disabled={processingUser === u.id || ["Admin", "SuperAdmin"].includes(u.role)}
+                                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  {t("ban") || "Ban"}
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -298,6 +447,32 @@ const AdminUsers = () => {
           )}
         </div>
       </div>
+
+      {/* Action Confirmation Modal */}
+      {actionModal.isOpen && (
+        <Alert
+          isOpen={actionModal.isOpen}
+          onClose={closeActionModal}
+          title={getActionModalContent().title}
+          message={getActionModalContent().message}
+          confirmText={getActionModalContent().confirmText}
+          cancelText={t("cancel") || "Cancel"}
+          onConfirm={handleConfirmAction}
+          type={getActionModalContent().alertType}
+        />
+      )}
+
+      {/* Result Alert */}
+      {resultAlert.isOpen && (
+        <Alert
+          isOpen={resultAlert.isOpen}
+          onClose={() => setResultAlert({ isOpen: false, type: "", message: "" })}
+          title={resultAlert.type === "success" ? (t("success") || "Success") : (t("error") || "Error")}
+          message={resultAlert.message}
+          confirmText={t("ok") || "OK"}
+          type={resultAlert.type === "success" ? "success" : "danger"}
+        />
+      )}
     </div>
   );
 };

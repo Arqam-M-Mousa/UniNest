@@ -312,6 +312,20 @@ export const adminAPI = {
     apiRequest(`/api/admin/users/${id}`, {
       method: "DELETE",
     }),
+  getDashboardStats: async () => apiRequest("/api/admin/dashboard/stats"),
+  getDashboardTrends: async () => apiRequest("/api/admin/dashboard/trends"),
+  getAllUsers: async (page = 1, limit = 20, role, search) => {
+    const params = new URLSearchParams();
+    params.append("page", page);
+    params.append("limit", limit);
+    if (role) params.append("role", role);
+    if (search) params.append("search", search);
+    return apiRequest(`/api/admin/users/all?${params.toString()}`);
+  },
+  getRecentReports: async (limit = 10) =>
+    apiRequest(`/api/admin/reports/recent?limit=${limit}`),
+  getRecentVerifications: async (limit = 10) =>
+    apiRequest(`/api/admin/verifications/recent?limit=${limit}`),
 };
 
 /**

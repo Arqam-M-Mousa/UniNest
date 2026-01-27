@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { adminAPI, reportsAPI } from "../../services/api";
+import { adminAPI } from "../../services/api";
 import Alert from "../../components/common/Alert";
 import {
   SparklesIcon,
@@ -31,11 +31,10 @@ const AdminAIReports = () => {
     if (forceRefresh) setAnalysis(null);
 
     try {
-      // First check if there are any reports for the selected status
-      const reportsResponse = await reportsAPI.list(selectedStatus === "all" ? null : selectedStatus, 1, 0);
-      const reportCount = reportsResponse.data?.length || 0;
-
-      if (reportCount === 0) {
+      const response = await adminAPI.analyzeReportsWithAI(selectedStatus, 50, forceRefresh);
+      
+      // Check if no reports were found (backend returns totalReports: 0)
+      if (response.data?.totalReports === 0) {
         setAlertModal({
           isOpen: true,
           type: "info",
@@ -46,7 +45,6 @@ const AdminAIReports = () => {
         return;
       }
 
-      const response = await adminAPI.analyzeReportsWithAI(selectedStatus, 50, forceRefresh);
       setAnalysis(response.data);
       setIsCached(response.data?.cached || false);
     } catch (err) {

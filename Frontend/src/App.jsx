@@ -25,11 +25,14 @@ import MyListings from "./pages/properties/MyListings";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Profile from "./pages/profile/Profile";
 import Messages from "./pages/general/Messages";
-import Admin from "./pages/admin/Admin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUniversities from "./pages/admin/AdminUniversities";
+import AdminUsers from "./pages/admin/AdminUsers";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminVerification from "./pages/admin/AdminVerification";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminAIReports from "./pages/admin/AdminAIReports";
 import RoommateProfile from "./pages/roommates/RoommateProfile";
 import RoommateSearch from "./pages/roommates/RoommateSearch";
 import RoommateView from "./pages/roommates/RoommateView";
@@ -80,11 +83,15 @@ function ThemedLayout() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Messages />} />
-          <Route path="/admin/universities" element={<Admin />} />
-          <Route path="/admin/manage-admins" element={<AdminManagement />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/universities" element={<AdminUniversities />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/management" element={<AdminManagement />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
           <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/ai-reports" element={<AdminAIReports />} />
           <Route path="/roommates" element={<RoommateSearch />} />
           <Route path="/roommates/profile" element={<RoommateProfile />} />
           <Route path="/roommates/view/:userId" element={<RoommateView />} />

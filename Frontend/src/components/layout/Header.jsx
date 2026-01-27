@@ -474,6 +474,22 @@ const Header = () => {
                           {t("administration")}
                         </div>
                         <Link
+                          to="/admin/dashboard"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <ChartBarIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("adminDashboard") || "Admin Dashboard"}</span>
+                        </Link>
+                        <Link
+                          to="/admin/users"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("userManagement") || "User Management"}</span>
+                        </Link>
+                        <Link
                           to="/admin/universities"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
@@ -482,7 +498,7 @@ const Header = () => {
                           <span className="font-medium">{t("universities")}</span>
                         </Link>
                         <Link
-                          to="/admin/manage-admins"
+                          to="/admin/management"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
                         >
@@ -522,6 +538,22 @@ const Header = () => {
                         <div className="px-4 py-2 text-xs font-semibold text-[var(--color-text-soft)] uppercase tracking-wider">
                           {t("administration")}
                         </div>
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <ChartBarIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("adminDashboard") || "Admin Dashboard"}</span>
+                        </Link>
+                        <Link
+                          to="/admin/users"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm themed-text-soft hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] transition-all group"
+                        >
+                          <UserCircleIcon className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">{t("userManagement") || "User Management"}</span>
+                        </Link>
                         <Link
                           to="/admin/verification"
                           onClick={() => setUserMenuOpen(false)}

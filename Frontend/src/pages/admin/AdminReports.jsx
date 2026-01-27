@@ -14,6 +14,7 @@ import {
   NoSymbolIcon,
   ChatBubbleLeftRightIcon,
   UserIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 const AdminReports = () => {
@@ -193,14 +194,23 @@ const AdminReports = () => {
   return (
     <div className="min-h-screen themed-surface py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--color-text)] flex items-center gap-3">
-            <FlagIcon className="w-8 h-8 text-[var(--color-accent)]" />
-            {t("reportsManagement") || "Reports Management"}
-          </h1>
-          <p className="mt-2 text-[var(--color-text-soft)]">
-            {t("reportsManagementSubtitle") || "Review and manage user reports"}
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--color-text)] flex items-center gap-3">
+              <FlagIcon className="w-8 h-8 text-[var(--color-accent)]" />
+              {t("reportsManagement") || "Reports Management"}
+            </h1>
+            <p className="mt-2 text-[var(--color-text-soft)]">
+              {t("reportsManagementSubtitle") || "Review and manage user reports"}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/admin/ai-reports")}
+            className="flex items-center gap-2 px-4 py-2.5 btn-primary rounded-xl"
+          >
+            <SparklesIcon className="w-5 h-5" />
+            <span>{t("aiReportAnalysis") || "AI Analysis"}</span>
+          </button>
         </div>
 
         {/* Filter Tabs */}
@@ -359,28 +369,28 @@ const AdminReports = () => {
                       <>
                         <button
                           onClick={() => handleActionClick(report, "dismiss")}
-                          className="px-3 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600 transition-all text-sm font-medium flex items-center gap-1"
+                          className="px-3 py-2 rounded-lg border border-slate-500/30 bg-slate-500/10 text-slate-600 dark:text-slate-400 hover:bg-slate-500/20 transition-colors text-sm font-medium flex items-center gap-1.5"
                         >
                           <XCircleIcon className="w-4 h-4" />
                           {t("dismiss") || "Dismiss"}
                         </button>
                         <button
                           onClick={() => handleActionClick(report, "warning")}
-                          className="px-3 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-all text-sm font-medium flex items-center gap-1"
+                          className="px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors text-sm font-medium flex items-center gap-1.5"
                         >
                           <ExclamationTriangleIcon className="w-4 h-4" />
                           {t("sendWarning") || "Warning"}
                         </button>
                         <button
                           onClick={() => handleActionClick(report, "suspend")}
-                          className="px-3 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-all text-sm font-medium flex items-center gap-1"
+                          className="px-3 py-2 rounded-lg border border-orange-500/30 bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors text-sm font-medium flex items-center gap-1.5"
                         >
                           <ClockIcon className="w-4 h-4" />
                           {t("suspendUser") || "Suspend"}
                         </button>
                         <button
                           onClick={() => handleActionClick(report, "ban")}
-                          className="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all text-sm font-medium flex items-center gap-1"
+                          className="px-3 py-2 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors text-sm font-medium flex items-center gap-1.5"
                         >
                           <NoSymbolIcon className="w-4 h-4" />
                           {t("banUser") || "Ban"}

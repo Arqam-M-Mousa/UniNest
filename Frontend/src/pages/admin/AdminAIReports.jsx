@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { adminAPI } from "../../services/api";
+import { adminAPI, reportsAPI } from "../../services/api";
 import Alert from "../../components/common/Alert";
 import {
   SparklesIcon,
@@ -23,6 +23,7 @@ const AdminAIReports = () => {
   const [processingRecommendation, setProcessingRecommendation] = useState(null);
   const [isCached, setIsCached] = useState(false);
   const [alertModal, setAlertModal] = useState({ isOpen: false, type: "", title: "", message: "" });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: "", data: null });
 
   const analyzeReports = async (forceRefresh = false) => {
     setLoading(true);
@@ -30,6 +31,21 @@ const AdminAIReports = () => {
     if (forceRefresh) setAnalysis(null);
 
     try {
+      // First check if there are any reports for the selected status
+      const reportsResponse = await reportsAPI.list(selectedStatus === "all" ? null : selectedStatus, 1, 0);
+      const reportCount = reportsResponse.data?.length || 0;
+
+      if (reportCount === 0) {
+        setAlertModal({
+          isOpen: true,
+          type: "info",
+          title: t("noReportsFound") || "No Reports Found",
+          message: t("noReportsForStatus") || `No ${selectedStatus} reports found to analyze.`,
+        });
+        setLoading(false);
+        return;
+      }
+
       const response = await adminAPI.analyzeReportsWithAI(selectedStatus, 50, forceRefresh);
       setAnalysis(response.data);
       setIsCached(response.data?.cached || false);
@@ -41,7 +57,34 @@ const AdminAIReports = () => {
     }
   };
 
-  const applyRecommendation = async (reportId, action, reasoning) => {
+  const showApplyConfirmation = (reportId, action, reasoning) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "apply",
+      data: { reportId, action, reasoning },
+    });
+  };
+
+  const showBulkConfirmation = (reportIds, action, reasoning) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "bulk",
+      data: { reportIds, action, reasoning },
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, data } = confirmModal;
+    setConfirmModal({ isOpen: false, type: "", data: null });
+
+    if (type === "apply") {
+      await executeApplyRecommendation(data.reportId, data.action, data.reasoning);
+    } else if (type === "bulk") {
+      await executeBulkAction(data.reportIds, data.action, data.reasoning);
+    }
+  };
+
+  const executeApplyRecommendation = async (reportId, action, reasoning) => {
     setProcessingRecommendation(reportId);
 
     try {
@@ -84,7 +127,7 @@ const AdminAIReports = () => {
     });
   };
 
-  const applyBulkAction = async (reportIds, action, reasoning) => {
+  const executeBulkAction = async (reportIds, action, reasoning) => {
     setLoading(true);
 
     try {
@@ -117,15 +160,15 @@ const AdminAIReports = () => {
   const getActionColor = (action) => {
     switch (action) {
       case "banned":
-        return "bg-red-600 hover:bg-red-700";
+        return "!bg-rose-500/20 !text-rose-600 dark:!text-rose-400 border border-rose-500/30 hover:!bg-rose-500/30";
       case "suspended":
-        return "bg-orange-600 hover:bg-orange-700";
+        return "!bg-orange-500/20 !text-orange-600 dark:!text-orange-400 border border-orange-500/30 hover:!bg-orange-500/30";
       case "warning":
-        return "bg-yellow-600 hover:bg-yellow-700";
+        return "!bg-amber-500/20 !text-amber-600 dark:!text-amber-400 border border-amber-500/30 hover:!bg-amber-500/30";
       case "none":
-        return "bg-gray-600 hover:bg-gray-700";
+        return "!bg-slate-500/20 !text-slate-600 dark:!text-slate-400 border border-slate-500/30 hover:!bg-slate-500/30";
       default:
-        return "bg-blue-600 hover:bg-blue-700";
+        return "!bg-sky-500/20 !text-sky-600 dark:!text-sky-400 border border-sky-500/30 hover:!bg-sky-500/30";
     }
   };
 
@@ -285,7 +328,7 @@ const AdminAIReports = () => {
                             {t("suggested") || "Suggested"}: <span className="font-medium text-violet-600 dark:text-violet-400">{pattern.suggestedBulkAction}</span>
                           </span>
                           <button
-                            onClick={() => applyBulkAction(pattern.reportIds, pattern.suggestedBulkAction, pattern.pattern)}
+                            onClick={() => showBulkConfirmation(pattern.reportIds, pattern.suggestedBulkAction, pattern.pattern)}
                             className="px-4 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
                           >
                             {t("applyToAll") || "Apply to All"}
@@ -373,9 +416,9 @@ const AdminAIReports = () => {
                         {!rec.applied && !rec.denied && (
                           <div className="flex gap-3 pt-4 border-t themed-border">
                             <button
-                              onClick={() => applyRecommendation(rec.reportId, rec.action, rec.reasoning)}
+                              onClick={() => showApplyConfirmation(rec.reportId, rec.action, rec.reasoning)}
                               disabled={processingRecommendation === rec.reportId}
-                              className={`flex-1 px-4 py-2 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${getActionColor(rec.action)}`}
+                              className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${getActionColor(rec.action)}`}
                             >
                               {processingRecommendation === rec.reportId ? (
                                 <>
@@ -419,7 +462,7 @@ const AdminAIReports = () => {
               {t("readyToAnalyzeDescription") || "Select a report status and click \"Analyze with AI\" to get intelligent recommendations."}
             </p>
             <div className="max-w-lg mx-auto text-left p-6 rounded-xl bg-[var(--color-surface)]">
-              <h4 className="font-medium text-[var(--color-text)] mb-3">{t("howItWorks") || "How it works"}:</h4>
+              <h4 className="font-medium text-[var(--color-text)] mb-3">{t("aiHowItWorks") || "How it works"}:</h4>
               <div className="space-y-3 text-sm text-[var(--color-text-soft)]">
                 <div className="flex gap-3">
                   <span className="w-6 h-6 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] flex items-center justify-center flex-shrink-0 text-xs font-medium">1</span>
@@ -443,6 +486,28 @@ const AdminAIReports = () => {
         )}
       </div>
 
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <Alert
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal({ isOpen: false, type: "", data: null })}
+          title={
+            confirmModal.type === "bulk"
+              ? (t("confirmBulkAction") || "Confirm Bulk Action")
+              : (t("confirmApplyAction") || "Confirm Action")
+          }
+          message={
+            confirmModal.type === "bulk"
+              ? `${t("confirmBulkActionMessage") || "Apply"} "${confirmModal.data?.action}" ${t("to") || "to"} ${confirmModal.data?.reportIds?.length || 0} ${t("reports") || "reports"}?`
+              : `${t("confirmApplyActionMessage") || "Apply"} "${confirmModal.data?.action}" ${t("toThisReport") || "to this report"}?`
+          }
+          confirmText={t("confirm") || "Confirm"}
+          cancelText={t("cancel") || "Cancel"}
+          onConfirm={handleConfirmAction}
+          type="warning"
+        />
+      )}
+
       {/* Alert Modal */}
       {alertModal.isOpen && (
         <Alert
@@ -451,7 +516,7 @@ const AdminAIReports = () => {
           title={alertModal.title}
           message={alertModal.message}
           confirmText={t("ok") || "OK"}
-          type={alertModal.type === "success" ? "success" : "danger"}
+          type={alertModal.type === "success" ? "success" : "error"}
         />
       )}
     </div>
